@@ -2,17 +2,17 @@
 import sys
 import os
 import numpy as np
-from PyQt5 import QtCore, QtGui, QtWidgets, QtWebEngineWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QUrl
-from PyQt5.QtWebEngineWidgets import QWebEnginePage
-from PyQt5.QtWebEngineWidgets import QWebEngineView
 from Decomposition import Decomposition
 from BrainView import BrainView
 from SelectionWidget import SelectionWidget
 from MenuBar import MenuBar
 from Logger import Logger
+from ParametersDialog import ParametersDialog
+import logging
 
 class ToolboxWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -41,7 +41,7 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         self.brainGridLayout = QtWidgets.QGridLayout()
 
         self.brainViews = []
-        for mode in range(4):
+        for mode in range(2):
             self.brainViews.append(BrainView(self.centralWidget))
             self.brainGridLayout.addWidget(self.brainViews[mode], 0 if (mode < 2 != 0) else 1, 0 if (mode % 2 != 0) else 1, 1, 1)
         
@@ -49,7 +49,7 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         
         self.menuBar = MenuBar(self)
         self.setMenuBar(self.menuBar)
-        self.menuBar.addActionsToMenu();
+        self.menuBar.addActionsToMenu()
 #        self.menuBar.actionOpen.triggered.connect()
 #        self.menuBar.actionSave.triggered.connect()
 
@@ -68,20 +68,51 @@ class ToolboxWindow(QtWidgets.QMainWindow):
     def updateSelectionWidgetFilesList(self):
         self.selectionWidget.filesList.addItems([os.path.split(name)[1] for name in self.fileNames])
 
+    def acceptParams(self):
+
+        if self.paramDialog != None:
+            self.paramDialog.accept()
+
+        params = {
+            'surf': self.paramDialog.comboSurfMesh.currentText(),
+            'colorbar': self.paramDialog.comboColorbar.currentText(),
+            'shadow': True if (self.paramDialog.comboShadow.currentText() == 'Yes') else False
+            }
+        logging.info("Parameters chosen.")
+
+        self.decomposition = Decomposition(self.fileNames)
+        self.loadModesDisplay(**params)
+
+    def rejectParams(self):
+
+        if self.paramDialog != None:
+            self.paramDialog.reject()
+
+        logging.info("Parameters not chosen. Using default parameters.")
+
+        self.decomposition = Decomposition(self.fileNames)
+        self.loadModesDisplay()
+
+    def loadModesDisplay(self, **params):
+        if self.decomposition != None:
+            for mode in range(len(self.brainViews)):
+                self.brainViews[mode].addBrain(self.decomposition.saveHTML(**params)[mode])
+        else:
+            logging.error("Was not able to create Decomposition.")
+
     def chooseFile(self):
         
         self.fileNames = self.openFileNamesDialog()
         
         if self.fileNames:
             self.updateSelectionWidgetFilesList()
-            self.decomposition = Decomposition(self.fileNames)
 
-            # Testing with mode 0 for now
-            for mode in range(len(self.brainViews)):
-                self.brainViews[mode].addBrain(self.decomposition.saveHTML()[mode])
-        
-        # self.visualHorizontalLayout = BrainView()
-#        self.mainVerticalLayout.addLayout(self.visualHorizontalLayout, 1)
+            self.paramDialog = ParametersDialog()
+
+            self.paramDialog.buttonBox.accepted.connect(self.acceptParams)
+            self.paramDialog.buttonBox.rejected.connect(self.rejectParams)
+
+            self.paramDialog.show()
 
     def reset(self):
         self.fileNames = ['']

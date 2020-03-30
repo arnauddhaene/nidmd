@@ -1,6 +1,5 @@
 # This Python file uses the following encoding: utf-8
 import scipy.io as scp
-import matplotlib.pyplot as plt
 import numpy as np
 import math, cmath
 import os, shutil, sys
@@ -82,7 +81,7 @@ class Decomposition:
 
         return modes
 
-    def saveHTML(self):
+    def saveHTML(self, surf = 'inflated', colorbar = 'RdYlGn', shadow = True):
         """
         Save 3D brain surface plots to html files.
 
@@ -103,14 +102,17 @@ class Decomposition:
                     htmls[mode][hemi] = os.path.join(dir, hemi + '.html')
 
                     labels = surface.load_surf_data(self.annots[mode][hemi])
-    
-                    view = plotting.view_surf(self.fsaverage['infl_%s' % hemi],
-                                              labels, cmap = 'RdYlGn',
-                                              bg_map = self.fsaverage['sulc_%s' % hemi],
-                                              symmetric_cmap = False,
-                                              colorbar_fontsize = 12,
-                                              title = 'Dynamic Mode ' + str(mode) + ': ' + hemi + ' hemisphere',
-                                              title_fontsize = 12)
+
+                    args = {'surf_mesh': self.fsaverage['{0}_{1}'.format(surf[:4], hemi)],
+                            'surf_map': labels,
+                            'cmap': colorbar,
+                            'bg_map': self.fsaverage['sulc_%s' % hemi] if shadow else None,
+                            'symmetric_cmap': False,
+                            'colorbar_fontsize': 10,
+                            'title': 'Dynamic Mode ' + str(mode) + ': ' + hemi + ' hemisphere',
+                            'title_fontsize': 12}
+
+                    view = plotting.view_surf(**args)
 
                     view.save_as_html(htmls[mode][hemi])
         
