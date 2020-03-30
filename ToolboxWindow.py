@@ -12,6 +12,7 @@ from Decomposition import Decomposition
 from BrainView import BrainView
 from SelectionWidget import SelectionWidget
 from MenuBar import MenuBar
+from Logger import Logger
 
 class ToolboxWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -26,6 +27,7 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         
         self.centralWidget = QtWidgets.QWidget(self)
         self.centralWidget.setObjectName("centralWidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.centralWidget)
 
         # Selection Widget for file selection and reset of program
         self.selectionWidget = SelectionWidget(self.centralWidget)
@@ -33,18 +35,17 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         # Signals
         self.selectionWidget.chooseFileButton.clicked.connect(self.chooseFile)
         self.selectionWidget.resetButton.clicked.connect(self.reset)
-
-#        self.mainVerticalLayout = QtWidgets.QVBoxLayout()
-#        self.mainVerticalLayout.setObjectName("mainVerticalLayout")
         
-#        vSpacer = QtWidgets.QSpacerItem(20, 40, 
-#                                           QtWidgets.QSizePolicy.Minimum, 
-#                                           QtWidgets.QSizePolicy.Expanding)
-#        self.mainVerticalLayout.addItem(vSpacer)
-
-#        self.gridLayout.addLayout(self.mainVerticalLayout, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.selectionWidget)
         
-        self.setCentralWidget(self.centralWidget)
+        self.brainGridLayout = QtWidgets.QGridLayout()
+
+        self.brainViews = []
+        for mode in range(4):
+            self.brainViews.append(BrainView(self.centralWidget))
+            self.brainGridLayout.addWidget(self.brainViews[mode], 0 if (mode < 2 != 0) else 1, 0 if (mode % 2 != 0) else 1, 1, 1)
+        
+        self.gridLayout.addLayout(self.brainGridLayout, 1, 0)
         
         self.menuBar = MenuBar(self)
         self.setMenuBar(self.menuBar)
@@ -57,20 +58,27 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         self.statusbar.setObjectName("statusbar")
         self.setStatusBar(self.statusbar)
         
+        # Initialize logger
+        self.logger = Logger(self)
+        self.gridLayout.addWidget(self.logger)
+        
+        self.setCentralWidget(self.centralWidget)
         QtCore.QMetaObject.connectSlotsByName(self)
 
     def updateSelectionWidgetFilesList(self):
         self.selectionWidget.filesList.addItems([os.path.split(name)[1] for name in self.fileNames])
 
     def chooseFile(self):
+        
         self.fileNames = self.openFileNamesDialog()
+        
         if self.fileNames:
             self.updateSelectionWidgetFilesList()
             self.decomposition = Decomposition(self.fileNames)
 
             # Testing with mode 0 for now
-            paths = self.decomposition.saveHTML()[0]
-            self.visualHorizontalLayout = BrainView(paths)
+            for mode in range(len(self.brainViews)):
+                self.brainViews[mode].addBrain(self.decomposition.saveHTML()[mode])
         
         # self.visualHorizontalLayout = BrainView()
 #        self.mainVerticalLayout.addLayout(self.visualHorizontalLayout, 1)
@@ -92,7 +100,6 @@ class ToolboxWindow(QtWidgets.QMainWindow):
 
     def openFileNamesDialog(self):
         options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
         files, _ = QFileDialog.getOpenFileNames(self, "QFileDialog.getOpenFileNames()",
                                                       "",
                                                       "MATLAB Files (*.mat)",
@@ -101,7 +108,6 @@ class ToolboxWindow(QtWidgets.QMainWindow):
 
     def saveFileDialog(self):
         options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getSaveFileName(self,
                                                   "QFileDialog.getSaveFileName()",
                                                   "",

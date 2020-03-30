@@ -143,7 +143,8 @@ class Decomposition:
             mean = np.mean(eigenVector)
 
             for roi in range(1, atlasLength):
-                color = 127 + scale * (eigenVector[roi] - mean)
+                eigVecIdx = (roi - 1) if (hemi == 'left') else (roi + (atlasLength - 2))
+                color = 127 + scale * (eigenVector[eigVecIdx] - mean)
                 newCtab[roi] = np.array([color, color, color, 0, labels[roi]])
 
             writepath[hemi] = os.path.join(dirpath, hemi + '.annot')

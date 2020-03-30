@@ -14,14 +14,11 @@ class SelectionWidget(QtWidgets.QWidget):
         """
         QtWidgets.QWidget.__init__(self, centralWidget)
         
-        self.setGeometry(QtCore.QRect(15, 15, 600, 100))
+        self.setMinimumSize(QtCore.QSize(600,80))
+        self.setMaximumSize(QtCore.QSize(4000,80))
         self.setObjectName("selectionWidget")
-        
-        self.selectionWidgetVerticalLayout = QtWidgets.QVBoxLayout(self)
-        self.selectionWidgetVerticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.selectionWidgetVerticalLayout.setObjectName("selectionWidgetVerticalLayout")
 
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self)
         self.horizontalLayout.setObjectName("horizontalLayout")
         
         self.buttonsVerticalLayout = QtWidgets.QVBoxLayout()
@@ -51,5 +48,3 @@ class SelectionWidget(QtWidgets.QWidget):
         self.filesList.setObjectName("filesList")
         
         self.horizontalLayout.addWidget(self.filesList)
-        
-        self.selectionWidgetVerticalLayout.addLayout(self.horizontalLayout)
