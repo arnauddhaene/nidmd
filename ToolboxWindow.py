@@ -33,10 +33,13 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         self.selectionWidget = SelectionWidget(self.centralWidget)
         
         # Signals
-        self.selectionWidget.chooseFileButton.clicked.connect(self.chooseFile)
+        self.selectionWidget.chooseFileButton.clicked.connect(self.choose_files)
         self.selectionWidget.resetButton.clicked.connect(self.reset)
         
         self.gridLayout.addWidget(self.selectionWidget)
+
+        self.radarLayout = QtWidgets.QHBoxLayout()
+        self.gridLayout.addLayout(self.radarLayout, 1, 0)
         
         self.brainGridLayout = QtWidgets.QGridLayout()
 
@@ -45,7 +48,7 @@ class ToolboxWindow(QtWidgets.QMainWindow):
             self.brainViews.append(BrainView(self.centralWidget))
             self.brainGridLayout.addWidget(self.brainViews[mode], 0 if (mode < 2 != 0) else 1, 0 if (mode % 2 != 0) else 1, 1, 1)
         
-        self.gridLayout.addLayout(self.brainGridLayout, 1, 0)
+        self.gridLayout.addLayout(self.brainGridLayout, 1, 1)
         
         self.menuBar = MenuBar(self)
         self.setMenuBar(self.menuBar)
@@ -65,10 +68,10 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.centralWidget)
         QtCore.QMetaObject.connectSlotsByName(self)
 
-    def updateSelectionWidgetFilesList(self):
+    def _update_files_selection_list(self):
         self.selectionWidget.filesList.addItems([os.path.split(name)[1] for name in self.fileNames])
 
-    def acceptParams(self):
+    def accept_params(self):
 
         if self.paramDialog != None:
             self.paramDialog.accept()
@@ -81,9 +84,11 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         logging.info("Parameters chosen.")
 
         self.decomposition = Decomposition(self.fileNames)
-        self.loadModesDisplay(**params)
+        self.radarLayout.addWidget(self.decomposition.radar_plot(5))
+        self._add_brain_views(**params)
 
-    def rejectParams(self):
+
+    def reject_params(self):
 
         if self.paramDialog != None:
             self.paramDialog.reject()
@@ -91,26 +96,26 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         logging.info("Parameters not chosen. Using default parameters.")
 
         self.decomposition = Decomposition(self.fileNames)
-        self.loadModesDisplay()
+        self._add_brain_views()
 
-    def loadModesDisplay(self, **params):
+    def _add_brain_views(self, **params):
         if self.decomposition != None:
             for mode in range(len(self.brainViews)):
                 self.brainViews[mode].addBrain(self.decomposition.saveHTML(**params)[mode])
         else:
             logging.error("Was not able to create Decomposition.")
 
-    def chooseFile(self):
+    def choose_files(self):
         
         self.fileNames = self.openFileNamesDialog()
         
         if self.fileNames:
-            self.updateSelectionWidgetFilesList()
+            self._update_files_selection_list()
 
             self.paramDialog = ParametersDialog()
 
-            self.paramDialog.buttonBox.accepted.connect(self.acceptParams)
-            self.paramDialog.buttonBox.rejected.connect(self.rejectParams)
+            self.paramDialog.buttonBox.accepted.connect(self.accept_params)
+            self.paramDialog.buttonBox.rejected.connect(self.reject_params)
 
             self.paramDialog.show()
 
@@ -118,7 +123,7 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         self.fileNames = ['']
         if (self.decomposition):
             self.decomposition.reset()
-        self.updateSelectionWidgetFilesList()
+        self._update_files_selection_list()
 
     def openFileNameDialog(self):
         options = QFileDialog.Options()

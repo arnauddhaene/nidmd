@@ -7,11 +7,13 @@ import json
 from PyQt5 import QtCore, QtWidgets
 from nilearn import datasets, plotting, surface
 import nibabel.freesurfer as fs
+from RadarPlot import RadarPlot
+import logging
 
 PI = math.pi
 
 class Decomposition:
-    def __init__(self, filenames, howManyModes=5):
+    def __init__(self, filenames, how_many_modes=5):
         # Read Global Variables which include paths to ATLASes
         self.gv = self.readGlobalVariables()
         self.filenames = filenames
@@ -28,7 +30,7 @@ class Decomposition:
         self.atlas = self.gv['atlas'][str(self.N)]
 
         # Create modes dict {1: 'path1', 2: 'path2', ...}
-        self.modes = self.createModeDirs(howManyModes)
+        self.modes = self.createModeDirs(how_many_modes)
 
         # List of Dictionaries [ {'left':'pathL1', 'right':'pathR1'}, ...]
         self.annots = []
@@ -36,6 +38,30 @@ class Decomposition:
         # Create annot files for BrainViews
         for mode in range(len(self.modes)):
             self.annots.append(self.writeLabels(self.modes[mode], np.real(self.eigVec[:, mode + 1])))
+
+    def radar_plot(self, modes=5):
+        """
+        Create RadarPlot instance displaying active networks.
+
+        :param modes: modes to plot (int)
+        :return: RadarPlot instance
+        """
+
+        labels = [self.gv['networks'][self.atlas][network]['name'] for network in self.gv['networks'][self.atlas]]
+        idx = [self.gv['networks'][self.atlas][network]['index'] for network in self.gv['networks'][self.atlas]]
+        # Global Variables contain MATLAB (1->) vs. Python (0->) indices
+        index = [np.add(np.asarray(idx[i]), -1) for i in range(len(idx))]
+
+        data = {}
+        for axis in ['real','complex']:
+
+            to_axis = (np.real if axis == 'real' else np.imag)
+
+            data[axis] = [[
+                np.mean(to_axis(self.eigVec[index[network], mode + 1])) for network in range(len(index))
+            ] for mode in range(modes)]
+
+        return RadarPlot(data, labels)
 
     def reset(self):
         """
@@ -135,7 +161,7 @@ class Decomposition:
 
             # initialize new color tab
             atlasLength = ctab.shape[0]
-            newCtab = np.empty( (atlasLength, 5) )
+            newCtab = np.empty((atlasLength, 5))
 
             # first row is always the same as old colortab
             newCtab[0] = ctab[0]
@@ -296,6 +322,5 @@ class Decomposition:
                     phi += PI / 2
 
             ox[:,j] = np.multiply(x[:,j], cmath.exp( complex(0,1) * phi ))
-
 
         return ox
