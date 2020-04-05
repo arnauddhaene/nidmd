@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
-import sys
-from PyQt5 import QtWidgets, QtCore
 import logging
+from PyQt5 import QtWidgets, QtCore
+
 
 # Uncomment below for terminal log messages
 # logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')

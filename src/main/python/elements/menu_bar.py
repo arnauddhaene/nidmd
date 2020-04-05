@@ -31,7 +31,7 @@ class MenuBar(QtWidgets.QMenuBar):
         self.actionSave.setObjectName("actionSave")
         self.actionSave.setShortcut("Crtl+S")
         
-    def addActionsToMenu(self):
+    def add_actions_to_menu(self):
         """
         Add actions to menus
         """

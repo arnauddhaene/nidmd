@@ -1,21 +1,22 @@
 # This Python file uses the following encoding: utf-8
-import sys
 import os
+import logging
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from elements import *
 from plotting import *
 from decomposition import Decomposition
-import logging
+
 
 class ToolboxWindow(QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         self.setObjectName("ToolboxWindow")
         self.resize(1980, 1020)
-        self.initUI()
+        self.decomposition = None
+        self.init_ui()
 
-    def initUI(self):
+    def init_ui(self):
         # Set window title
         self.setWindowTitle("Dynamic Mode Toolbox")
         
@@ -38,7 +39,7 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         self.brainGridLayout = QtWidgets.QGridLayout()
 
         self.brainViews = []
-        for mode in range(2):
+        for mode in range(1):
             self.brainViews.append(BrainView(self.centralWidget))
             self.brainGridLayout.addWidget(self.brainViews[mode], 0 if (mode < 2 != 0) else 1, 0 if (mode % 2 != 0) else 1, 1, 1)
         
@@ -46,7 +47,7 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         
         self.menuBar = MenuBar(self)
         self.setMenuBar(self.menuBar)
-        self.menuBar.addActionsToMenu()
+        self.menuBar.add_actions_to_menu()
 #        self.menuBar.actionOpen.triggered.connect()
 #        self.menuBar.actionSave.triggered.connect()
 
@@ -63,7 +64,13 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self)
 
     def _update_files_selection_list(self):
-        self.selectionWidget.filesList.addItems([os.path.split(name)[1] for name in self.fileNames])
+
+        self.selectionWidget.filesList.clear()
+
+        if not self.fileNames:
+            pass
+        else:
+            self.selectionWidget.filesList.addItems([os.path.split(name)[1] for name in self.fileNames])
 
     def accept_params(self):
 
@@ -81,7 +88,6 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         self.radarLayout.addWidget(self.decomposition.radar_plot(5))
         self._add_brain_views(**params)
 
-
     def reject_params(self):
 
         if self.paramDialog != None:
@@ -93,17 +99,22 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         self._add_brain_views()
 
     def _add_brain_views(self, **params):
-        if self.decomposition != None:
-            for mode in range(len(self.brainViews)):
-                self.brainViews[mode].addBrain(self.decomposition.saveHTML(**params)[mode])
+        if not self.decomposition:
+            logging.error('DecompositionError: Decomposition does not exist.')
         else:
-            logging.error("Was not able to create Decomposition.")
+            htmls = self.decomposition.save_HTML(**params)
+            if len(self.brainViews) <= len(htmls):
+                for i in range(len(self.brainViews)):
+                    self.brainViews[i].add_brain(htmls[i])
+            else:
+                logging.error('HTML number less than Brain View number.')
 
     def choose_files(self):
         
-        self.fileNames = self.openFileNamesDialog()
+        self.fileNames = self.open_file_names_dialog()
         
         if self.fileNames:
+
             self._update_files_selection_list()
 
             self.paramDialog = ParametersDialog()
@@ -114,34 +125,34 @@ class ToolboxWindow(QtWidgets.QMainWindow):
             self.paramDialog.show()
 
     def reset(self):
-        self.fileNames = ['']
-        if (self.decomposition):
+        self.fileNames = []
+        if self.decomposition != None:
             self.decomposition.reset()
         self._update_files_selection_list()
 
-    def openFileNameDialog(self):
+    def open_file_name_dialog(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self,
+        _file_name, _ = QFileDialog.getOpenFileName(self,
                                                   "QFileDialog.getOpenFileName()",
                                                   "",
                                                   "MATLAB File (*.mat)",
                                                   options=options)
-        return fileName
+        return _file_name
 
-    def openFileNamesDialog(self):
+    def open_file_names_dialog(self):
         options = QFileDialog.Options()
-        files, _ = QFileDialog.getOpenFileNames(self, "QFileDialog.getOpenFileNames()",
+        _files, _ = QFileDialog.getOpenFileNames(self, "QFileDialog.getOpenFileNames()",
                                                       "",
                                                       "MATLAB Files (*.mat)",
                                                       options=options)
-        return files
 
-    def saveFileDialog(self):
+        return _files
+
+    def save_file_dialog(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self,
+        _file_name, _ = QFileDialog.getSaveFileName(self,
                                                   "QFileDialog.getSaveFileName()",
                                                   "",
                                                   "All Files (*);;Text Files (*.txt)",
                                                   options=options)
-        if fileName:
-            print(fileName)
+        return _file_name

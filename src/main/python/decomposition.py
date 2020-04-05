@@ -1,41 +1,29 @@
 # This Python file uses the following encoding: utf-8
 import scipy.io as scp
 import numpy as np
-import math, cmath
-import os, shutil
-import json
+import cmath
+import os
+import shutil
+import logging
 from nilearn import datasets, plotting, surface
-import nibabel.freesurfer as fs
+from nibabel.freesurfer.io import (read_annot, write_annot)
 from plotting import RadarPlot
+from utils import *
 
-PI = math.pi
 
 class Decomposition:
     def __init__(self, filenames, how_many_modes=5):
-        # Read Global Variables which include paths to ATLASes
-        self.gv = self.readGlobalVariables()
-        self.filenames = filenames
 
-        # Fetch surface mesh
-        self.fsaverage = datasets.fetch_surf_fsaverage('fsaverage', 'resources')
-
-        # Get Dynamic Modes from filenames
-        self.extractData()  # this line defines data
-        self.checkData()  # this line defines X, Y, N, T
-        self.getDynamicModes()  # this line defines A, eigVal, eigVec, eigIdx
-
-        # Identify atlas depending on number of ROIs in data
-        self.atlas = self.gv['atlas'][str(self.N)]
-
-        # Create modes dict {1: 'path1', 2: 'path2', ...}
-        self.modes = self.createModeDirs(how_many_modes)
+        # Get Dynamic Modes from filenames  
+        X, Y, self.atlas = self._check_data(  # this defines X, Y, N, T
+                self._extract_data(filenames)  # this defines data
+            )
+        # this defines eigVal, eigVec, eigIdx, A
+        self.eigVal, self.eigVec, _, _ = self._get_dynamic_modes(X, Y)  
 
         # List of Dictionaries [ {'left':'pathL1', 'right':'pathR1'}, ...]
-        self.annots = []
-
-        # Create annot files for BrainViews
-        for mode in range(len(self.modes)):
-            self.annots.append(self.writeLabels(self.modes[mode], np.real(self.eigVec[:, mode + 1])))
+        self.annots = [self._write_labels(dir, np.real(self.eigVec[:, mode + 1]))
+                       for mode, dir in enumerate(self._create_mode_dirs(how_many_modes)) ]
 
     def radar_plot(self, modes=5):
         """
@@ -45,8 +33,8 @@ class Decomposition:
         :return: RadarPlot instance
         """
 
-        labels = [self.gv['networks'][self.atlas][network]['name'] for network in self.gv['networks'][self.atlas]]
-        idx = [self.gv['networks'][self.atlas][network]['index'] for network in self.gv['networks'][self.atlas]]
+        labels = [ATLAS['networks'][self.atlas][network]['name'] for network in ATLAS['networks'][self.atlas]]
+        idx = [ATLAS['networks'][self.atlas][network]['index'] for network in ATLAS['networks'][self.atlas]]
         # Global Variables contain MATLAB (1->) vs. Python (0->) indices
         index = [np.add(np.asarray(idx[i]), -1) for i in range(len(idx))]
 
@@ -61,64 +49,40 @@ class Decomposition:
 
         return RadarPlot(data, labels)
 
-    def reset(self):
+    @staticmethod
+    def reset():
         """
         Reset
         """
-        self.clear_cache()
+        clear_cache()
+        reset_target()
 
-    def readGlobalVariables(self):
-        """
-        Read JSON file containing all global variables.
-
-        :return gv: global variables
-        """
-        with open('resources/GLOBAL.JSON') as json_file:
-            return json.load(json_file)
-
-    def clear_cache(self):
-        """
-        Clear cache directory.
-        """
-        for filename in os.listdir('cache'):
-            file_path = os.path.join('cache', filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
-
-    def clear_target(self):
-        """
-        Clear target directory.
-        """
-        for filename in os.listdir('target'):
-            file_path = os.path.join('target', filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
-
-    def createModeDirs(self, howMany):
+    def _create_mode_dirs(self, how_many_modes):
         """
         Make directories to store created files.
 
-        :param howMany: how many modes should be created
+        :param how_many_modes: how many modes should be created
         :return modes: list of paths
         """
-        self.clear_cache()
+        reset_target()
 
-        modes = ['cache/mode-%s' % mode for mode in range(howMany)]
-        for mode in modes: os.mkdir(mode)
+        modes = [self._create_mode_dir(mode + 1) for mode in range(how_many_modes)]
 
         return modes
 
-    def saveHTML(self, surf = 'inflated', colorbar = 'RdYlGn', shadow = True):
+    @staticmethod
+    def _create_mode_dir(mode):
+        """
+        Create individual mode directory
+        :param mode: mode number
+        :return: path
+        """
+        name = 'mode-{}'.format(mode)
+        Path(TARGET_DIR.joinpath(name)).mkdir()
+
+        return name
+
+    def save_HTML(self, surf='inflated', colorbar='RdYlGn', shadow=True):
         """
         Save 3D brain surface plots to html files.
 
@@ -132,35 +96,34 @@ class Decomposition:
             htmls[mode] = {}
             
             for hemi in ['left', 'right']:
-    
-                    dir, filename = os.path.split(self.annots[mode][hemi])
-    
-                    # TODO ADD FILE EXTENSION PROBLEM
-                    htmls[mode][hemi] = os.path.join(dir, hemi + '.html')
 
-                    labels = surface.load_surf_data(self.annots[mode][hemi])
+                dir = Path(self.annots[mode][hemi]).parent
 
-                    args = {'surf_mesh': self.fsaverage['{0}_{1}'.format(surf[:4], hemi)],
-                            'surf_map': labels,
-                            'cmap': colorbar,
-                            'bg_map': self.fsaverage['sulc_%s' % hemi] if shadow else None,
-                            'symmetric_cmap': False,
-                            'colorbar_fontsize': 10,
-                            'title': 'Dynamic Mode ' + str(mode) + ': ' + hemi + ' hemisphere',
-                            'title_fontsize': 12}
+                # TODO ADD FILE EXTENSION PROBLEM
+                htmls[mode][hemi] = dir.joinpath('{}.html'.format(hemi))
 
-                    view = plotting.view_surf(**args)
+                labels = surface.load_surf_data(TARGET_DIR.joinpath(self.annots[mode][hemi]).as_posix())
 
-                    view.save_as_html(htmls[mode][hemi])
+                args = {'surf_mesh': FSAVERAGE['{0}_{1}'.format(surf[:4], hemi)],
+                        'surf_map': labels,
+                        'cmap': colorbar,
+                        'bg_map': FSAVERAGE['sulc_{}'.format(hemi)] if shadow else None,
+                        'symmetric_cmap': False,
+                        'colorbar_fontsize': 10,
+                        'title': 'Dynamic Mode {0}: {1} hemisphere'.format(str(mode+1), hemi),
+                        'title_fontsize': 12}
+
+                view = plotting.view_surf(**args)
+
+                view.save_as_html(TARGET_DIR.joinpath(htmls[mode][hemi]))
         
         return htmls
 
-    def writeLabels(self, dirpath, eigenVector):
+    def _write_labels(self, modedir, eigenVector):
         """
         Write Data mapping .annot file for Dynamic Modes.
 
-        :param dirpath: Path to new where the .annot files will be written
-        :param atlas: Accepted parcellations are : {'glasser','schaefer'}
+        :param modedir: directory of mode
         :param eigenVector: eigenvector of selected Dynamic Mode.
         :return writepath: dict of 'left' and 'right' hemispheric .annot filepaths
         """
@@ -168,7 +131,7 @@ class Decomposition:
 
         for hemi in ['left', 'right']:
             # extract parcellation
-            labels, ctab, names = fs.io.read_annot(self.gv['label'][self.atlas][hemi])
+            labels, ctab, names = read_annot(RES_DIR.joinpath(ATLAS['label'][self.atlas][hemi]))
 
             # initialize new color tab
             atlasLength = ctab.shape[0]
@@ -186,43 +149,56 @@ class Decomposition:
                 color = 127 + scale * (eigenVector[eigVecIdx] - mean)
                 newCtab[roi] = np.array([color, color, color, 0, labels[roi]])
 
-            writepath[hemi] = os.path.join(dirpath, hemi + '.annot')
+            writepath[hemi] = Path(modedir).joinpath('{}.annot'.format(hemi))
 
-            fs.io.write_annot(writepath[hemi], labels, newCtab, names, fill_ctab = True)
+            write_annot(TARGET_DIR.joinpath(writepath[hemi]), labels, newCtab, names, fill_ctab=True)
 
         return writepath
 
+    def _get_dynamic_modes(self, X, Y):
+        """
+        Get dynamic modes by Least Squares optimization.
+        To use the index simply use eigVal[idx] and eigVec[:,idx]
 
-    def getDynamicModes(self):
+        :param X: data for t (1->T)
+        :param Y: data for t (0->T-1)
+        :return eigVal: eigenvalues of dynamic mode decomposition
+        :return eigVec: eigenvectors of dynamic mode decomposition
+        :return eigIdx: eigen-indices for descendent sorting
+        :return A: decomposition matrix
         """
-        Get dynamic modes by Least Squares optimization. To use the index simply use eigVal[idx] and eigVec[:,idx]
-        """
-        self.A = (self.X @ self.Y.T) @ (np.linalg.inv(self.Y @ self.Y.T))
+        A = (X @ Y.T) @ (np.linalg.inv(Y @ Y.T))
 
         # extract eigenvalues and eigenvectors
-        self.eigVal, self.eigVec = np.linalg.eig(self.A)
+        eigVal, eigVec = np.linalg.eig(A)
 
         # sort descending - from https://stackoverflow.com/questions/8092920/
         # simply use index for later use
-        absEigVal = abs(self.eigVal)
-        self.eigIdx = absEigVal.argsort()[::-1]
+        eigIdx = abs(eigVal).argsort()[::-1]
 
         # adjust eigenvectors' phases for orthogonality
-        self.eigVec = self.adjustPhase(self.eigVec)
+        eigVec = self._adjust_phase(eigVec)
 
-    def checkData(self):
+        return eigVal, eigVec, eigIdx, A
+
+    def _check_data(self, data):
         """
         Check and format data into autoregressive model.
+
+        :param data: list of NumPy arrays
+        :return X: data for t (1->T)
+        :return Y: data for t (0->T-1)
+        :return atlas: cortical parcellations 'glasser' or 'schaefer'
         """
         # 'empty' arrays for creating X and Y
-        self.X = np.array([]).reshape(self.data[0].shape[0], 0)
-        self.Y = np.array([]).reshape(self.data[0].shape[0], 0)
+        X = np.array([]).reshape(data[0].shape[0], 0)
+        Y = np.array([]).reshape(data[0].shape[0], 0)
 
-        for matrice in self.data:
+        for matrice in data:
             # check for zero rows
             # indices of rows that are zero (full zero ROIs)
             zIdx = np.where(~matrice.any(axis=1))[0]
-            logMsg = "ROIError. Matrice contains " + str(zIdx.shape) + " zero rows. "
+            logging.warning("ROIError: Matrice contains " + str(zIdx.shape) + " zero rows.")
             # TODO: remove row ? how will that be shown in the graph then ????
 
             # normalize matrices
@@ -231,49 +207,36 @@ class Decomposition:
             # concatenate matrices
             Xn = matriceN[:, 1:  ]
             Yn = matriceN[:,  :-1]
-            self.X = np.concatenate((self.X, Xn), axis=1)
-            self.Y = np.concatenate((self.Y, Yn), axis=1)
+            X = np.concatenate((X, Xn), axis=1)
+            Y = np.concatenate((Y, Yn), axis=1)
 
-        self.N, self.T = self.X.shape
+        if str(X.shape[0]) in ATLAS['atlas'].keys():
+            atlas = ATLAS['atlas'][str(X.shape[0])]
+            return X, Y, atlas
+        else:
+            logging.error("ROIError: Number of ROIs does not correspond to any known parcellation.")
+            return X, Y, None
 
-#        if not self.N > self.T:
-#            logMsg = 'DimensionError. Not enough time points to use auto-regressive model. More than ' +  ATLAS[N] + ' time points are needed.'
-#            # TODO: find a way to stop program at this point in time
-
-
-#        logMsg = 'Data matrice succesfully extracted with ' + ATLAS[N] + ' atlas and ' + str(T) + ' time points.'
-
-    def extractData(self):
+    def _extract_data(self, filenames):
         """
         Extracts fMRI data from files.
         Supported formats are: .mat
+
+        :param filenames: list of filenames
+        :return data: list of NumPy arrays
         """
-        logMsg = ''
-        self.data = []
+        data = []
 
-        if isinstance(self.filenames, list):
-            for filename in self.filenames:
-                if (self.fileFormat(filename) == '.mat'):
-                    mat = scp.loadmat( filename )
-                    self.data.append(mat['TCSnf'])
-#                    else:
-                    #, "FileError. Filetype not supported. If multiple files are processed, make sure they all have the same file extension."
+        if isinstance(filenames, list):
+            for file in filenames:
+                if file_format(file) == '.mat':
+                    mat = scp.loadmat(file)
+                    data.append(mat['TCSnf'])
 
-            #, "Data successfully extracted."
-#            else:
+        return data
 
-            #, "TypeError. Parameter filenames must be a list of strings."
-
-    def fileFormat(self, filename):
-        """
-        Find file format by extracting what comes after the dot.
-
-        :param filename: filename
-        :return format: str of the file format
-        """
-        return os.path.splitext(filename)[-1]
-
-    def normalize(self, x, direction=1, demean=True, destandard=False):
+    @staticmethod
+    def normalize(x, direction=1, demean=True, destandard=False):
         """
         Normalize the original data set.
 
@@ -302,7 +265,8 @@ class Decomposition:
 
         return x, mean, std_x
 
-    def adjustPhase(self, x):
+    @staticmethod
+    def _adjust_phase(x):
         """
         Adjust phase as to have orthogonal eigenVectors
 

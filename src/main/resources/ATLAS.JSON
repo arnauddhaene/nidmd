@@ -5,12 +5,12 @@
   },
   "label": {
     "glasser": {
-      "left": "res/glasser/lh.HCP-MMP1.annot",
-      "right": "res/glasser/rh.HCP-MMP1.annot"
+      "left": "glasser/lh.HCP-MMP1.annot",
+      "right": "glasser/rh.HCP-MMP1.annot"
     },
     "schaefer": {
-      "left": "res/schaefer/lh.Schaefer2018_400Parcels_7Networks_order.annot",
-      "right": "res/schaefer/rh.Schaefer2018_400Parcels_7Networks_order.annot"
+      "left": "schaefer/lh.Schaefer2018_400Parcels_7Networks_order.annot",
+      "right": "schaefer/rh.Schaefer2018_400Parcels_7Networks_order.annot"
     }
   },
   "networks": {

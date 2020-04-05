@@ -1,14 +1,14 @@
 # This Python file uses the following encoding: utf-8
-from PyQt5 import QtWidgets, QtCore
-import numpy as np
-import matplotlib.pyplot as plt
-from nilearn.plotting.cm import _cmap_d as nilearn_cmaps
-from nilearn.plotting import show
 import logging
+import matplotlib.pyplot as plt
+from PyQt5 import QtWidgets, QtCore
+
 
 class ParametersDialog(QtWidgets.QDialog):
     def __init__(self):
         QtWidgets.QDialog.__init__(self)
+
+        logging.info('Fetching Parameters...')
 
         self.setWindowTitle("Set Decomposition Parameters")
 
