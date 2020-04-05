@@ -16,6 +16,7 @@ else:
         FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
 
+
 class RadarPlot(FigureCanvas):
 
     def __init__(self, data, labels, title='Network Activation', mode_titles=None):

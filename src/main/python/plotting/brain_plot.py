@@ -11,6 +11,5 @@ class BrainPlot(QWebEngineView):
         :param path: absolute Path to html file
         """
         QWebEngineView.__init__(self)
-        print(self.settings())
 
         self.load(QUrl('file:///' + path.as_posix()))

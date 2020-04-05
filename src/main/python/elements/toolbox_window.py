@@ -1,7 +1,8 @@
 # This Python file uses the following encoding: utf-8
 import os
 import logging
-from PyQt5 import QtCore, QtWidgets
+import numpy as np
+from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtWidgets import QFileDialog
 from elements import *
 from plotting import *
@@ -87,6 +88,18 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         self.decomposition = Decomposition(self.fileNames)
         self.radarLayout.addWidget(self.decomposition.radar_plot(5))
         self._add_brain_views(**params)
+
+        spectre = QtWidgets.QMainWindow()
+        spectre.setWindowTitle('Spectre')
+        spectre.resize(600,400)
+
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(SpectrePlot((self.decomposition.eigIdx, np.abs(self.decomposition.eigVal[self.decomposition.eigIdx]))))
+
+        spectre.setLayout(layout)
+
+        spectre.show()
+
 
     def reject_params(self):
 

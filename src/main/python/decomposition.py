@@ -19,7 +19,7 @@ class Decomposition:
                 self._extract_data(filenames)  # this defines data
             )
         # this defines eigVal, eigVec, eigIdx, A
-        self.eigVal, self.eigVec, _, _ = self._get_dynamic_modes(X, Y)  
+        self.eigVal, self.eigVec, self.eigIdx, _ = self._get_dynamic_modes(X, Y)
 
         # List of Dictionaries [ {'left':'pathL1', 'right':'pathR1'}, ...]
         self.annots = [self._write_labels(dir, np.real(self.eigVec[:, mode + 1]))
@@ -158,7 +158,7 @@ class Decomposition:
     def _get_dynamic_modes(self, X, Y):
         """
         Get dynamic modes by Least Squares optimization.
-        To use the index simply use eigVal[idx] and eigVec[:,idx]
+        To use the index simply use eigVal[eigIdx] and eigVec[:,eigIdx]
 
         :param X: data for t (1->T)
         :param Y: data for t (0->T-1)
@@ -232,6 +232,8 @@ class Decomposition:
                 if file_format(file) == '.mat':
                     mat = scp.loadmat(file)
                     data.append(mat['TCSnf'])
+
+        print(data[0])
 
         return data
 
