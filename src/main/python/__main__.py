@@ -5,10 +5,14 @@ from elements import ToolboxWindow
 
 
 if __name__ == '__main__':
-    # appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext
-    app = QApplication(sys.argv)
+
+    # overwrite automated QApplication from ApplicationContext to include flags
+    ApplicationContext.app = QApplication(sys.argv)
+
+    appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext
+
     window = ToolboxWindow()
     window.show()
-    # exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
-    exit_code = app.exec_()
+
+    exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
     sys.exit(exit_code)

@@ -39,11 +39,12 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         
         self.brainGridLayout = QtWidgets.QGridLayout()
 
+        # Create empty widgets to place brainviews in
         self.brainViews = []
-        for mode in range(1):
+        for mode in range(4):
             self.brainViews.append(BrainView(self.centralWidget))
-            self.brainGridLayout.addWidget(self.brainViews[mode], 0 if (mode < 2 != 0) else 1, 0 if (mode % 2 != 0) else 1, 1, 1)
-        
+            self.brainGridLayout.addWidget(self.brainViews[mode], 0 if (mode < 2) else 1, 0 if (mode % 2 != 0) else 1, 1, 1)
+
         self.gridLayout.addLayout(self.brainGridLayout, 1, 1)
         
         self.menuBar = MenuBar(self)
@@ -86,20 +87,8 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         logging.info("Parameters chosen.")
 
         self.decomposition = Decomposition(self.fileNames)
-        self.radarLayout.addWidget(self.decomposition.radar_plot(5))
+        self.radarLayout.addWidget(self.decomposition.dashboard(5))
         self._add_brain_views(**params)
-
-        spectre = QtWidgets.QMainWindow()
-        spectre.setWindowTitle('Spectre')
-        spectre.resize(600,400)
-
-        layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(SpectrePlot((self.decomposition.eigIdx, np.abs(self.decomposition.eigVal[self.decomposition.eigIdx]))))
-
-        spectre.setLayout(layout)
-
-        spectre.show()
-
 
     def reject_params(self):
 

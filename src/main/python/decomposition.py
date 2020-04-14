@@ -2,12 +2,11 @@
 import scipy.io as scp
 import numpy as np
 import cmath
-import os
-import shutil
+import pandas as pd
 import logging
 from nilearn import datasets, plotting, surface
 from nibabel.freesurfer.io import (read_annot, write_annot)
-from plotting import RadarPlot
+from plotting import Dashboard
 from utils import *
 
 
@@ -25,11 +24,11 @@ class Decomposition:
         self.annots = [self._write_labels(dir, np.real(self.eigVec[:, mode + 1]))
                        for mode, dir in enumerate(self._create_mode_dirs(how_many_modes)) ]
 
-    def radar_plot(self, modes=5):
+    def dashboard(self, modes=5):
         """
         Create RadarPlot instance displaying active networks.
 
-        :param modes: modes to plot (int)
+        :param modes: modes to plot in radar plot (int)
         :return: RadarPlot instance
         """
 
@@ -38,16 +37,30 @@ class Decomposition:
         # Global Variables contain MATLAB (1->) vs. Python (0->) indices
         index = [np.add(np.asarray(idx[i]), -1) for i in range(len(idx))]
 
-        data = {}
-        for axis in ['real','complex']:
+        df_radar = pd.DataFrame(columns=['mode', 'network', 'strength', 'complex'])
+
+        for axis in ['real', 'imag']:
 
             to_axis = (np.real if axis == 'real' else np.imag)
 
-            data[axis] = [[
-                np.mean(to_axis(self.eigVec[index[network], mode + 1])) for network in range(len(index))
-            ] for mode in range(modes)]
+            for mode in range(1, modes + 1):
 
-        return RadarPlot(data, labels)
+                for n, network in enumerate(labels):
+
+                    df_radar = pd.concat([df_radar,
+                                          pd.DataFrame({'Mode': ['Mode {}'.format(mode)],
+                                                        'Network': [network],
+                                                        'Strength': [np.mean(np.abs(to_axis(self.eigVec[index[n],
+                                                                                                        mode + 1])))],
+                                                        'complex': [axis]
+                                                        })
+                                          ])
+
+        df_spectre = pd.DataFrame(
+            data={'Mode': np.flip(range(1, np.unique(np.abs(self.eigVal)).shape[0] + 1)),
+                  'Absolute Value of Eigenvalue': np.unique(np.abs(self.eigVal))})
+
+        return Dashboard(df_radar, df_spectre)
 
     @staticmethod
     def reset():
@@ -174,7 +187,7 @@ class Decomposition:
 
         # sort descending - from https://stackoverflow.com/questions/8092920/
         # simply use index for later use
-        eigIdx = abs(eigVal).argsort()[::-1]
+        eigIdx = np.abs(eigVal).argsort()[::-1]
 
         # adjust eigenvectors' phases for orthogonality
         eigVec = self._adjust_phase(eigVec)
@@ -232,8 +245,6 @@ class Decomposition:
                 if file_format(file) == '.mat':
                     mat = scp.loadmat(file)
                     data.append(mat['TCSnf'])
-
-        print(data[0])
 
         return data
 

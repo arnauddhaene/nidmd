@@ -5,14 +5,14 @@ from plotting import BrainPlot
 from utils import *
 
 
-class BrainView(QtWidgets.QWidget):
+class BrainView(QtWidgets.QTabWidget):
     def __init__(self, parent):
         """
         Constructor
         
         :param parent: parent widget
         """
-        QtWidgets.QWidget.__init__(self, parent)
+        QtWidgets.QTabWidget.__init__(self, parent)
         
         self.setMinimumSize(QtCore.QSize(600, 350))
         self.layout = QtWidgets.QHBoxLayout(self)
@@ -24,11 +24,11 @@ class BrainView(QtWidgets.QWidget):
         :param paths: dictionary with 'left' and 'right' html local paths
         """
         # Create BrainPlot instance for each hemisphere
-        self.lHemisphere = BrainPlot(TARGET_DIR.joinpath(paths['left']))
-        self.rHemisphere = BrainPlot(TARGET_DIR.joinpath(paths['right']))
+        lHemisphere = BrainPlot(TARGET_DIR.joinpath(paths['left']))
+        rHemisphere = BrainPlot(TARGET_DIR.joinpath(paths['right']))
         
         logging.info("HTML files loaded to BrainView.")
     
         # Add each BrainPlot to the Horizontal Layout
-        self.layout.addWidget(self.lHemisphere)
-        self.layout.addWidget(self.rHemisphere)
+        self.addTab(lHemisphere, "Left")
+        self.addTab(rHemisphere, "Right")
