@@ -34,18 +34,18 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         
         self.gridLayout.addWidget(self.selectionWidget)
 
-        self.radarLayout = QtWidgets.QHBoxLayout()
-        self.gridLayout.addLayout(self.radarLayout, 1, 0)
+        self.dashboardLayout = QtWidgets.QHBoxLayout()
+        self.gridLayout.addLayout(self.dashboardLayout, 1, 0)
         
-        self.brainGridLayout = QtWidgets.QGridLayout()
-
-        # Create empty widgets to place brainviews in
-        self.brainViews = []
-        for mode in range(4):
-            self.brainViews.append(BrainView(self.centralWidget))
-            self.brainGridLayout.addWidget(self.brainViews[mode], 0 if (mode < 2) else 1, 0 if (mode % 2 != 0) else 1, 1, 1)
-
-        self.gridLayout.addLayout(self.brainGridLayout, 1, 1)
+        # self.brainGridLayout = QtWidgets.QGridLayout()
+        #
+        # # Create empty widgets to place brainviews in
+        # self.brainViews = []
+        # for mode in range(4):
+        #     self.brainViews.append(BrainView(self.centralWidget))
+        #     self.brainGridLayout.addWidget(self.brainViews[mode], 0 if (mode < 2) else 1, 0 if (mode % 2 != 0) else 1, 1, 1)
+        #
+        # self.gridLayout.addLayout(self.brainGridLayout, 1, 1)
         
         self.menuBar = MenuBar(self)
         self.setMenuBar(self.menuBar)
@@ -87,8 +87,8 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         logging.info("Parameters chosen.")
 
         self.decomposition = Decomposition(self.fileNames)
-        self.radarLayout.addWidget(self.decomposition.dashboard(5))
-        self._add_brain_views(**params)
+        self.dashboardLayout.addWidget(self.decomposition.create_dashboard())
+        # self._add_brain_views(**params)
 
     def reject_params(self):
 
@@ -98,7 +98,7 @@ class ToolboxWindow(QtWidgets.QMainWindow):
         logging.info("Parameters not chosen. Using default parameters.")
 
         self.decomposition = Decomposition(self.fileNames)
-        self._add_brain_views()
+        # self._add_brain_views()
 
     def _add_brain_views(self, **params):
         if not self.decomposition:

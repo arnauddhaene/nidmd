@@ -6,6 +6,7 @@ import pandas as pd
 import logging
 from nilearn import datasets, plotting, surface
 from nibabel.freesurfer.io import (read_annot, write_annot)
+from .mode import Mode
 from plotting import Dashboard
 from utils import *
 
@@ -18,49 +19,26 @@ class Decomposition:
                 self._extract_data(filenames)  # this defines data
             )
         # this defines eigVal, eigVec, eigIdx, A
-        self.eigVal, self.eigVec, self.eigIdx, _ = self._get_dynamic_modes(X, Y)
+        self.eigVal, self.eigVec, self.eigIdx, self.A = self._get_decomposition(X, Y)
+
+        # translate findings into object oriented modes
+        self.modes, self.modes_df = self._compute_modes()
 
         # List of Dictionaries [ {'left':'pathL1', 'right':'pathR1'}, ...]
-        self.annots = [self._write_labels(dir, np.real(self.eigVec[:, mode + 1]))
-                       for mode, dir in enumerate(self._create_mode_dirs(how_many_modes)) ]
+        # self.annots = [self._write_labels(dir, np.real(self.eigVec[:, mode + 1]))
+        #                for mode, dir in enumerate(self._create_mode_dirs(how_many_modes)) ]
 
-    def dashboard(self, modes=5):
+    def create_dashboard(self):
         """
         Create RadarPlot instance displaying active networks.
 
         :param modes: modes to plot in radar plot (int)
-        :return: RadarPlot instance
+        :param df_radar: pandas dataframe with columns=['mode','network','strength','complex']
+        :param df_spectre: pandas dataframe with columns=['mode','value']
+        :param eigv: eigenvectors of the decomposition
         """
 
-        labels = [ATLAS['networks'][self.atlas][network]['name'] for network in ATLAS['networks'][self.atlas]]
-        idx = [ATLAS['networks'][self.atlas][network]['index'] for network in ATLAS['networks'][self.atlas]]
-        # Global Variables contain MATLAB (1->) vs. Python (0->) indices
-        index = [np.add(np.asarray(idx[i]), -1) for i in range(len(idx))]
-
-        df_radar = pd.DataFrame(columns=['mode', 'network', 'strength', 'complex'])
-
-        for axis in ['real', 'imag']:
-
-            to_axis = (np.real if axis == 'real' else np.imag)
-
-            for mode in range(1, modes + 1):
-
-                for n, network in enumerate(labels):
-
-                    df_radar = pd.concat([df_radar,
-                                          pd.DataFrame({'Mode': ['Mode {}'.format(mode)],
-                                                        'Network': [network],
-                                                        'Strength': [np.mean(np.abs(to_axis(self.eigVec[index[n],
-                                                                                                        mode + 1])))],
-                                                        'complex': [axis]
-                                                        })
-                                          ])
-
-        df_spectre = pd.DataFrame(
-            data={'Mode': np.flip(range(1, np.unique(np.abs(self.eigVal)).shape[0] + 1)),
-                  'Absolute Value of Eigenvalue': np.unique(np.abs(self.eigVal))})
-
-        return Dashboard(df_radar, df_spectre)
+        return Dashboard(self)
 
     @staticmethod
     def reset():
@@ -132,6 +110,51 @@ class Decomposition:
         
         return htmls
 
+    def _compute_modes(self):
+
+        modes = []
+        mode_names = []
+        mode_values = []
+        mode_dt = []
+        mode_t = []
+
+        order = 1
+        idx = 0
+        sortedVal = self.eigVal[self.eigIdx]
+        sortedVec = self.eigVec[:, self.eigIdx]
+
+
+        while idx < self.eigIdx.shape[0]:
+
+            if idx < self.eigIdx.shape[0] - 1 and sortedVal[idx] == sortedVal[idx + 1].conjugate():
+
+                value = list(sortedVal[idx:idx + 2])
+                vector = sortedVec[:, idx]
+                m = Mode(value, vector, order)
+
+                order += 1
+
+                idx += 2
+
+            else:
+
+                m = Mode(sortedVal[idx], sortedVec[:, idx], order)
+                order += 1
+
+                idx += 1
+
+            modes.append(m)
+            mode_names.append(m.__str__())
+            mode_values.append(m.print_value())
+            mode_dt.append(m.damping_time)
+            mode_t.append(m.period)
+
+        return modes, pd.DataFrame(data={'Mode': mode_names,
+                                         'Value': mode_values,
+                                         'Damping Time': mode_dt,
+                                         'Period': mode_t})
+
+
     def _write_labels(self, modedir, eigenVector):
         """
         Write Data mapping .annot file for Dynamic Modes.
@@ -168,7 +191,7 @@ class Decomposition:
 
         return writepath
 
-    def _get_dynamic_modes(self, X, Y):
+    def _get_decomposition(self, X, Y):
         """
         Get dynamic modes by Least Squares optimization.
         To use the index simply use eigVal[eigIdx] and eigVec[:,eigIdx]
@@ -288,20 +311,20 @@ class Decomposition:
         """
 
         # create empty instance for ox
-        ox = np.empty(shape = x.shape, dtype=complex)
+        ox = np.empty(shape=x.shape, dtype=complex)
 
-        for j in range(1, x.shape[1]):
+        for j in range(x.shape[1]):
 
             # seperate real and imaginary parts
             a = np.real(x[:,j])
             b = np.imag(x[:,j])
 
             # phase calculation
-            phi = 0.5 * np.arctan( 2 * (a @ b) / (b.T @ b - a.T @ a) )
+            phi = 0.5 * np.arctan(2 * (a @ b) / (b.T @ b - a.T @ a))
 
             # compute normalised a, b
-            anorm = np.linalg.norm( math.sin(phi) * a + math.cos(phi) * b )
-            bnorm = np.linalg.norm( math.cos(phi) * a - math.sin(phi) * b )
+            anorm = np.linalg.norm(math.sin(phi) * a + math.cos(phi) * b)
+            bnorm = np.linalg.norm(math.cos(phi) * a - math.sin(phi) * b)
 
             if bnorm > anorm:
                 if phi < 0:
@@ -309,6 +332,6 @@ class Decomposition:
                 else:
                     phi += PI / 2
 
-            ox[:,j] = np.multiply(x[:,j], cmath.exp( complex(0,1) * phi ))
+            ox[:,j] = np.multiply(x[:,j], cmath.exp(complex(0,1) * phi))
 
         return ox
