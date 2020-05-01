@@ -7,38 +7,88 @@ import logging
 from nilearn import datasets, plotting, surface
 from nibabel.freesurfer.io import (read_annot, write_annot)
 from .mode import Mode
-from plotting import Dashboard
 from utils import *
 
 
 class Decomposition:
-    def __init__(self, filenames, how_many_modes=5):
+    def __init__(self):
 
-        # Get Dynamic Modes from filenames  
-        X, Y, self.atlas = self._check_data(  # this defines X, Y, N, T
-                self._extract_data(filenames)  # this defines data
+        self.data = []
+
+    def run(self):
+        """
+        Run decomposition
+
+        :return:
+        """
+
+        if self.data is not None:
+
+            # Get Dynamic Modes from filenames
+            X, Y, self.atlas = self._check_data(  # this defines X, Y, N, T
+                    self.data
             )
-        # this defines eigVal, eigVec, eigIdx, A
-        self.eigVal, self.eigVec, self.eigIdx, self.A = self._get_decomposition(X, Y)
 
-        # translate findings into object oriented modes
-        self.modes, self.modes_df = self._compute_modes()
+            # this defines eigVal, eigVec, eigIdx, A
+            self.eigVal, self.eigVec, self.eigIdx, self.A = self._get_decomposition(X, Y)
 
-        # List of Dictionaries [ {'left':'pathL1', 'right':'pathR1'}, ...]
-        # self.annots = [self._write_labels(dir, np.real(self.eigVec[:, mode + 1]))
-        #                for mode, dir in enumerate(self._create_mode_dirs(how_many_modes)) ]
+            # this defines the general data frame
+            self.df = self._compute(self.eigVal, self.eigVec, self.eigIdx)
 
-    def create_dashboard(self):
-        """
-        Create RadarPlot instance displaying active networks.
+            # translate findings into object oriented modes
+            self.modes, self.modes_df = self._compute_modes()
 
-        :param modes: modes to plot in radar plot (int)
-        :param df_radar: pandas dataframe with columns=['mode','network','strength','complex']
-        :param df_spectre: pandas dataframe with columns=['mode','value']
-        :param eigv: eigenvectors of the decomposition
-        """
+    def _compute(self, val, vec, index):
 
-        return Dashboard(self)
+        modes = []
+
+        atlas = ATLAS['atlas'][str(val.shape[0])]
+
+        order = 1
+        idx = 0
+        val_sorted = val[index]
+        vec_sorted = vec[:, index]
+
+        labels = list(ATLAS['networks'][atlas].keys())
+        netidx = [ATLAS['networks'][atlas][network]['index'] for network in
+               ATLAS['networks'][atlas]]
+
+        # Global Variables contain MATLAB (1->) vs. Python (0->) indices
+        netindex = [np.add(np.asarray(netidx[i]), -1) for i in range(len(netidx))]
+
+        while idx < index.shape[0]:
+
+            conj = (idx < index.shape[0] - 1) and (val_sorted[idx] == val_sorted[idx + 1].conjugate())
+
+            # TODO: modify sampling time with user input
+
+            value = val_sorted[idx]
+
+            strength_real = []
+            strength_imag = []
+
+            for n, network in enumerate(labels):
+                strength_real.append(np.mean(np.abs(np.real(vec_sorted[netindex[n], idx]))))
+                strength_imag.append(np.mean(np.abs(np.imag(vec_sorted[netindex[n], idx]))))
+
+            modes.append(
+                dict(
+                    mode=order,
+                    value=value,
+                    intensity=vec_sorted[:, idx],
+                    damping_time=(-1 / np.log(np.abs(value))) * 0.72,
+                    period=((2 * PI) / np.abs(np.angle(value))) * 0.72 if conj else np.inf,
+                    conjugate=conj,
+                    networks=labels,
+                    strength_real=strength_real,
+                    strength_imag=strength_imag,
+                )
+            )
+
+            order += 1
+            idx += 1 if not conj else 2
+
+        return pd.DataFrame(modes)
 
     @staticmethod
     def reset():
@@ -146,13 +196,13 @@ class Decomposition:
             modes.append(m)
             mode_names.append(m.__str__())
             mode_values.append(m.print_value())
-            mode_dt.append(m.damping_time)
-            mode_t.append(m.period)
+            mode_dt.append('%s' % float('%.2f' % m.damping_time))
+            mode_t.append('%s' % float('%.2f' % m.period))
 
         return modes, pd.DataFrame(data={'Mode': mode_names,
                                          'Value': mode_values,
-                                         'Damping Time': mode_dt,
-                                         'Period': mode_t})
+                                         'Damping Time [s]': mode_dt,
+                                         'Period [s]': mode_t})
 
 
     def _write_labels(self, modedir, eigenVector):
@@ -271,6 +321,15 @@ class Decomposition:
 
         return data
 
+    def add_data(self, data):
+        """
+        Add data to decomposition.
+
+        :param data: data matrix (N x T)
+        """
+
+        self.data.append(data)
+
     @staticmethod
     def normalize(x, direction=1, demean=True, destandard=False):
         """
@@ -323,8 +382,8 @@ class Decomposition:
             phi = 0.5 * np.arctan(2 * (a @ b) / (b.T @ b - a.T @ a))
 
             # compute normalised a, b
-            anorm = np.linalg.norm(math.sin(phi) * a + math.cos(phi) * b)
-            bnorm = np.linalg.norm(math.cos(phi) * a - math.sin(phi) * b)
+            anorm = np.linalg.norm(math.cos(phi) * a - math.sin(phi) * b)
+            bnorm = np.linalg.norm(math.sin(phi) * a + math.cos(phi) * b)
 
             if bnorm > anorm:
                 if phi < 0:

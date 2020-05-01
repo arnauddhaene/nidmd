@@ -1,6 +1,6 @@
 """
 __init__
 """
-from decomposition import Decomposition
-from plotting import *
-from elements import *
+from decomposition import *
+from logger import Logger
+from dashboard import Dashboard

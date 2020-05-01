@@ -2,6 +2,7 @@
 import numpy as np
 from utils import *
 
+
 class Mode:
 
     def __init__(self, value, vector, order):
@@ -38,10 +39,10 @@ class Mode:
         return "Mode {}".format(self.order)
 
     def print(self):
-        return "Mode {0} — ∆ = {1} — T = {2}".format(self.order, self.damping_time, self.period)
+        return "Mode {0} — ∆ = {1} — T = {2}".format(self.order, '%s' % float('%.2f' % self.damping_time), '%s' % float('%.2f' % self.period))
 
     def print_value(self):
         if self.is_complex_conjugate:
-            return str(np.real(self.value)) + u"\u00B1" + str(np.imag(self.value)) + 'j'
+            return '%s' % float('%.2f' % np.real(self.value)) + ' ' + u"\u00B1" + ' ' + '%s' % float('%.2f' % np.imag(self.value)) + 'j'
         else:
-            return str(self.value)
+            return '%s' % float('%.2f' % self.value)

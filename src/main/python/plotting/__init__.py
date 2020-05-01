@@ -1,6 +1,6 @@
 """
-Classes and functions for plotting.
+__init__
 """
-from .brain_plot import BrainPlot
-from .brain_view import BrainView
-from .dashboard import Dashboard
+from .brain import Brain
+from .spectre import Spectre
+from .radar import Radar

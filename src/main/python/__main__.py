@@ -1,8 +1,9 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWebEngineWidgets import *
+from PyQt5.QtCore import QUrl
 import sys
-from elements import ToolboxWindow
-
+from dashboard import Dashboard
 
 if __name__ == '__main__':
 
@@ -11,8 +12,10 @@ if __name__ == '__main__':
 
     appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext
 
-    window = ToolboxWindow()
-    window.show()
+    main_window = QMainWindow()
+
+    db = Dashboard()
+    db.show()
 
     exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
     sys.exit(exit_code)
