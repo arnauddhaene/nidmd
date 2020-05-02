@@ -29,7 +29,7 @@ class Radar:
         fig = make_subplots(rows=1, cols=2, specs=[[{'type': 'polar'}] * 2],
                             subplot_titles=("Real", "Imaginary"))
 
-        colors = ['darkviolet', 'darkorchid', 'firebrick', 'darkred', 'forestgreen']
+        colors = COLORS
 
         for mode in range(1, amount + 1):
 

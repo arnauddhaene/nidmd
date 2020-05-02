@@ -1,6 +1,7 @@
 # This Python file uses the following encoding: utf-8
 import scipy.io as scp
 import numpy as np
+import numpy.linalg as la
 import cmath
 import pandas as pd
 import logging
@@ -32,13 +33,15 @@ class Decomposition:
             # this defines eigVal, eigVec, eigIdx, A
             self.eigVal, self.eigVec, self.eigIdx, self.A = self._get_decomposition(X, Y)
 
+            self.Z = la.inv(self.eigVec) @ X
+
             # this defines the general data frame
-            self.df = self._compute(self.eigVal, self.eigVec, self.eigIdx)
+            self.df = self._compute(self.eigVal, self.eigVec, self.eigIdx, self.Z)
 
             # translate findings into object oriented modes
             self.modes, self.modes_df = self._compute_modes()
 
-    def _compute(self, val, vec, index):
+    def _compute(self, val, vec, index, time):
 
         modes = []
 
@@ -48,6 +51,7 @@ class Decomposition:
         idx = 0
         val_sorted = val[index]
         vec_sorted = vec[:, index]
+        time_sorted = time[index, :]
 
         labels = list(ATLAS['networks'][atlas].keys())
         netidx = [ATLAS['networks'][atlas][network]['index'] for network in
@@ -82,6 +86,7 @@ class Decomposition:
                     networks=labels,
                     strength_real=strength_real,
                     strength_imag=strength_imag,
+                    activity=np.real(time_sorted[idx, :])
                 )
             )
 

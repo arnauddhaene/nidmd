@@ -135,7 +135,8 @@ class Brain:
                            showticklabels=False, zeroline=False, showspikes=False)
 
         fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                          showlegend=False, title_text='Mode {}'.format(self.order if self.order is not None else ''))
+                          showlegend=False, title_text='Mode {}'.format(self.order if self.order is not None else ''),
+                          height=150+len(rows)*200)
 
         for i, label in enumerate(labels):
 

@@ -53,6 +53,9 @@ FSAVERAGE, SURFACE = _get_surface()
 ATLAS2D = dict(schaefer=pd.read_json(RES_DIR.joinpath('schaefer.json').as_posix()),
                glasser=pd.read_json(RES_DIR.joinpath('glasser.json').as_posix()))
 
+# Colors
+COLORS = ['#50514f', '#f25f5c', '#ffe066', '#247ba0', '#70c1b3']
+
 # File handling
 
 def file_format(filename):

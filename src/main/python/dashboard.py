@@ -156,6 +156,21 @@ class Dashboard(QWebEngineView):
                 return s.figure()
 
         @self.app.callback(
+            Output('timeplot', 'figure')
+            , [
+                Input('run', 'n_clicks')
+            ])
+        def compute_timeplot(n):
+
+            if n is None or self.atlas is None:
+                raise PreventUpdate
+            else:
+
+                t = TimePlot(_filter_time())
+
+                return t.figure()
+
+        @self.app.callback(
             Output('radar', 'figure')
         , [
             Input('run', 'n_clicks')
@@ -224,6 +239,17 @@ class Dashboard(QWebEngineView):
                                 'Group': ['Group 1' for i in range(self.df1.shape[0])]}) \
                 if self.df1 is not None else None
             df2 = pd.DataFrame({'Mode': self.df2['mode'], 'Value': np.abs(self.df2['value']),
+                                'Group': ['Group 2' for i in range(self.df2.shape[0])]}) \
+                if self.df2 is not None else None
+
+            return pd.concat([df1, df2])
+
+        def _filter_time():
+
+            df1 = pd.DataFrame({'Mode': self.df1['mode'], 'Activity': self.df1['activity'],
+                                'Group': ['Group 1' for i in range(self.df1.shape[0])]}) \
+                if self.df1 is not None else None
+            df2 = pd.DataFrame({'Mode': self.df2['mode'], 'Activity': self.df2['activity'],
                                 'Group': ['Group 2' for i in range(self.df2.shape[0])]}) \
                 if self.df2 is not None else None
 
@@ -427,10 +453,16 @@ class Dashboard(QWebEngineView):
                             [dcc.Graph(id="radar")],
                              className="col-12")
                     ]),
-                    # spectre and table
+                    # spectre
                     html.Div(className="row", children=[
                         html.Div(
                             [dcc.Graph(id="spectre")],
+                            className="col-12")
+                    ]),
+                    # timeplot
+                    html.Div(className="row", children=[
+                        html.Div(
+                            [dcc.Graph(id="timeplot")],
                             className="col-12")
                     ]),
                 ]),
