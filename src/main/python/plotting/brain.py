@@ -7,13 +7,13 @@ from utils import *
 
 class Brain:
 
-    def __init__(self, atlas, mode1, mode2=None):
+    def __init__(self, atlas, mode1, mode2=None, order=None):
         """
         Constructor
 
         :param atlas: cortical parcellation { 'schaefer', 'glasser' } (string)
-        :param mode1: intensity information (Mode)
-        :param mode2: intensity information for comparison (Mode)
+        :param mode1: intensity information (object with 'intensity', 'conjugate')
+        :param mode2: intensity information for comparison (object with 'intensity', 'conjugate')
         """
 
         self.atlas = ATLAS2D[atlas]
@@ -22,12 +22,13 @@ class Brain:
             # TODO: RAISE ERROR
         self.mode1 = mode1
         self.mode2 = mode2
+        self.order = order
 
     def _get_intensity(self, modes):
         """
         Add mode
 
-        :param mode: mode (list of Mode)
+        :param modes: modes (list of objects)
         :return: rows, intensity
         """
 
@@ -36,7 +37,7 @@ class Brain:
 
         for mode in modes:
 
-            if not mode.is_complex_conjugate:
+            if not mode.conjugate:
                 # extend rows list
                 rows.append(rows[-1] + 1 if len(rows) != 0 else 1)
                 # normalize from -0.1 -> 0.1 in modes to 0.0 -> 1.0 for colormap
@@ -60,16 +61,15 @@ class Brain:
         return rows, intensity
 
 
-    def figure(self, complex=None):
+    def figure(self):
         """
         Get Plotly figure
 
-        :param complex: { 'real', 'imag' }, default both (string)
         :return: Plotly figure instance
         """
 
         # Analysis
-        if not self.mode2:
+        if self.mode2 is None:
 
             rows, intensity = self._get_intensity([self.mode1])
 
@@ -83,7 +83,7 @@ class Brain:
             if len(rows) == 2:
                 labels = ['G1 Real', 'G2 Real']
             elif len(rows) == 3:
-                if self.mode1.is_complex_conjugate():
+                if self.mode1.conjugate:
                     labels = ['G1 Real', 'G1 Imaginary','G2 Real']
                 else:
                     labels = ['G1 Real', 'G2 Real','G2 Imaginary']
@@ -131,15 +131,17 @@ class Brain:
                                      mode='text'),
                           row=row, col=1)
 
-            fig.update_xaxes(showgrid=False, showline=False, visible=False, ticks='',
-                             showticklabels=False, zeroline=False, showspikes=False)
-            fig.update_yaxes(showgrid=False, showline=False, visible=True, ticks='',
-                             title=labels[row - 1],
-                             showticklabels=False, zeroline=False, showspikes=False, constrain='domain',
-                             scaleanchor='x', scaleratio=1,
-                             row=row, col=1)
+        axis_config = dict(showgrid=False, showline=False, visible=False, ticks='',
+                           showticklabels=False, zeroline=False, showspikes=False)
 
         fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                          showlegend=False, title_text='Mode {}'.format(self.mode1.order))
+                          showlegend=False, title_text='Mode {}'.format(self.order if self.order is not None else ''))
+
+        for i, label in enumerate(labels):
+
+            fig.layout['xaxis' + str(i + 1)].update(axis_config)
+            fig.layout['yaxis' + str(i + 1)].update({**axis_config,
+                                                     **dict(scaleanchor='x' + str(i + 1), scaleratio=1,
+                                                            title=labels[i], visible=True)})
 
         return fig

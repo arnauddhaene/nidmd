@@ -44,6 +44,7 @@ class Dashboard(QWebEngineView):
 
         self.df1 = None
         self.df2 = None
+        self.atlas = None
 
         self.app = dash.Dash(
             external_stylesheets=[dbc.themes.YETI]
@@ -139,23 +140,56 @@ class Dashboard(QWebEngineView):
 
             return names1, names2
 
-        @self.app.callback([
-            Output('spectre', 'figure'),
-            Output('radar', 'figure')
-        ],[
+        @self.app.callback(
+            Output('spectre', 'figure')
+        ,[
             Input('run', 'n_clicks')
         ])
-        def compute(n):
+        def compute_spectre(n):
 
-            if n is None:
+            if n is None or self.atlas is None:
                 raise PreventUpdate
             else:
 
                 s = Spectre(_filter_spectre())
 
+                return s.figure()
+
+        @self.app.callback(
+            Output('radar', 'figure')
+        , [
+            Input('run', 'n_clicks')
+        ])
+        def compute_radar(n):
+
+            if n is None or self.atlas is None:
+                raise PreventUpdate
+            else:
+
                 r = Radar(*_filter_radar())
 
-                return s.figure(), r.figure()
+                return r.figure()
+
+        @self.app.callback(
+            Output('brains', 'children')
+        , [
+            Input('run', 'n_clicks')
+        ])
+        def compute_brain(n):
+
+            if n is None or self.atlas is None:
+                raise PreventUpdate
+            else:
+
+                brains = []
+
+                for mode in range(1, 4):
+
+                    b = Brain(*_filter_brain(mode))
+
+                    brains.append(html.Div([dcc.Graph(figure=b.figure())]))
+
+                return brains
 
         def _parse_files(contents, files):
             """
@@ -209,6 +243,13 @@ class Dashboard(QWebEngineView):
                 networks = self.df2['networks'][0] if self.df2 is not None else None
 
             return pd.concat([df1, df2]), networks
+
+        def _filter_brain(order):
+
+            mode1 = self.df1.loc[order - 1][['intensity', 'conjugate']] if self.df1 is not None else None
+            mode2 = self.df2.loc[order - 1][['intensity', 'conjugate']] if self.df2 is not None else None
+
+            return self.atlas, mode1, mode2, order
 
         # if self.dcp:
                 #
@@ -392,83 +433,12 @@ class Dashboard(QWebEngineView):
                             [dcc.Graph(id="spectre")],
                             className="col-12")
                     ]),
-                ])
-            ])
+                ]),
+                # left panel - radar, spectre, temporal information
+                html.Div(className="col-7", id="brains")
+            ], className="row")
         ])
 
-
-    def _create_radar(self):
-        """
-        Create radar plot.
-
-        :return:
-        """
-
-        labels = list(ATLAS['networks'][self.atlas].keys())
-        idx = [ATLAS['networks'][self.atlas][network]['index'] for network in
-               ATLAS['networks'][self.atlas]]
-
-        # Global Variables contain MATLAB (1->) vs. Python (0->) indices
-        index = [np.add(np.asarray(idx[i]), -1) for i in range(len(idx))]
-
-        df = pd.DataFrame(columns=['Mode', 'Network', 'Strength', 'complex', 'group'])
-
-        for i, decomposition in enumerate(self.dcp):
-
-            for axis in ['real', 'imag']:
-
-                to_axis = (np.real if axis == 'real' else np.imag)
-
-                for mode in range(4):
-
-                    for n, network in enumerate(labels):
-                        strength = np.mean(np.abs(to_axis(decomposition.modes[mode].intensity[index[n]])))
-
-                        df = pd.concat([df, pd.DataFrame({'Mode': [mode + 1],
-                                                          'Network': [network],
-                                                          'Strength': [strength],
-                                                          'complex': [axis],
-                                                          'group': [int(i + 1)]})]
-                                       )
-
-        r = Radar(df)
-
-        return
-
-    def _create_spectre(self):
-        """
-        Create spectre plot.
-
-        :return:
-        """
-
-        frames = []
-
-        for i, decomposition in enumerate(self.dcp):
-
-            frames.append(
-                pd.DataFrame(
-                    data={'Mode': range(len(self.dcp.modes)),
-                          'Absolute Value of Eigenvalue': [np.abs(mode.value) for mode in self.dcp.modes],
-                          'Group': 'Group {}'.format(i)
-                    })
-            )
-
-        s = Spectre(pd.concat(frames))
-
-        return s.figure()
-
-    def _create_brain(self, mode):
-        """
-        Create 2D brain plot.
-
-        :param mode: Mode instance
-        :return:
-        """
-
-        b = Brain(self.atlas, mode)
-
-        return b.figure()
 
     def _get_cbar(self):
         """

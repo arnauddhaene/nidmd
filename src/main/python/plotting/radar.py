@@ -18,10 +18,11 @@ class Radar:
         self.df = df
         self.networks = networks
 
-    def figure(self):
+    def figure(self, amount=4):
         """
         Get Figure
 
+        :param amount: number of modes to plot
         :return: Plotly Figure instance
         """
 
@@ -30,7 +31,7 @@ class Radar:
 
         colors = ['darkviolet', 'darkorchid', 'firebrick', 'darkred', 'forestgreen']
 
-        for mode in range(1, 4):
+        for mode in range(1, amount + 1):
 
             for group in list(np.unique(self.df.group)):
 
