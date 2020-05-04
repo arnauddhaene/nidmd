@@ -353,13 +353,13 @@ class Decomposition:
 
         # removal of mean
         if demean:
-            x -= mean.reshape( (mean.shape[0]), 1 )
+            x -= mean.reshape((mean.shape[0]), 1 )
             # different implementation
             # x -= mean[:, None]
 
         # removal of standard deviation
         if destandard:
-            # not sure about formulation - not needed in this protocol should usually be F
+            # TODO: not sure about formulation - not needed in this protocol should usually be F
             # x = x / std_x
             print('Standardization formula not too sure')
 

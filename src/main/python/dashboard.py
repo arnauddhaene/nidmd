@@ -45,9 +45,10 @@ class Dashboard(QWebEngineView):
         self.df1 = None
         self.df2 = None
         self.atlas = None
+        self.progress = 0
 
         self.app = dash.Dash(
-            external_stylesheets=[dbc.themes.YETI]
+            external_stylesheets=[dbc.themes.FLATLY]
         )
 
         self._set_app_layout()
@@ -185,9 +186,10 @@ class Dashboard(QWebEngineView):
 
                 return r.figure()
 
-        @self.app.callback(
-            Output('brains', 'children')
-        , [
+        @self.app.callback([
+            Output('brains', 'children'),
+            Output('progress-div', 'style')
+        ], [
             Input('run', 'n_clicks')
         ])
         def compute_brain(n):
@@ -198,13 +200,30 @@ class Dashboard(QWebEngineView):
 
                 brains = []
 
+                self.progress += 10
+
                 for mode in range(1, 4):
 
                     b = Brain(*_filter_brain(mode))
 
                     brains.append(html.Div([dcc.Graph(figure=b.figure())]))
 
-                return brains
+                    self.progress += 30
+
+                return brains, {'display': 'none'}
+
+        @self.app.callback([
+            Output("progress", "value"),
+            Output("progress", "children")
+        ], [
+            Input("progress-interval", "n_intervals")
+        ])
+        def progress(n):
+            # check progress of some background process, in this example we'll just
+            # use n_intervals constrained to be in 0-100
+            progress = min(self.progress % 110, 100)
+            # only add text after 5% progress to ensure text isn't squashed too much
+            return progress, f"{progress} %" if progress >= 5 else ""
 
         def _parse_files(contents, files):
             """
@@ -466,11 +485,24 @@ class Dashboard(QWebEngineView):
                             className="col-12")
                     ]),
                 ]),
-                # left panel - radar, spectre, temporal information
-                html.Div(className="col-7", id="brains")
+                # right panel - brains
+                    # brains
+
+                # html.Div(
+                #     [dcc.Graph(figure=self._get_cbar())],
+                #     className="col-12", id="colorbar")
+                html.Div(className="col-7", children=[
+                    html.Div(className="col-12", id="brains"),
+                    # progress
+                    html.Div(
+                        [
+                            html.P('Loading cortical surface graphs...', className="mt-4"),
+                            dcc.Interval(id="progress-interval", n_intervals=0, interval=500),
+                            dbc.Progress(id="progress", style={'width': '70%', 'align':'center'}),
+                        ], className="col-12", id="progress-div")
+                ])
             ], className="row")
         ])
-
 
     def _get_cbar(self):
         """
@@ -478,16 +510,16 @@ class Dashboard(QWebEngineView):
 
         :return:
         """
-        cbar = go.Figure(data=[go.Mesh3d(x=[1, 0, 0],
-                                         y=[0, 1, 0],
-                                         z=[0, 0, 1],
-                                         i=[0], j=[1], k=[2],
-                                         intensity=[0.],
-                                         opacity=0,
-                                         colorbar={'tickfont': {'size': 14}, 'len': .1},
-                                         colorscale=self._mpl_to_plotly(cm.coolwarm, 255))])
-
-        axis_config_x = {
+        # cbar = go.Figure(data=[go.Mesh3d(x=[1, 0, 0],
+        #                                  y=[0, 1, 0],
+        #                                  z=[0, 0, 1],
+        #                                  i=[0], j=[1], k=[2],
+        #                                  intensity=[0.1],
+        #                                  opacity=0,
+        #                                  colorbar={'tickfont': {'size': 14}, 'len': 1},
+        #                                  colorscale=self._mpl_to_plotly(cm.coolwarm, 255))])
+        #
+        axis_config = {
             'visible': False,
             'showgrid': False,
             'showline': False,
@@ -495,16 +527,28 @@ class Dashboard(QWebEngineView):
             'title': '',
             'showticklabels': False,
             'zeroline': False,
-            'showspikes': False,
-            'constrain': 'domain'
+            'showspikes': False
         }
+        #
+        # cbar.update_layout(scene={'xaxis': axis_config,
+        #                           'yaxis': axis_config,
+        #                           'zaxis': axis_config,
+        #                           'bgcolor': '#fff'})
 
-        cbar.update_layout(scene={'xaxis': self.axisConfig,
-                                  'yaxis': self.axisConfig,
-                                  'zaxis': self.axisConfig,
-                                  'bgcolor': '#fff'})
+        a = [-0.1, 0.1]
+        b = [-0.1, 0.1]
+        c = [-0.1, 0.1]
 
-        return cbar
+        fig = go.Figure(go.Heatmap(
+            z=[a, b, c],
+            colorscale='RdBu',
+            zmid=0))
+
+        fig.layout['xaxis'].update(axis_config)
+        fig.layout['yaxis'].update(axis_config)
+
+
+        return fig
 
     @staticmethod
     def _mpl_to_plotly(cmap, pl_entries):
