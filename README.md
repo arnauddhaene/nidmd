@@ -3,7 +3,7 @@
 ## Installation
 
 First, make sure you have a working installation of Python 3.7.0 (other versions should work as well but have not been tested).
-Run ````python --version ```` in your Terminal, which should return 
+Run ```python --version``` in your Terminal, which should return 
 
 ```
 Python 3.7.0

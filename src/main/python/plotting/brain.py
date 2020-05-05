@@ -145,4 +145,14 @@ class Brain:
                                                      **dict(scaleanchor='x' + str(i + 1), scaleratio=1,
                                                             title=labels[i], visible=True)})
 
+        fig.add_trace(go.Scatter(x=[200, 200], y=[-20, -20],
+                                 marker=dict(size=0.01, opacity=1,
+                                             cmax=0.1, cmin=-0.1,
+                                             color=[-0.1, 0.1],
+                                             colorbar=dict(title="Activity", len=.7, nticks=3),
+                                             colorscale=COOLWARM,
+                                             reversescale=True),
+                                 mode="markers")
+                      )
+
         return fig

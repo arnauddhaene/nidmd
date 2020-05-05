@@ -3,6 +3,8 @@ import json
 import logging
 import numpy as np
 import pandas as pd
+import matplotlib
+from matplotlib import cm
 from pathlib import *
 from nilearn.datasets import fetch_surf_fsaverage
 from nilearn.surface import load_surf_mesh
@@ -55,6 +57,27 @@ ATLAS2D = dict(schaefer=pd.read_json(RES_DIR.joinpath('schaefer.json').as_posix(
 
 # Colors
 COLORS = ['#50514f', '#f25f5c', '#ffe066', '#247ba0', '#70c1b3']
+
+
+def matplotlib_to_plotly(cmap, pl_entries=255):
+    """
+    Matplotlib to Plotly colorscale
+
+    :param cmap: mpl cm
+    :param pl_entries: number of entries (default 255)
+    :return: plotly cm
+    """
+    h = 1.0/(pl_entries-1)
+    pl_colorscale = []
+
+    for k in range(pl_entries):
+        C = list(map(np.uint8, np.array(cmap(k * h)[:3])*255))
+        pl_colorscale.append([k*h, 'rgb'+str((C[0], C[1], C[2]))])
+
+    return pl_colorscale
+
+
+COOLWARM = matplotlib_to_plotly(matplotlib.cm.get_cmap('coolwarm'))
 
 # File handling
 
