@@ -4,8 +4,12 @@ from PyQt5.QtWebEngineWidgets import *
 from PyQt5.QtCore import QUrl
 import sys
 from dashboard import Dashboard
+from utils import clear_target, clear_cache
 
 if __name__ == '__main__':
+
+    clear_target()
+    clear_cache()
 
     # overwrite automated QApplication from ApplicationContext to include flags
     ApplicationContext.app = QApplication(sys.argv)

@@ -1,6 +1,10 @@
 import numpy as np
 import logging
+from logging.handlers import RotatingFileHandler
 import io
+import time
+import os
+import sys
 import base64
 import datetime
 import threading
@@ -37,6 +41,7 @@ class Dashboard(QWebEngineView):
         """
         # the figure is now accessible via self.figure
         QWebEngineView.__init__(self)
+        self.showMaximized()
 
         address = {'address': '127.0.0.1',
                    'port': 8000
@@ -47,9 +52,17 @@ class Dashboard(QWebEngineView):
         self.atlas = None
         self.progress = 0
 
+        self.logfilename = TARGET_DIR.joinpath('log.log').as_posix()
+        handler = RotatingFileHandler(self.logfilename, maxBytes=10000, backupCount=1)
+        self.logfile = open(TARGET_DIR.joinpath(self.logfilename).as_posix(), 'r')
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
         self.app = dash.Dash(
             external_stylesheets=[dbc.themes.FLATLY]
         )
+
+        self.app.server.logger.addHandler(handler)
 
         self._set_app_layout()
 
@@ -66,36 +79,24 @@ class Dashboard(QWebEngineView):
         :param port: port (int)
         """
 
-        # cache = Cache(self.app.server, config={
-        #     'CACHE_TYPE': 'redis',
-        #     # Note that filesystem cache doesn't work on systems with ephemeral
-        #     # filesystems like Heroku.
-        #     'CACHE_TYPE': 'filesystem',
-        #     'CACHE_DIR': 'cache-directory',
-        #
-        #     # should be equal to maximum number of users on the app at a single time
-        #     # higher numbers will store more data in the filesystem / redis cache
-        #     'CACHE_THRESHOLD': 200
-        # })
-        #
-        # def get_dataframe(session_id, decompositions):
-        #     @cache.memoize()
-        #     def query_and_serialize_data(session_id, decompositions):
-        #         # expensive or user/session-unique data processing step goes here
-        #
-        #
-        #
-        #         # simulate an expensive data processing task by sleeping
-        #         time.sleep(5)
-        #
-        #
-        #
-        #         return df.to_json()
-        #
-        #     return pd.read_json(query_and_serialize_data(session_id))
+        @self.app.callback(
+            Output('log', 'children'),
+            [Input('log-update', 'n_intervals')],
+            [State('log', 'children')]
+        )
+        def update_logs(interval, console):
+
+            if console is not None:
+
+                console.append(html.P(self.logfile.read()))
+                return console
+
+            else:
+                return None
 
         @self.app.callback([
             Output('upload-1-div', 'className'),
+            Output('upload-1', 'style'),
             Output('upload-2', 'style'),
             Output('selected-files-group-2-t', 'style'),
             Output('selected-files-group-2-p', 'style'),
@@ -104,20 +105,22 @@ class Dashboard(QWebEngineView):
         ])
         def input_setting(value):
 
+            upload = {
+                'height': '60px',
+                'lineHeight': '60px',
+                'borderWidth': '1px',
+                'borderStyle': 'dashed',
+                'borderRadius': '5px',
+                'textAlign': 'center',
+                'margin': '10px'
+            }
+
             if value is None:
-                raise PreventUpdate
+                return "row", {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
             elif value == 1:
-                return "col-12", {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
+                return "col-12", upload, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
             elif value == 2:
-                return "col-6", {
-                                    'height': '60px',
-                                    'lineHeight': '60px',
-                                    'borderWidth': '1px',
-                                    'borderStyle': 'dashed',
-                                    'borderRadius': '5px',
-                                    'textAlign': 'center',
-                                    'margin': '10px'
-                                }, {}, {}
+                return "col-6", upload, upload, {}, {}
 
         @self.app.callback([
             Output('selected-files-group-1-p', 'children'),
@@ -152,6 +155,8 @@ class Dashboard(QWebEngineView):
                 raise PreventUpdate
             else:
 
+                self.app.logger.info("Computing spectre of dynamical modes")
+
                 s = Spectre(_filter_spectre())
 
                 return s.figure()
@@ -166,6 +171,8 @@ class Dashboard(QWebEngineView):
             if n is None or self.atlas is None:
                 raise PreventUpdate
             else:
+
+                self.app.logger.info("Computing time series activation of dominant modes")
 
                 t = TimePlot(_filter_time())
 
@@ -182,6 +189,8 @@ class Dashboard(QWebEngineView):
                 raise PreventUpdate
             else:
 
+                self.app.logger.info("Computing cortical network activation")
+
                 r = Radar(*_filter_radar())
 
                 return r.figure()
@@ -197,6 +206,8 @@ class Dashboard(QWebEngineView):
             if n is None or self.atlas is None:
                 raise PreventUpdate
             else:
+
+                self.app.logger.info("Computing cortical surface representations")
 
                 brains = []
 
@@ -233,8 +244,7 @@ class Dashboard(QWebEngineView):
             :param files: list of names
             """
 
-            logging.info('_parse_files called')
-            print('_parse_files called')
+            self.app.logger.info("Parsing {} files".format(len(files)))
 
             dcp = Decomposition()
 
@@ -243,7 +253,12 @@ class Dashboard(QWebEngineView):
 
                 mat = io.BytesIO(base64.b64decode(string))
 
-                data = sio.loadmat(mat)['TCSnf']
+                data = sio.loadmat(mat)
+
+                if 'TCSnf' in data.keys():
+                    data = data['TCSnf']
+                else:
+                    data = data['TCS']
 
                 dcp.add_data(data)
 
@@ -253,6 +268,9 @@ class Dashboard(QWebEngineView):
             return dcp.df
 
         def _filter_spectre():
+
+            self.app.logger.info("Filtering Spectre data")
+
             # Filter data for Spectre
             df1 = pd.DataFrame({'Mode': self.df1['mode'], 'Value': np.abs(self.df1['value']),
                                 'Group': ['Group 1' for i in range(self.df1.shape[0])]}) \
@@ -265,6 +283,8 @@ class Dashboard(QWebEngineView):
 
         def _filter_time():
 
+            self.app.logger.info("Filtering TimePlot data")
+
             df1 = pd.DataFrame({'Mode': self.df1['mode'], 'Activity': self.df1['activity'],
                                 'Group': ['Group 1' for i in range(self.df1.shape[0])]}) \
                 if self.df1 is not None else None
@@ -275,6 +295,9 @@ class Dashboard(QWebEngineView):
             return pd.concat([df1, df2])
 
         def _filter_radar():
+
+
+            self.app.logger.info("Filtering Radar data")
 
             df1 = pd.DataFrame({'mode': self.df1['mode'], 'group': [1 for i in range(self.df1.shape[0])],
                                 'strength_real': self.df1['strength_real'], 'strength_imag': self.df1['strength_imag']}) \
@@ -291,6 +314,8 @@ class Dashboard(QWebEngineView):
 
         def _filter_brain(order):
 
+            self.app.logger.info("Filtering Brain data for Mode {}".format(order))
+
             mode1 = self.df1.loc[order - 1][['intensity', 'conjugate']] if self.df1 is not None else None
             mode2 = self.df2.loc[order - 1][['intensity', 'conjugate']] if self.df2 is not None else None
 
@@ -300,8 +325,7 @@ class Dashboard(QWebEngineView):
 
     def _set_app_layout(self):
 
-        logging.info('_set_app_layout called')
-        print('_set_app_layout called')
+        self.app.logger.info("Setting Application Layout")
 
         self.app.layout = html.Div([
             # SETTING CHOICE RADIO ROW
@@ -359,18 +383,30 @@ class Dashboard(QWebEngineView):
                     multiple=True)],
                     className="col-6")
                 ], className="row"),
-            # FILE SELECTION CARD
-            html.Div(children=[dbc.Card(
-                        dbc.CardBody([
-                                html.H5("Selected Files", className="card-title"),
-                                html.H6("Group 1"),
-                                html.P(id="selected-files-group-1-p"),
-                                html.H6("Group 2", id="selected-files-group-2-t"),
-                                html.P(id="selected-files-group-2-p"),
-                                dbc.Button("Run Decomposition", color="primary", id="run")
-                        ]))],
-                     id="file-selection-card",
-                     className="col-12"),
+            # FILE SELECTION + LOGGER
+            html.Div(children=[
+                # file selection info
+                html.Div(children=[dbc.Card(
+                            dbc.CardBody([
+                                    html.H5("Selected Files", className="card-title"),
+                                    html.H6("Group 1"),
+                                    html.P(id="selected-files-group-1-p"),
+                                    html.H6("Group 2", id="selected-files-group-2-t"),
+                                    html.P(id="selected-files-group-2-p"),
+                                    dbc.Button("Run Decomposition", color="primary", id="run")
+                            ]))],
+                         id="file-selection-card",
+                         className="col-6"),
+                # logger
+                html.Div(children=[
+                            dcc.Interval(
+                                id='log-update',
+                                interval=1 * 1000  # in milliseconds
+                            ),
+                            html.Div(children=[html.P("———— APP START ————")], id='log')],
+                         className="col-6", id="log-div", style={"maxHeight": "200px", "overflow": "scroll"})
+            ], className="row"),
+            # PLOTS
             html.Div(children=[
                 # left panel - radar, spectre, temporal information
                 html.Div(className="col-5", children=[
