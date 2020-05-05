@@ -124,7 +124,10 @@ class Dashboard(QWebEngineView):
 
         @self.app.callback([
             Output('selected-files-group-1-p', 'children'),
-            Output('selected-files-group-2-p', 'children')
+            Output('selected-files-group-2-p', 'children'),
+            Output('table-1-tab', 'children'),
+            Output('table-2-tab', 'children'),
+            Output('table-2-tab', 'disabled')
         ], [
             Input('upload-1', 'contents'),
             Input('upload-2', 'contents')
@@ -134,15 +137,71 @@ class Dashboard(QWebEngineView):
         ])
         def upload(contents1, contents2, names1, names2):
 
+            df1 = None
+            df2 = None
+            tab1 = None
+            tab2 = None
+            disabled = True
+
+            table_config = dict(
+                fixed_rows={'headers': True, 'data': 0},
+                style_cell={'padding': '5px'},
+                style_header={
+                    'backgroundColor': 'white',
+                    'fontWeight': 'bold',
+                    'font-family': 'Helvetica',
+                    'padding': '0px 5px'
+                },
+                style_data={'font-family': 'Helvetica'},
+                style_data_conditional=[
+                    {
+                        'if': {'row_index': 'odd'},
+                        'backgroundColor': 'rgb(248, 248, 248)'
+                    }
+                ],
+                style_cell_conditional=[
+                    {
+                        'if': {'column_id': 'Mode'},
+                        'textAlign': 'left'
+                    },
+                    {'if': {'column_id': 'Mode'},
+                     'width': '10%'},
+                    {'if': {'column_id': 'Value'},
+                     'width': '30%'},
+                    {'if': {'column_id': 'Damping Time'},
+                     'width': '40%'},
+                    {'if': {'column_id': 'Period'},
+                     'width': '20%'},
+                ],
+                style_as_list_view=True
+            )
+
             if [contents1, contents2, names1, names2].count(None) == 4:
                 raise PreventUpdate
             else:
                 if contents1 is not None:
                     self.df1 = _parse_files(contents1, names1)
+                    df1 = self.df1[['mode', 'value', 'damping_time', 'period']]
+                    df1['value'] = [str(value) for value in list(df1['value'])]
+                    data1 = df1.to_dict('records') if df1 is not None else dict()
+                    columns1 = [{"name": i, "id": i} for i in df1.columns] if df1 is not None else [
+                        {"name": "none", "id": "none"}]
+                    tab1 = html.Div(DataTable(
+                        id="table-1", data=data1, columns=columns1, **table_config
+                    ), className="container") if self.df1 is not None else None
                 if contents2 is not None:
                     self.df2 = _parse_files(contents2, names2)
+                    df2 = self.df2[['mode', 'value', 'damping_time', 'period']]
+                    df2['value'] = [str(value) for value in list(df2['value'])]
+                    data2 = df2.to_dict('records') if df2 is not None else dict()
+                    columns2 = [{"name": i, "id": i} for i in df2.columns] if df2 is not None else [
+                        {"name": "none", "id": "none"}]
+                    tab2 = html.Div(DataTable(
+                        id="table-2", data=data2, columns=columns2, **table_config
+                    ), className="container") if self.df2 is not None else None
+                    disabled = False
 
-            return names1, names2
+            return names1, names2, tab1, tab2, disabled
 
         @self.app.callback(
             Output('spectre', 'figure')
@@ -406,40 +465,52 @@ class Dashboard(QWebEngineView):
                             html.Div(children=[html.P("———— APP START ————")], id='log')],
                          className="col-6", id="log-div", style={"maxHeight": "200px", "overflow": "scroll"})
             ], className="row"),
-            # PLOTS
-            html.Div(children=[
-                # left panel - radar, spectre, temporal information
-                html.Div(className="col-5", children=[
-                    # radar plots
-                    html.Div(className="row", children=[
-                        html.Div(
-                            [dcc.Graph(id="radar")],
-                             className="col-12")
-                    ]),
-                    # spectre
-                    html.Div(className="row", children=[
-                        html.Div(
-                            [dcc.Graph(id="spectre")],
-                            className="col-12")
-                    ]),
-                    # timeplot
-                    html.Div(className="row", children=[
-                        html.Div(
-                            [dcc.Graph(id="timeplot")],
-                            className="col-12")
-                    ]),
-                ]),
-                # right panel - brains
-                # brains
-                html.Div(className="col-7", children=[
-                    html.Div(className="col-12", id="brains"),
-                    # progress
-                    html.Div(
-                        [
-                            html.P('Loading cortical surface graphs...', className="mt-4"),
-                            dcc.Interval(id="progress-interval", n_intervals=0, interval=500),
-                            dbc.Progress(id="progress", style={'width': '70%', 'align':'center'}),
-                        ], className="col-12", id="progress-div")
-                ])
-            ], className="row")
+            # TABS
+            dbc.Tabs(
+                [
+                    ## PLOTS
+                    dbc.Tab(
+                        html.Div(children=[
+                            # left panel - radar, spectre, temporal information
+                            html.Div(className="col-5", children=[
+                                # radar plots
+                                html.Div(className="row", children=[
+                                    html.Div(
+                                        [dcc.Graph(id="radar")],
+                                         className="col-12")
+                                ]),
+                                # spectre
+                                html.Div(className="row", children=[
+                                    html.Div(
+                                        [dcc.Graph(id="spectre")],
+                                        className="col-12")
+                                ]),
+                                # timeplot
+                                html.Div(className="row", children=[
+                                    html.Div(
+                                        [dcc.Graph(id="timeplot")],
+                                        className="col-12")
+                                ]),
+                            ]),
+                            # right panel - brains
+                            # brains
+                            html.Div(className="col-7", children=[
+                                html.Div(className="col-12", id="brains"),
+                                # progress
+                                html.Div(
+                                    [
+                                        html.P('Loading cortical surface graphs...', className="mt-4"),
+                                        dcc.Interval(id="progress-interval", n_intervals=0, interval=500),
+                                        dbc.Progress(id="progress", style={'width': '70%', 'align':'center'}),
+                                    ], className="col-12", id="progress-div")
+                            ])
+                        ], className="row"),
+                        label="Graphs"),
+
+                    ## TABLE 1
+                    dbc.Tab(label="Group 1", id="table-1-tab"),
+
+                    ## TABLE 2
+                    dbc.Tab(label="Group 2", disabled=True, id="table-2-tab")]
+            ),
         ])
