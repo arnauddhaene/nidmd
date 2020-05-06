@@ -9,8 +9,10 @@ from utils import *
 
 if __name__ == '__main__':
 
-    Path(TARGET_DIR).mkdir()
-    Path(CACHE_DIR).mkdir()
+    if not Path(TARGET_DIR).exists():
+        Path(TARGET_DIR).mkdir()
+    if not Path(TARGET_DIR).exists():
+        Path(CACHE_DIR).mkdir()
 
     clear_target()
     clear_cache()
