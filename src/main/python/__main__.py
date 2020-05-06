@@ -4,9 +4,13 @@ from PyQt5.QtWebEngineWidgets import *
 from PyQt5.QtCore import QUrl
 import sys
 from dashboard import Dashboard
-from utils import clear_target, clear_cache
+from utils import *
+
 
 if __name__ == '__main__':
+
+    Path(TARGET_DIR).mkdir()
+    Path(CACHE_DIR).mkdir()
 
     clear_target()
     clear_cache()
