@@ -1,8 +1,6 @@
 # This Python file uses the following encoding: utf-8
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-import plotly.express as px
-from matplotlib import cm
 from utils import *
 
 

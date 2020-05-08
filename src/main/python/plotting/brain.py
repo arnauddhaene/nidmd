@@ -1,7 +1,6 @@
 # This Python file uses the following encoding: utf-8
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from matplotlib import cm
 from utils import *
 
 
@@ -150,8 +149,7 @@ class Brain:
                                              cmax=0.1, cmin=-0.1,
                                              color=[-0.1, 0.1],
                                              colorbar=dict(title="Activity", len=.7, nticks=3),
-                                             colorscale=COOLWARM,
-                                             reversescale=True),
+                                             colorscale=COOLWARM),
                                  mode="markers")
                       )
 

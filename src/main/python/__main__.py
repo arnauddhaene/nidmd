@@ -1,10 +1,9 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.QtWebEngineWidgets import *
-from PyQt5.QtCore import QUrl
 import sys
 from dashboard import Dashboard
 from utils import *
+import logging
 
 
 if __name__ == '__main__':
@@ -16,6 +15,13 @@ if __name__ == '__main__':
 
     clear_target()
     clear_cache()
+
+    logging.getLogger('werkzeug').setLevel(logging.ERROR)
+    logging.basicConfig(filename=TARGET_DIR.joinpath('log.log').as_posix(),
+                        filemode='a',
+                        format='%(asctime)s,%(msecs)d | %(levelname)s — %(message)s',
+                        datefmt='%H:%M:%S',
+                        level=logging.INFO)
 
     # overwrite automated QApplication from ApplicationContext to include flags
     ApplicationContext.app = QApplication(sys.argv)

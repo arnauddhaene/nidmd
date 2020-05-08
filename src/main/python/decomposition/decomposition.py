@@ -1,11 +1,8 @@
 # This Python file uses the following encoding: utf-8
 import scipy.io as scp
-import numpy as np
 import numpy.linalg as la
 import cmath
-import pandas as pd
-import logging
-from nilearn import datasets, plotting, surface
+from nilearn import plotting, surface
 from nibabel.freesurfer.io import (read_annot, write_annot)
 from .mode import Mode
 from utils import *
@@ -336,32 +333,29 @@ class Decomposition:
         self.data.append(data)
 
     @staticmethod
-    def normalize(x, direction=1, demean=True, destandard=False):
+    def normalize(X, direction=1, demean=True, destandard=True):
         """
         Normalize the original data set.
 
         :param x: data
-        :param direction: 0 for columns, 1 for lines, None for global
+        :param direction: 0 for columns, 1 for rows, None for global
         :param demean: demean
         :param destandard: remove standard deviation (to 1)
         :return x: standardized data
         :return mean: mean of original data
         """
+        x = X.copy()
         r, c = x.shape
         std_x = np.std(x, axis=direction)
         mean = np.mean(x, axis=direction)
 
         # removal of mean
         if demean:
-            x -= mean.reshape((mean.shape[0]), 1 )
-            # different implementation
-            # x -= mean[:, None]
+            x -= mean.reshape((mean.shape[0]), 1)
 
         # removal of standard deviation
         if destandard:
-            # TODO: not sure about formulation - not needed in this protocol should usually be F
-            # x = x / std_x
-            print('Standardization formula not too sure')
+            x /= std_x.reshape((std_x.shape[0]), 1)
 
         return x, mean, std_x
 
@@ -380,8 +374,8 @@ class Decomposition:
         for j in range(x.shape[1]):
 
             # seperate real and imaginary parts
-            a = np.real(x[:,j])
-            b = np.imag(x[:,j])
+            a = np.real(x[:, j])
+            b = np.imag(x[:, j])
 
             # phase calculation
             phi = 0.5 * np.arctan(2 * (a @ b) / (b.T @ b - a.T @ a))
@@ -396,6 +390,7 @@ class Decomposition:
                 else:
                     phi += PI / 2
 
-            ox[:,j] = np.multiply(x[:,j], cmath.exp(complex(0,1) * phi))
+            adjed = np.multiply(x[:, j], cmath.exp(complex(0, 1) * phi))
+            ox[:, j] = adjed if np.mean(adjed) >= 0 else -1 * adjed
 
         return ox

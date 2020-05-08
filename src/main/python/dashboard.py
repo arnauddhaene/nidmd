@@ -1,19 +1,7 @@
-import numpy as np
-import logging
-from logging.handlers import RotatingFileHandler
 import io
-import time
-import os
-import sys
 import base64
-import datetime
 import threading
 import scipy.io as sio
-from plotly.subplots import make_subplots
-import plotly.express as px
-import plotly.graph_objects as go
-import pandas as pd
-from nibabel.freesurfer.io import (read_annot, write_annot)
 import dash
 from dash_table import DataTable
 import dash_bootstrap_components as dbc
@@ -24,13 +12,10 @@ from flask_caching import Cache
 from dash.dependencies import (Input, Output, State)
 from PyQt5.QtCore import *
 from PyQt5.QtWebEngineWidgets import *
-from PyQt5.QtWidgets import QApplication
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib import cm
 from decomposition import Decomposition
 from utils import *
 from plotting import *
+
 
 class Dashboard(QWebEngineView):
 
@@ -52,17 +37,11 @@ class Dashboard(QWebEngineView):
         self.atlas = None
         self.progress = 0
 
-        self.logfilename = TARGET_DIR.joinpath('log.log').as_posix()
-        handler = RotatingFileHandler(self.logfilename, maxBytes=10000, backupCount=1)
-        self.logfile = open(TARGET_DIR.joinpath(self.logfilename).as_posix(), 'r')
-        handler.setLevel(logging.INFO)
-        handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-
         self.app = dash.Dash(
             external_stylesheets=[dbc.themes.FLATLY]
         )
 
-        self.app.server.logger.addHandler(handler)
+        self.logfile = open(TARGET_DIR.joinpath('log.log').as_posix(), 'r')
 
         self._set_app_layout()
 
@@ -87,8 +66,9 @@ class Dashboard(QWebEngineView):
         def update_logs(interval, console):
 
             if console is not None:
+                for line in self.logfile.read().split('\n'):
+                    console.append(html.Tbody(line))
 
-                console.append(html.P(self.logfile.read()))
                 return console
 
             else:
@@ -214,7 +194,7 @@ class Dashboard(QWebEngineView):
                 raise PreventUpdate
             else:
 
-                self.app.logger.info("Computing spectre of dynamical modes")
+                logging.info("Computing spectre of dynamical modes")
 
                 s = Spectre(_filter_spectre())
 
@@ -231,7 +211,7 @@ class Dashboard(QWebEngineView):
                 raise PreventUpdate
             else:
 
-                self.app.logger.info("Computing time series activation of dominant modes")
+                logging.info("Computing time series activation of dominant modes")
 
                 t = TimePlot(_filter_time())
 
@@ -248,7 +228,7 @@ class Dashboard(QWebEngineView):
                 raise PreventUpdate
             else:
 
-                self.app.logger.info("Computing cortical network activation")
+                logging.info("Computing cortical network activation")
 
                 r = Radar(*_filter_radar())
 
@@ -266,7 +246,7 @@ class Dashboard(QWebEngineView):
                 raise PreventUpdate
             else:
 
-                self.app.logger.info("Computing cortical surface representations")
+                logging.info("Computing cortical surface representations")
 
                 brains = []
 
@@ -303,7 +283,7 @@ class Dashboard(QWebEngineView):
             :param files: list of names
             """
 
-            self.app.logger.info("Parsing {} files".format(len(files)))
+            logging.info("Parsing {} files".format(len(files)))
 
             dcp = Decomposition()
 
@@ -328,7 +308,7 @@ class Dashboard(QWebEngineView):
 
         def _filter_spectre():
 
-            self.app.logger.info("Filtering Spectre data")
+            logging.info("Filtering Spectre data")
 
             # Filter data for Spectre
             df1 = pd.DataFrame({'Mode': self.df1['mode'], 'Value': np.abs(self.df1['value']),
@@ -342,7 +322,7 @@ class Dashboard(QWebEngineView):
 
         def _filter_time():
 
-            self.app.logger.info("Filtering TimePlot data")
+            logging.info("Filtering TimePlot data")
 
             df1 = pd.DataFrame({'Mode': self.df1['mode'], 'Activity': self.df1['activity'],
                                 'Group': ['Group 1' for i in range(self.df1.shape[0])]}) \
@@ -356,7 +336,7 @@ class Dashboard(QWebEngineView):
         def _filter_radar():
 
 
-            self.app.logger.info("Filtering Radar data")
+            logging.info("Filtering Radar data")
 
             df1 = pd.DataFrame({'mode': self.df1['mode'], 'group': [1 for i in range(self.df1.shape[0])],
                                 'strength_real': self.df1['strength_real'], 'strength_imag': self.df1['strength_imag']}) \
@@ -373,7 +353,7 @@ class Dashboard(QWebEngineView):
 
         def _filter_brain(order):
 
-            self.app.logger.info("Filtering Brain data for Mode {}".format(order))
+            logging.info("Filtering Brain data for Mode {}".format(order))
 
             mode1 = self.df1.loc[order - 1][['intensity', 'conjugate']] if self.df1 is not None else None
             mode2 = self.df2.loc[order - 1][['intensity', 'conjugate']] if self.df2 is not None else None
@@ -384,7 +364,7 @@ class Dashboard(QWebEngineView):
 
     def _set_app_layout(self):
 
-        self.app.logger.info("Setting Application Layout")
+        logging.info("Setting Application Layout")
 
         self.app.layout = html.Div([
             # SETTING CHOICE RADIO ROW
@@ -455,15 +435,7 @@ class Dashboard(QWebEngineView):
                                     dbc.Button("Run Decomposition", color="primary", id="run")
                             ]))],
                          id="file-selection-card",
-                         className="col-6"),
-                # logger
-                html.Div(children=[
-                            dcc.Interval(
-                                id='log-update',
-                                interval=1 * 1000  # in milliseconds
-                            ),
-                            html.Div(children=[html.P("———— APP START ————")], id='log')],
-                         className="col-6", id="log-div", style={"maxHeight": "200px", "overflow": "scroll"})
+                         className="col-12")
             ], className="row"),
             # TABS
             dbc.Tabs(
@@ -511,6 +483,18 @@ class Dashboard(QWebEngineView):
                     dbc.Tab(label="Group 1", id="table-1-tab"),
 
                     ## TABLE 2
-                    dbc.Tab(label="Group 2", disabled=True, id="table-2-tab")]
+                    dbc.Tab(label="Group 2", disabled=True, id="table-2-tab"),
+
+                    ## LOG
+                    dbc.Tab(
+                        html.Div(children=[
+                            dcc.Interval(
+                                id='log-update',
+                                interval=1000  # in milliseconds
+                            ),
+                            html.Div(children=[html.P("———— APP START ————")], id='log')],
+                            className="col-6", id="log-div"),
+                        label="Log", id='log-tab')
+                ]
             ),
         ])
