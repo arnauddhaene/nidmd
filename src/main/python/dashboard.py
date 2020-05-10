@@ -365,12 +365,12 @@ class Dashboard(QWebEngineView):
 
                 data = sio.loadmat(mat)
 
-                if 'TCSnf' in data.keys():
-                    data = data['TCSnf']
-                else:
-                    data = data['TCS']
+                for key in data.keys():
+                    if key[:2] != '__':
+                        print(key)
+                        d = data[key]
 
-                dcp.add_data(data, self.sampling_time)
+                dcp.add_data(d, self.sampling_time)
 
             dcp.run()
             self.atlas = dcp.atlas
