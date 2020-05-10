@@ -35,9 +35,6 @@ class Decomposition:
             # this defines the general data frame
             self.df = self._compute(self.eigVal, self.eigVec, self.eigIdx, self.Z)
 
-            # translate findings into object oriented modes
-            self.modes, self.modes_df = self._compute_modes()
-
     def _compute(self, val, vec, index, time):
 
         modes = []
@@ -61,8 +58,6 @@ class Decomposition:
 
             conj = (idx < index.shape[0] - 1) and (val_sorted[idx] == val_sorted[idx + 1].conjugate())
 
-            # TODO: modify sampling time with user input
-
             value = val_sorted[idx]
 
             strength_real = []
@@ -77,8 +72,8 @@ class Decomposition:
                     mode=order,
                     value=value,
                     intensity=vec_sorted[:, idx],
-                    damping_time=(-1 / np.log(np.abs(value))) * 0.72,
-                    period=((2 * PI) / np.abs(np.angle(value))) * 0.72 if conj else np.inf,
+                    damping_time=(-1 / np.log(np.abs(value))) * self.sampling_time,
+                    period=((2 * PI) / np.abs(np.angle(value))) * self.sampling_time if conj else np.inf,
                     conjugate=conj,
                     networks=labels,
                     strength_real=strength_real,
@@ -162,50 +157,6 @@ class Decomposition:
         
         return htmls
 
-    def _compute_modes(self):
-
-        modes = []
-        mode_names = []
-        mode_values = []
-        mode_dt = []
-        mode_t = []
-
-        order = 1
-        idx = 0
-        sortedVal = self.eigVal[self.eigIdx]
-        sortedVec = self.eigVec[:, self.eigIdx]
-
-
-        while idx < self.eigIdx.shape[0]:
-
-            if idx < self.eigIdx.shape[0] - 1 and sortedVal[idx] == sortedVal[idx + 1].conjugate():
-
-                value = list(sortedVal[idx:idx + 2])
-                vector = sortedVec[:, idx]
-                m = Mode(value, vector, order)
-
-                order += 1
-
-                idx += 2
-
-            else:
-
-                m = Mode(sortedVal[idx], sortedVec[:, idx], order)
-                order += 1
-
-                idx += 1
-
-            modes.append(m)
-            mode_names.append(m.__str__())
-            mode_values.append(m.print_value())
-            mode_dt.append('%s' % float('%.2f' % m.damping_time))
-            mode_t.append('%s' % float('%.2f' % m.period))
-
-        return modes, pd.DataFrame(data={'Mode': mode_names,
-                                         'Value': mode_values,
-                                         'Damping Time [s]': mode_dt,
-                                         'Period [s]': mode_t})
-
 
     def _write_labels(self, modedir, eigenVector):
         """
@@ -286,8 +237,8 @@ class Decomposition:
             # check for zero rows
             # indices of rows that are zero (full zero ROIs)
             zIdx = np.where(~matrice.any(axis=1))[0]
-            logging.warning("ROIError: Matrice contains " + str(zIdx.shape) + " zero rows.")
-            # TODO: remove row ? how will that be shown in the graph then ????
+            if zIdx.shape[0] > 0:
+                logging.warning("ROIError: Matrice contains " + str(zIdx.shape) + " zero rows.")
 
             # normalize matrices
             matriceN, _, _ = self.normalize(matrice, direction=1, demean=True, destandard=False)
@@ -323,12 +274,15 @@ class Decomposition:
 
         return data
 
-    def add_data(self, data):
+    def add_data(self, data, sampling_time):
         """
         Add data to decomposition.
 
         :param data: data matrix (N x T)
+        :param sampling_time: sampling time (s)
         """
+
+        self.sampling_time = sampling_time
 
         self.data.append(data)
 
@@ -394,3 +348,52 @@ class Decomposition:
             ox[:, j] = adjed if np.mean(adjed) >= 0 else -1 * adjed
 
         return ox
+
+    def _match_mode(self, other):
+        """
+        Match mode to group (self)
+
+        :param other: Decomposition instance of subject
+        :return: pd.DataFrame containing 'mode', 'value', 'damping_time', 'period', 'conjugate'
+        """
+
+        modes = []
+
+        atlas = ATLAS['atlas'][str(val.shape[0])]
+
+        order = 1
+        idx = 0
+        val_sorted = val[index]
+
+        labels = list(ATLAS['networks'][atlas].keys())
+
+
+        while idx < index.shape[0]:
+
+            conj = (idx < index.shape[0] - 1) and (val_sorted[idx] == val_sorted[idx + 1].conjugate())
+
+            # TODO: modify sampling time with user input
+
+            value = val_sorted[idx]
+
+            strength_real = []
+            strength_imag = []
+
+            for n, network in enumerate(labels):
+                strength_real.append(np.mean(np.abs(np.real(vec_sorted[netindex[n], idx]))))
+                strength_imag.append(np.mean(np.abs(np.imag(vec_sorted[netindex[n], idx]))))
+
+            modes.append(
+                dict(
+                    mode=order,
+                    value=value,
+                    damping_time=(-1 / np.log(np.abs(value))) * self.sampling_time,
+                    period=((2 * PI) / np.abs(np.angle(value))) * self.sampling_time if conj else np.inf,
+                    conjugate=conj
+                )
+            )
+
+            order += 1
+            idx += 1 if not conj else 2
+
+        return pd.DataFrame(modes)

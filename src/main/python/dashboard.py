@@ -36,6 +36,8 @@ class Dashboard(QWebEngineView):
         self.df2 = None
         self.atlas = None
         self.progress = 0
+        self.sampling_time = None
+        self.valid = False  # put to true if decomposition can run
 
         self.app = dash.Dash(
             external_stylesheets=[dbc.themes.FLATLY]
@@ -80,12 +82,16 @@ class Dashboard(QWebEngineView):
             Output('upload-2', 'style'),
             Output('selected-files-group-2-t', 'style'),
             Output('selected-files-group-2-p', 'style'),
+            Output('selected-files-group-1-t', 'children'),
+            Output('selected-files-group-2-t', 'children'),
+            Output('upload-1', 'children'),
+            Output('upload-2', 'children')
         ], [
             Input('setting', 'value')
         ])
         def input_setting(value):
 
-            upload = {
+            uploadStyle = {
                 'height': '60px',
                 'lineHeight': '60px',
                 'borderWidth': '1px',
@@ -96,32 +102,45 @@ class Dashboard(QWebEngineView):
             }
 
             if value is None:
-                return "row", {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
-            elif value == 1:
-                return "col-12", upload, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
-            elif value == 2:
-                return "col-6", upload, upload, {}, {}
+                return "row", {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, None, \
+                       None, None, None
+            elif value == 1: # Analysis
+                return "col-12", uploadStyle, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, None, None, \
+                       html.Div(['Drag and Drop or ', html.A('Select Files')]), None
+            elif value == 2: # Comparison
+                return "col-6", uploadStyle, uploadStyle, {}, {}, "Group 1", "Group 2", \
+                       html.Div(['Group 1: Drag and Drop or ', html.A('Select Files')]), \
+                       html.Div(['Group 2: Drag and Drop or ', html.A('Select Files')])
+            elif value == 3: # Matching Modes
+                return "col-6", uploadStyle, uploadStyle, {}, {}, "Group", "Subjects",  \
+                       html.Div(['Group: Drag and Drop or ', html.A('Select Files')]), \
+                       html.Div(['Add Subject: Drag and Drop or ', html.A('Select Files')])
 
         @self.app.callback([
             Output('selected-files-group-1-p', 'children'),
             Output('selected-files-group-2-p', 'children'),
             Output('table-1-tab', 'children'),
             Output('table-2-tab', 'children'),
-            Output('table-2-tab', 'disabled')
+            Output('table-2-tab', 'disabled'),
+            # Output('message-alert', 'children'),
+            # Output('message-alert', 'style')
         ], [
             Input('upload-1', 'contents'),
-            Input('upload-2', 'contents')
+            Input('upload-2', 'contents'),
+            Input('sampling-time', 'value')
         ], [
             State('upload-1', 'filename'),
             State('upload-2', 'filename')
         ])
-        def upload(contents1, contents2, names1, names2):
+        def upload(contents1, contents2, time, names1, names2):
 
             df1 = None
             df2 = None
             tab1 = None
             tab2 = None
             disabled = True
+            message = ""
+            error = False
 
             table_config = dict(
                 fixed_rows={'headers': True, 'data': 0},
@@ -145,11 +164,11 @@ class Dashboard(QWebEngineView):
                         'textAlign': 'left'
                     },
                     {'if': {'column_id': 'Mode'},
-                     'width': '10%'},
+                     'width': '15%'},
                     {'if': {'column_id': 'Value'},
                      'width': '30%'},
                     {'if': {'column_id': 'Damping Time'},
-                     'width': '40%'},
+                     'width': '35%'},
                     {'if': {'column_id': 'Period'},
                      'width': '20%'},
                 ],
@@ -159,12 +178,16 @@ class Dashboard(QWebEngineView):
             if [contents1, contents2, names1, names2].count(None) == 4:
                 raise PreventUpdate
             else:
+                self.sampling_time = float(time)
+
                 if contents1 is not None:
                     self.df1 = _parse_files(contents1, names1)
                     df1 = self.df1[['mode', 'value', 'damping_time', 'period']]
                     df1['value'] = [str(value) for value in list(df1['value'])]
                     data1 = df1.to_dict('records') if df1 is not None else dict()
-                    columns1 = [{"name": i, "id": i} for i in df1.columns] if df1 is not None else [
+                    columns1 = [dict(name='#', id='mode'), dict(name='Value', id='value'),
+                                dict(name='Damping Time', id='damping_time'),
+                                dict(name='Period', id='period')] if df1 is not None else [
                         {"name": "none", "id": "none"}]
                     tab1 = html.Div(DataTable(
                         id="table-1", data=data1, columns=columns1, **table_config
@@ -174,7 +197,9 @@ class Dashboard(QWebEngineView):
                     df2 = self.df2[['mode', 'value', 'damping_time', 'period']]
                     df2['value'] = [str(value) for value in list(df2['value'])]
                     data2 = df2.to_dict('records') if df2 is not None else dict()
-                    columns2 = [{"name": i, "id": i} for i in df2.columns] if df2 is not None else [
+                    columns2 = [dict(name='#', id='mode'), dict(name='Value', id='value'),
+                                dict(name='Damping Time', id='damping_time'),
+                                dict(name='Period', id='period')] if df1 is not None else [
                         {"name": "none", "id": "none"}]
                     tab2 = html.Div(DataTable(
                         id="table-2", data=data2, columns=columns2, **table_config
@@ -183,6 +208,52 @@ class Dashboard(QWebEngineView):
 
             return names1, names2, tab1, tab2, disabled
 
+        @self.app.callback([
+            Output('message-alert', 'children'),
+            Output('message-alert', 'style')
+        ], [
+            Input('run', 'n_clicks')
+        ], [
+            State('setting', 'value')
+        ])
+        def validate(n, setting):
+
+            message = ""
+            error = False
+
+            if n is None:
+                raise PreventUpdate
+            if setting is not None:
+                if setting == 1:
+                    if self.df1 is None:
+                        message += "No file(s) chosen. "
+                        error = True
+                elif setting == 2:
+                    if self.df1 or self.df2 is None:
+                        message += "Group missing. "
+                        error = True
+                elif setting == 3:
+                    if self.df1 or self.df2 is None:
+                        message += "File(s) missing. "
+                        error = True
+                elif self.atlas is None:
+                    message += "Parsing unsuccessful, no atlas found. Please use a .mat file with the data under key 'TCS' or 'TCSnf'. "
+                    error = True
+                if self.sampling_time is None:
+                    message += "Sampling time missing. "
+                    error = True
+            else:
+                message += "No setting chosen. "
+                error = True
+
+            if error:
+                message += "Check log for more info."
+            else:
+                self.valid = True
+
+            return message, {} if error else {'display':'none'}
+
+
         @self.app.callback(
             Output('spectre', 'figure')
         ,[
@@ -190,7 +261,7 @@ class Dashboard(QWebEngineView):
         ])
         def compute_spectre(n):
 
-            if n is None or self.atlas is None:
+            if n is None or not self.valid:
                 raise PreventUpdate
             else:
 
@@ -207,7 +278,7 @@ class Dashboard(QWebEngineView):
             ])
         def compute_timeplot(n):
 
-            if n is None or self.atlas is None:
+            if n is None or not self.valid:
                 raise PreventUpdate
             else:
 
@@ -224,7 +295,7 @@ class Dashboard(QWebEngineView):
         ])
         def compute_radar(n):
 
-            if n is None or self.atlas is None:
+            if n is None or not self.valid:
                 raise PreventUpdate
             else:
 
@@ -242,7 +313,7 @@ class Dashboard(QWebEngineView):
         ])
         def compute_brain(n):
 
-            if n is None or self.atlas is None:
+            if n is None or not self.valid:
                 raise PreventUpdate
             else:
 
@@ -299,7 +370,7 @@ class Dashboard(QWebEngineView):
                 else:
                     data = data['TCS']
 
-                dcp.add_data(data)
+                dcp.add_data(data, self.sampling_time)
 
             dcp.run()
             self.atlas = dcp.atlas
@@ -376,6 +447,7 @@ class Dashboard(QWebEngineView):
                         options=[
                             {"label": "Analysis", "value": 1},
                             {"label": "Comparision", "value": 2},
+                            {"label": "Mode Matching", "value":3}
                         ],
                     ), className="col-8")], row=True)],
                 className="col-12", style={'margin-top': '25px'}
@@ -385,19 +457,6 @@ class Dashboard(QWebEngineView):
                 # UPLOAD 1
                 html.Div([dcc.Upload(
                     id='upload-1',
-                    children=html.Div([
-                        'Group 1: Drag and Drop or ',
-                        html.A('Select Files')
-                    ]),
-                    style={
-                        'height': '60px',
-                        'lineHeight': '60px',
-                        'borderWidth': '1px',
-                        'borderStyle': 'dashed',
-                        'borderRadius': '5px',
-                        'textAlign': 'center',
-                        'margin': '10px'
-                    },
                     # Allow multiple files to be uploaded
                     multiple=True)],
                     className="col-6", id='upload-1-div',
@@ -405,19 +464,6 @@ class Dashboard(QWebEngineView):
                 # UPLOAD 2
                 html.Div([dcc.Upload(
                     id='upload-2',
-                    children=html.Div([
-                        'Group 2: Drag and Drop or ',
-                        html.A('Select Files')
-                    ]),
-                    style={
-                        'height': '60px',
-                        'lineHeight': '60px',
-                        'borderWidth': '1px',
-                        'borderStyle': 'dashed',
-                        'borderRadius': '5px',
-                        'textAlign': 'center',
-                        'margin': '10px'
-                    },
                     # Allow multiple files to be uploaded
                     multiple=True)],
                     className="col-6")
@@ -427,12 +473,15 @@ class Dashboard(QWebEngineView):
                 # file selection info
                 html.Div(children=[dbc.Card(
                             dbc.CardBody([
-                                    html.H5("Selected Files", className="card-title"),
-                                    html.H6("Group 1"),
+                                    html.H5("Selection", className="card-title col-2"),
+                                    dcc.Input(id="sampling-time", placeholder="Sampling Time (s)",
+                                              className="form-control col-1"),
+                                    html.H6(id="selected-files-group-1-t"),
                                     html.P(id="selected-files-group-1-p"),
-                                    html.H6("Group 2", id="selected-files-group-2-t"),
+                                    html.H6(id="selected-files-group-2-t"),
                                     html.P(id="selected-files-group-2-p"),
-                                    dbc.Button("Run Decomposition", color="primary", id="run")
+                                    dbc.Button("Run Decomposition", color="primary", id="run"),
+                                    html.Div(id="message-alert", className="text-danger mt-2")
                             ]))],
                          id="file-selection-card",
                          className="col-12")

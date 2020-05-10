@@ -37,9 +37,7 @@ class TimePlot:
 
                 activity = df[df.Mode == mode].Activity.to_list()[0]
 
-                # TODO: fix sampling time !!!
-
-                fig.add_trace(go.Scatter(x=list(np.array(range(activity.shape[0])) * 0.72), y=activity,
+                fig.add_trace(go.Scatter(x=list(np.array(range(activity.shape[0]))), y=activity,
                                          legendgroup='Mode {}'.format(mode),
                                          name='Mode {}'.format(mode),
                                          showlegend=True if group == 1 else False,
@@ -49,7 +47,7 @@ class TimePlot:
 
         fig.update_traces(hovertemplate=None)
         fig.update_yaxes(title_text='Activity', nticks=10)
-        fig.layout['xaxis1' if groups == 1 else 'xaxis2'].update(dict(title_text='Time (s)', nticks=10))
+        fig.layout['xaxis1' if groups == 1 else 'xaxis2'].update(dict(title_text='Time/Sampling Time (s)', nticks=10))
 
         fig.update_layout(hovermode="x unified", legend_orientation="h", height=150+groups*250)
 
