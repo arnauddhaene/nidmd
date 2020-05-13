@@ -24,6 +24,6 @@ class Spectre:
 
         fig.update_traces(hovertemplate=None)
 
-        fig.update_layout(hovermode="x unified", legend_orientation="h")
+        fig.update_layout(hovermode="x unified", legend_orientation="v", legend_title_text='')
 
         return fig

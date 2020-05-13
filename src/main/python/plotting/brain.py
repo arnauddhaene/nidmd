@@ -23,11 +23,12 @@ class Brain:
         self.mode2 = mode2
         self.order = order
 
-    def _get_intensity(self, modes):
+    def _get_intensity(self, modes, imag=False):
         """
         Add mode
 
         :param modes: modes (list of objects)
+        :param imag: get imaginary values
         :return: rows, intensity
         """
 
@@ -36,7 +37,7 @@ class Brain:
 
         for mode in modes:
 
-            if not mode.conjugate:
+            if not mode.conjugate or not imag:
                 # extend rows list
                 rows.append(rows[-1] + 1 if len(rows) != 0 else 1)
                 # normalize from -0.1 -> 0.1 in modes to 0.0 -> 1.0 for colormap
@@ -60,24 +61,25 @@ class Brain:
         return rows, intensity
 
 
-    def figure(self):
+    def figure(self, imag=False):
         """
         Get Plotly figure
 
+        :param imag: plot imaginary values
         :return: Plotly figure instance
         """
 
         # Analysis
         if self.mode2 is None:
 
-            rows, intensity = self._get_intensity([self.mode1])
+            rows, intensity = self._get_intensity([self.mode1], imag)
 
             labels = ['Real'] if len(rows) == 1 else ['Real', 'Imaginary']
 
         # Comparison
         else:
 
-            rows, intensity = self._get_intensity([self.mode1, self.mode2])
+            rows, intensity = self._get_intensity([self.mode1, self.mode2], imag)
 
             if len(rows) == 2:
                 labels = ['G1 Real', 'G2 Real']

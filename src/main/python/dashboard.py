@@ -12,6 +12,7 @@ from flask_caching import Cache
 from dash.dependencies import (Input, Output, State)
 from PyQt5.QtCore import *
 from PyQt5.QtWebEngineWidgets import *
+from PyQt5 import QtWebEngineWidgets, QtCore, QtWidgets
 from decomposition import Decomposition
 from utils import *
 from plotting import *
@@ -28,21 +29,28 @@ class Dashboard(QWebEngineView):
         QWebEngineView.__init__(self)
         self.showMaximized()
 
+        QtWebEngineWidgets.QWebEngineProfile.defaultProfile().downloadRequested.connect(
+            self.on_downloadRequested
+        )
+
         address = {'address': '127.0.0.1',
                    'port': 8000
         }
 
-        self.df1 = None
-        self.df2 = None
+        self.dcp1 = None
+        self.dcp2 = None
         self.atlas = None
         self.progress = 0
         self.sampling_time = None
         self.valid = False  # put to true if decomposition can run
+        self.imag = False
 
         self.app = dash.Dash(
             external_stylesheets=[dbc.themes.FLATLY]
         )
 
+        if not TARGET_DIR.joinpath('log.log').exists():
+            with open(TARGET_DIR.joinpath('log.log').as_posix(), 'w'): pass
         self.logfile = open(TARGET_DIR.joinpath('log.log').as_posix(), 'r')
 
         self._set_app_layout()
@@ -51,6 +59,17 @@ class Dashboard(QWebEngineView):
         # self.run_dash()
 
         self.load(QUrl("http://{0}:{1}".format(address['address'], address['port'])))
+
+    @QtCore.pyqtSlot("QWebEngineDownloadItem*")
+    def on_downloadRequested(self, download):
+        old_path = download.url().path()  # download.path()
+        suffix = QtCore.QFileInfo(old_path).suffix()
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Save File", old_path, "*.svg" + suffix
+        )
+        if path:
+            download.setPath(path)
+            download.accept()
 
     def run_dash(self, address='127.0.0.1', port=8000):
         """
@@ -102,37 +121,61 @@ class Dashboard(QWebEngineView):
             }
 
             if value is None:
-                return "row", {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, None, \
+                return "row", {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, "Selected files", \
                        None, None, None
-            elif value == 1: # Analysis
+            elif value == 1:  # Analysis
                 return "col-12", uploadStyle, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, None, None, \
                        html.Div(['Drag and Drop or ', html.A('Select Files')]), None
-            elif value == 2: # Comparison
+            elif value == 2:  # Comparison
                 return "col-6", uploadStyle, uploadStyle, {}, {}, "Group 1", "Group 2", \
                        html.Div(['Group 1: Drag and Drop or ', html.A('Select Files')]), \
                        html.Div(['Group 2: Drag and Drop or ', html.A('Select Files')])
-            elif value == 3: # Matching Modes
+            elif value == 3:  # Matching Modes
                 return "col-6", uploadStyle, uploadStyle, {}, {}, "Group", "Subjects",  \
-                       html.Div(['Group: Drag and Drop or ', html.A('Select Files')]), \
-                       html.Div(['Add Subject: Drag and Drop or ', html.A('Select Files')])
+                       html.Div(['Reference Group: Drag and Drop or ', html.A('Select Files')]), \
+                       html.Div(['Match Group: Drag and Drop or ', html.A('Select Files')])
+
+        @self.app.callback(
+            Output('description', 'children')
+        , [
+            Input('setting', 'value')
+        ])
+        def update_description(value):
+
+            if value is None:
+                return "Based on 'Dynamic mode decomposition of resting-state and task fMRI' by Casorso et al, \
+                        the dmd dashboard allows you to analyse, compare, and display the decomposition of your \
+                        fMRI time-series data. Click on the radio buttons on the right to get started!"
+            elif value == 1: # Analysis
+                return "Analysis: this setting allows you to analyse the decomposition of one or multiple time-series \
+                       files. Simply input the sampling time, select the one or multiple files you want to analyse, \
+                       and the rest is done automatically."
+            elif value == 2: # Comparison
+                return "Comparison: this setting allows you to compare the decomposition of two groups of one or multiple time-series \
+                       files. Simply input the sampling time, select the groups of one or multiple files you want to compare, \
+                       and the rest is done automatically."
+            elif value == 3: # Matching Modes
+                return "Matching Modes: this setting allow you to match one group's modes to anothers. The selection \
+                        toolbar on the left will take the reference group files, while the one on the right will have \
+                        its time-series data matched to the spatial modes of the reference group."
+
 
         @self.app.callback([
             Output('selected-files-group-1-p', 'children'),
             Output('selected-files-group-2-p', 'children'),
             Output('table-1-tab', 'children'),
             Output('table-2-tab', 'children'),
-            Output('table-2-tab', 'disabled'),
-            # Output('message-alert', 'children'),
-            # Output('message-alert', 'style')
+            Output('table-2-tab', 'disabled')
         ], [
             Input('upload-1', 'contents'),
             Input('upload-2', 'contents'),
             Input('sampling-time', 'value')
         ], [
             State('upload-1', 'filename'),
-            State('upload-2', 'filename')
+            State('upload-2', 'filename'),
+            State('setting', 'value')
         ])
-        def upload(contents1, contents2, time, names1, names2):
+        def upload(contents1, contents2, time, names1, names2, setting):
 
             df1 = None
             df2 = None
@@ -181,8 +224,9 @@ class Dashboard(QWebEngineView):
                 self.sampling_time = float(time)
 
                 if contents1 is not None:
-                    self.df1 = _parse_files(contents1, names1)
-                    df1 = self.df1[['mode', 'value', 'damping_time', 'period']]
+                    self.dcp1 = _parse_files(contents1, names1)
+                    self.dcp1.run()
+                    df1 = self.dcp1.df[['mode', 'value', 'damping_time', 'period']]
                     df1['value'] = [str(value) for value in list(df1['value'])]
                     data1 = df1.to_dict('records') if df1 is not None else dict()
                     columns1 = [dict(name='#', id='mode'), dict(name='Value', id='value'),
@@ -191,26 +235,66 @@ class Dashboard(QWebEngineView):
                         {"name": "none", "id": "none"}]
                     tab1 = html.Div(DataTable(
                         id="table-1", data=data1, columns=columns1, **table_config
-                    ), className="container") if self.df1 is not None else None
-                if contents2 is not None:
-                    self.df2 = _parse_files(contents2, names2)
-                    df2 = self.df2[['mode', 'value', 'damping_time', 'period']]
-                    df2['value'] = [str(value) for value in list(df2['value'])]
-                    data2 = df2.to_dict('records') if df2 is not None else dict()
-                    columns2 = [dict(name='#', id='mode'), dict(name='Value', id='value'),
-                                dict(name='Damping Time', id='damping_time'),
-                                dict(name='Period', id='period')] if df1 is not None else [
-                        {"name": "none", "id": "none"}]
-                    tab2 = html.Div(DataTable(
-                        id="table-2", data=data2, columns=columns2, **table_config
-                    ), className="container") if self.df2 is not None else None
-                    disabled = False
+                    ), className="container") if self.dcp1 is not None else None
+
+                if setting != 1:
+                    if contents2 is not None:
+                        if setting == 2:  # Comparison
+                            self.dcp2 = _parse_files(contents2, names2)
+                            self.dcp2.run()
+                            df2 = self.dcp2.df[['mode', 'value', 'damping_time', 'period']]
+                            df2['value'] = [str(value) for value in list(df2['value'])]
+                            data2 = df2.to_dict('records') if df2 is not None else dict()
+                            columns2 = [dict(name='#', id='mode'), dict(name='Value', id='value'),
+                                        dict(name='Damping Time', id='damping_time'),
+                                        dict(name='Period', id='period')] if df1 is not None else [
+                                {"name": "none", "id": "none"}]
+                            tab2 = html.Div(DataTable(
+                                id="table-2", data=data2, columns=columns2, **table_config
+                            ), className="container") if self.dcp2 is not None else None
+                            disabled = False
+
+                        if setting == 3:  # Mode Matching
+
+                            self.match_group = _parse_files(contents2, names2)
+
+                            if self.dcp1 is not None:
+
+                                d = self.dcp1.match_modes(self.match_group.data)
+
+                                match_df['value'] = [str(value) for value in list(df2['value'])]
+
+                                match_data = df2.to_dict('records') if df2 is not None else dict()
+
+                                match_columns = [dict(name='#', id='mode'), dict(name='Value', id='value'),
+                                            dict(name='Damping Time', id='damping_time'),
+                                            dict(name='Period', id='period')] if df1 is not None else [
+                                    {"name": "none", "id": "none"}]
+                                tab2 = html.Div(DataTable(
+                                    id="table-2", data=match_data, columns=match_columns, **table_config
+                                ), className="container") if self.dcp2 is not None else None
 
             return names1, names2, tab1, tab2, disabled
 
+        @self.app.callback(
+            Output('imag-label', 'children')
+        , [
+            Input('imag-setting', 'value')
+        ])
+        def imag_switch(switch):
+
+            self.imag = switch == [1]
+
+            message = "Plotting imaginary values" if self.imag else "Not plotting imaginary values"
+
+            logging.info(message)
+
+            return "Plotting imaginary values" if self.imag else "Not plotting imaginary values"
+
         @self.app.callback([
             Output('message-alert', 'children'),
-            Output('message-alert', 'style')
+            Output('message-alert', 'style'),
+            Output('upload-row', 'style')
         ], [
             Input('run', 'n_clicks')
         ], [
@@ -225,15 +309,15 @@ class Dashboard(QWebEngineView):
                 raise PreventUpdate
             if setting is not None:
                 if setting == 1:
-                    if self.df1 is None:
+                    if self.dcp1 is None:
                         message += "No file(s) chosen. "
                         error = True
                 elif setting == 2:
-                    if self.df1 or self.df2 is None:
+                    if self.dcp1 or self.dcp2 is None:
                         message += "Group missing. "
                         error = True
                 elif setting == 3:
-                    if self.df1 or self.df2 is None:
+                    if self.dcp1 or self.match_group is None:
                         message += "File(s) missing. "
                         error = True
                 elif self.atlas is None:
@@ -251,7 +335,7 @@ class Dashboard(QWebEngineView):
             else:
                 self.valid = True
 
-            return message, {} if error else {'display':'none'}
+            return message, {} if error else {'display':'none'}, {} if error else {'display':'none'}
 
 
         @self.app.callback(
@@ -303,7 +387,7 @@ class Dashboard(QWebEngineView):
 
                 r = Radar(*_filter_radar())
 
-                return r.figure()
+                return r.figure(self.imag)
 
         @self.app.callback([
             Output('brains', 'children'),
@@ -327,7 +411,12 @@ class Dashboard(QWebEngineView):
 
                     b = Brain(*_filter_brain(mode))
 
-                    brains.append(html.Div([dcc.Graph(figure=b.figure())]))
+                    brains.append(html.Div([dcc.Graph(figure=b.figure(self.imag),
+                                                      config={"toImageButtonOptions": {"width": None,
+                                                                                       "height": None,
+                                                                                       "format": "svg",
+                                                                                       "filename": "mode {}".format(mode)},
+                                                              "displaylogo": False})]))
 
                     self.progress += 30
 
@@ -352,6 +441,7 @@ class Dashboard(QWebEngineView):
 
             :param contents: list of Base64 encoded contents
             :param files: list of names
+            :return decomposition: Decomposition instance
             """
 
             logging.info("Parsing {} files".format(len(files)))
@@ -375,19 +465,19 @@ class Dashboard(QWebEngineView):
             dcp.run()
             self.atlas = dcp.atlas
 
-            return dcp.df
+            return dcp
 
         def _filter_spectre():
 
             logging.info("Filtering Spectre data")
 
             # Filter data for Spectre
-            df1 = pd.DataFrame({'Mode': self.df1['mode'], 'Value': np.abs(self.df1['value']),
-                                'Group': ['Group 1' for i in range(self.df1.shape[0])]}) \
-                if self.df1 is not None else None
-            df2 = pd.DataFrame({'Mode': self.df2['mode'], 'Value': np.abs(self.df2['value']),
-                                'Group': ['Group 2' for i in range(self.df2.shape[0])]}) \
-                if self.df2 is not None else None
+            df1 = pd.DataFrame({'Mode': self.dcp1.df['mode'], 'Value': np.abs(self.dcp1.df['value']),
+                                'Group': ['Group 1' for i in range(self.dcp1.df.shape[0])]}) \
+                if self.dcp1 is not None else None
+            df2 = pd.DataFrame({'Mode': self.dcp2.df['mode'], 'Value': np.abs(self.dcp2.df['value']),
+                                'Group': ['Group 2' for i in range(self.dcp2.df.shape[0])]}) \
+                if self.dcp2 is not None else None
 
             return pd.concat([df1, df2])
 
@@ -395,12 +485,12 @@ class Dashboard(QWebEngineView):
 
             logging.info("Filtering TimePlot data")
 
-            df1 = pd.DataFrame({'Mode': self.df1['mode'], 'Activity': self.df1['activity'],
-                                'Group': ['Group 1' for i in range(self.df1.shape[0])]}) \
-                if self.df1 is not None else None
-            df2 = pd.DataFrame({'Mode': self.df2['mode'], 'Activity': self.df2['activity'],
-                                'Group': ['Group 2' for i in range(self.df2.shape[0])]}) \
-                if self.df2 is not None else None
+            df1 = pd.DataFrame({'Mode': self.dcp1.df['mode'], 'Activity': self.dcp1.df['activity'],
+                                'Group': ['Group 1' for i in range(self.dcp1.df.shape[0])]}) \
+                if self.dcp1 is not None else None
+            df2 = pd.DataFrame({'Mode': self.dcp2.df['mode'], 'Activity': self.dcp2.df['activity'],
+                                'Group': ['Group 2' for i in range(self.dcp2.df.shape[0])]}) \
+                if self.dcp2 is not None else None
 
             return pd.concat([df1, df2])
 
@@ -409,16 +499,16 @@ class Dashboard(QWebEngineView):
 
             logging.info("Filtering Radar data")
 
-            df1 = pd.DataFrame({'mode': self.df1['mode'], 'group': [1 for i in range(self.df1.shape[0])],
-                                'strength_real': self.df1['strength_real'], 'strength_imag': self.df1['strength_imag']}) \
-                if self.df1 is not None else None
-            df2 = pd.DataFrame({'mode': self.df2['mode'], 'group': [2 for i in range(self.df2.shape[0])],
-                                'strength_real': self.df2['strength_real'], 'strength_imag': self.df2['strength_imag']}) \
-                if self.df2 is not None else None
+            df1 = pd.DataFrame({'mode': self.dcp1.df['mode'], 'group': [1 for i in range(self.dcp1.df.shape[0])],
+                                'strength_real': self.dcp1.df['strength_real'], 'strength_imag': self.dcp1.df['strength_imag']}) \
+                if self.dcp1 is not None else None
+            df2 = pd.DataFrame({'mode': self.dcp2.df['mode'], 'group': [2 for i in range(self.dcp2.df.shape[0])],
+                                'strength_real': self.dcp2.df['strength_real'], 'strength_imag': self.dcp2.df['strength_imag']}) \
+                if self.dcp2 is not None else None
 
-            networks = self.df1['networks'][0] if self.df1 is not None else None
+            networks = self.dcp1.df['networks'][0] if self.dcp1 is not None else None
             if networks is None:
-                networks = self.df2['networks'][0] if self.df2 is not None else None
+                networks = self.dcp2.df['networks'][0] if self.dcp2 is not None else None
 
             return pd.concat([df1, df2]), networks
 
@@ -426,8 +516,8 @@ class Dashboard(QWebEngineView):
 
             logging.info("Filtering Brain data for Mode {}".format(order))
 
-            mode1 = self.df1.loc[order - 1][['intensity', 'conjugate']] if self.df1 is not None else None
-            mode2 = self.df2.loc[order - 1][['intensity', 'conjugate']] if self.df2 is not None else None
+            mode1 = self.dcp1.df.loc[order - 1][['intensity', 'conjugate']] if self.dcp1 is not None else None
+            mode2 = self.dcp2.df.loc[order - 1][['intensity', 'conjugate']] if self.dcp2 is not None else None
 
             return self.atlas, mode1, mode2, order
 
@@ -440,18 +530,54 @@ class Dashboard(QWebEngineView):
         self.app.layout = html.Div([
             # SETTING CHOICE RADIO ROW
             html.Div([dbc.FormGroup([
-                dbc.Label("Decomposition Setting", html_for="setting", className="col-4"),
+                # dbc.Label("Decomposition Setting", html_for="setting", className="col-4"),
+                html.Div(children=[
+                    html.H4("Dynamic Mode Toolbox"),
+                    html.P(id="description")],
+                    className="col-6 ml-5 mt-2"),
                 dbc.Col(
                     dbc.RadioItems(
                         id="setting",
                         options=[
                             {"label": "Analysis", "value": 1},
                             {"label": "Comparision", "value": 2},
-                            {"label": "Mode Matching", "value":3}
+                            {"label": "Mode Matching", "value": 3}
                         ],
-                    ), className="col-8")], row=True)],
-                className="col-12", style={'margin-top': '25px'}
+                    ), className="col-4 mt-4")], row=True)],
+                className="row", style={'margin-top': '25px'}
             ),
+            # FILE SELECTION + LOGGER
+            html.Div(children=[
+                # file selection info
+                html.Div(children=[dbc.Card(
+                            dbc.CardBody([
+                                    html.H5("Selection", className="card-title col-2"),
+                                    html.H6("Sampling Time"),
+                                    dcc.Input(id="sampling-time", placeholder="Sampling Time (s)",
+                                              className="form-control col-1 mt-2 ml-2 mb-2"),
+                                    dbc.FormGroup(
+                                        [
+                                            dbc.Label("Not plotting imaginary values", id="imag-label"),
+                                            dbc.Checklist(
+                                                options=[
+                                                    {"label": "Plot imaginary values", "value": 1},
+                                                ],
+                                                value=[],
+                                                id="imag-setting",
+                                                switch=True,
+                                            ),
+                                        ]
+                                    ),
+                                    html.H6(id="selected-files-group-1-t"),
+                                    html.P(id="selected-files-group-1-p"),
+                                    html.H6(id="selected-files-group-2-t"),
+                                    html.P(id="selected-files-group-2-p"),
+                                    dbc.Button("Run Decomposition", color="primary", id="run"),
+                                    html.Div(id="message-alert", className="text-danger mt-2")
+                            ]))],
+                         id="file-selection-card",
+                         className="col-12 mt-2 mb-2 mr-2 ml-2")
+            ], className="row"),
             # UPLOAD ROW
             html.Div([
                 # UPLOAD 1
@@ -467,25 +593,7 @@ class Dashboard(QWebEngineView):
                     # Allow multiple files to be uploaded
                     multiple=True)],
                     className="col-6")
-                ], className="row"),
-            # FILE SELECTION + LOGGER
-            html.Div(children=[
-                # file selection info
-                html.Div(children=[dbc.Card(
-                            dbc.CardBody([
-                                    html.H5("Selection", className="card-title col-2"),
-                                    dcc.Input(id="sampling-time", placeholder="Sampling Time (s)",
-                                              className="form-control col-1"),
-                                    html.H6(id="selected-files-group-1-t"),
-                                    html.P(id="selected-files-group-1-p"),
-                                    html.H6(id="selected-files-group-2-t"),
-                                    html.P(id="selected-files-group-2-p"),
-                                    dbc.Button("Run Decomposition", color="primary", id="run"),
-                                    html.Div(id="message-alert", className="text-danger mt-2")
-                            ]))],
-                         id="file-selection-card",
-                         className="col-12")
-            ], className="row"),
+            ], className="row", id="upload-row"),
             # TABS
             dbc.Tabs(
                 [
@@ -497,19 +605,34 @@ class Dashboard(QWebEngineView):
                                 # radar plots
                                 html.Div(className="row", children=[
                                     html.Div(
-                                        [dcc.Graph(id="radar")],
+                                        [dcc.Graph(id="radar",
+                                                   config={"toImageButtonOptions": {"width": None,
+                                                                                    "height": None,
+                                                                                    "format": "svg",
+                                                                                    "filename": "radar"},
+                                                           "displaylogo": False})],
                                          className="col-12")
                                 ]),
                                 # spectre
                                 html.Div(className="row", children=[
                                     html.Div(
-                                        [dcc.Graph(id="spectre")],
+                                        [dcc.Graph(id="spectre",
+                                                   config={"toImageButtonOptions": {"width": None,
+                                                                                    "height": None,
+                                                                                    "format": "svg",
+                                                                                    "filename": "spectre"},
+                                                           "displaylogo": False})],
                                         className="col-12")
                                 ]),
                                 # timeplot
                                 html.Div(className="row", children=[
                                     html.Div(
-                                        [dcc.Graph(id="timeplot")],
+                                        [dcc.Graph(id="timeplot",
+                                                   config={"toImageButtonOptions": {"width": None,
+                                                                                    "height": None,
+                                                                                    "format": "svg",
+                                                                                    "filename": "timeplot"},
+                                                           "displaylogo": False})],
                                         className="col-12")
                                 ]),
                             ]),
@@ -529,10 +652,10 @@ class Dashboard(QWebEngineView):
                         label="Graphs"),
 
                     ## TABLE 1
-                    dbc.Tab(label="Group 1", id="table-1-tab"),
+                    dbc.Tab(label="Group A", id="table-1-tab"),
 
                     ## TABLE 2
-                    dbc.Tab(label="Group 2", disabled=True, id="table-2-tab"),
+                    dbc.Tab(label="Group B", disabled=True, id="table-2-tab"),
 
                     ## LOG
                     dbc.Tab(

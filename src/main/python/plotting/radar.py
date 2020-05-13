@@ -16,32 +16,32 @@ class Radar:
         self.df = df
         self.networks = networks
 
-    def figure(self, amount=4):
+    def figure(self, imag=False, amount=4):
         """
         Get Figure
 
         :param amount: number of modes to plot
+        :param imag: add imaginary values
         :return: Plotly Figure instance
         """
 
-        fig = make_subplots(rows=1, cols=2, specs=[[{'type': 'polar'}] * 2],
+        fig = make_subplots(rows=1, cols=2 if imag else 1, specs=[[{'type': 'polar'}] * (2 if imag else 1)],
                             subplot_titles=("Real", "Imaginary"))
-
         colors = COLORS
 
         for mode in range(1, amount + 1):
 
             for group in list(np.unique(self.df.group)):
 
-                self._add_trace(fig, mode, group, colors[mode])
+                self._add_trace(fig, mode, group, colors[mode], imag)
 
         fig.update_layout(polar1=dict(radialaxis_range=[0, 0.1]),
-                          polar2=dict(radialaxis_range=[0, 0.1]),
-                          legend_orientation="h")
+                          polar2=dict(radialaxis_range=[0, 0.1]) if imag else None,
+                          legend_orientation="v")
 
         return fig
 
-    def _add_trace(self, fig, mode, group, color):
+    def _add_trace(self, fig, mode, group, color, imag=False):
         """
         Adds adequate trace to figure
 
@@ -66,16 +66,17 @@ class Radar:
             subplot="polar1"
         ), row=1, col=1)
 
-        fig.add_trace(go.Scatterpolar(
-            r=self._close(r_i),
-            theta=self._close(self.networks),
-            mode="lines",
-            legendgroup='Mode {0} Group {1}'.format(mode, group),
-            name='Mode {0} Group {1}'.format(mode, group),
-            showlegend=False,
-            line=dict(color=color, dash='dash' if group != 1 else None),
-            subplot="polar2"
-        ), row=1, col=2)
+        if imag:
+            fig.add_trace(go.Scatterpolar(
+                r=self._close(r_i),
+                theta=self._close(self.networks),
+                mode="lines",
+                legendgroup='Mode {0} Group {1}'.format(mode, group),
+                name='Mode {0} Group {1}'.format(mode, group),
+                showlegend=False,
+                line=dict(color=color, dash='dash' if group != 1 else None),
+                subplot="polar2"
+            ), row=1, col=2)
 
     @staticmethod
     def _close(l):

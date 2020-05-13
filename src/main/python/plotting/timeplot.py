@@ -49,6 +49,6 @@ class TimePlot:
         fig.update_yaxes(title_text='Activity', nticks=10)
         fig.layout['xaxis1' if groups == 1 else 'xaxis2'].update(dict(title_text='Time/Sampling Time (s)', nticks=10))
 
-        fig.update_layout(hovermode="x unified", legend_orientation="h", height=150+groups*250)
+        fig.update_layout(hovermode="x unified", legend_orientation="v", height=150+groups*250)
 
         return fig

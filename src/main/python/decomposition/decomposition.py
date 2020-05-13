@@ -23,8 +23,13 @@ class Decomposition:
         if self.data is not None:
 
             # Get Dynamic Modes from filenames
+            # X, Y, self.atlas = self._check_data(  # this defines X, Y, N, T
+            #         self.data
+            # )
+
+            # Get Dynamic Modes from filenames
             X, Y, self.atlas = self._check_data(  # this defines X, Y, N, T
-                    self.data
+                self.data
             )
 
             # this defines eigVal, eigVec, eigIdx, A
@@ -220,7 +225,8 @@ class Decomposition:
 
         return eigVal, eigVec, eigIdx, A
 
-    def _check_data(self, data):
+    @staticmethod
+    def _check_data(data):
         """
         Check and format data into autoregressive model.
 
@@ -241,7 +247,7 @@ class Decomposition:
                 logging.warning("ROIError: Matrice contains " + str(zIdx.shape) + " zero rows.")
 
             # normalize matrices
-            matriceN, _, _ = self.normalize(matrice, direction=1, demean=True, destandard=False)
+            matriceN, _, _ = Decomposition.normalize(matrice, direction=1, demean=True, destandard=False)
 
             # concatenate matrices
             Xn = matriceN[:, 1:  ]
@@ -255,6 +261,54 @@ class Decomposition:
         else:
             logging.error("ROIError: Number of ROIs does not correspond to any known parcellation.")
             return X, Y, None
+
+    def match_modes(self, data, m):
+        """
+        Match other time-series to spatial modes. Annex A2 of Casorso et al. 2019.
+
+        :param data: time-series data of other group
+        :param N: amount of modes to match
+        :return: eigenvalues
+        """
+
+        S = self.eigVec[:, self.eigIdx]
+        S_inv = la.inv(S)
+        N = S.shape[0]
+
+        b = np.empty([m, 1], dtype=complex)
+        C = np.empty([m, m], dtype=complex)
+
+        T2, T1, atlas = self._check_data(data)
+
+        T2 = T2.T
+        T1 = T1.T
+
+        if atlas != self.atlas:
+            logging.error("ATLAS of reference and match group do not correspond.")
+
+        for r in range(m):
+
+            r1 = S[:, r].reshape(N, 1) @ S_inv[r, :].reshape(1, N)
+
+            for c in range(r, m):
+
+                c1 = S[:, c].reshape(N, 1) @ S_inv[c, :].reshape(1, N)
+
+                if r != c:
+
+                    M = (c1.T @ r1 + r1.T @ c1)
+
+                    C[r, c] = T1.flatten() @ (T1 @ M.T).flatten()
+
+                    C[c, r] = C[r, c]
+
+                else:
+
+                    C[r, c] = 2 * T1.flatten() @ (T1 @ r1.T @ r1).flatten()
+
+            b[r] = 2 * T2.flatten() @ (T1 @ r1.T).flatten()
+
+        return np.around(la.solve(C, b), decimals=8)
 
     def _extract_data(self, filenames):
         """
