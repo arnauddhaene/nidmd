@@ -40,6 +40,7 @@ class Dashboard(QWebEngineView):
         self.dcp1 = None
         self.dcp2 = None
         self.match_group = None
+        self.match_df = None
         self.atlas = None
         self.progress = 0
         self.sampling_time = None
@@ -133,6 +134,23 @@ class Dashboard(QWebEngineView):
                 return "col-6", uploadStyle, uploadStyle, {}, {}, "Reference Group", "Match Group",  \
                        html.Div(['Reference Group: Drag and Drop or ', html.A('Select Files')]), \
                        html.Div(['Match Group: Drag and Drop or ', html.A('Select Files')])
+
+        @self.app.callback([
+            Output('table-1-tab', 'label'),
+            Output('table-2-tab', 'label')
+        ], [
+            Input('setting', 'value')
+        ])
+        def update_tab_labels(setting):
+
+            if setting is None:
+                raise PreventUpdate
+            elif setting == 1:  # Analysis
+                return 'Modes', 'Disabled'
+            elif setting == 2:  # Comparison
+                return 'Group 1', 'Group 2'
+            elif setting == 3:  # Mode Matching
+                return 'Reference', 'Match'
 
         @self.app.callback(
             Output('description', 'children')
@@ -261,9 +279,10 @@ class Dashboard(QWebEngineView):
 
                             if self.dcp1 is not None:
 
-                                match_df = self.dcp1.compute_match(self.match_group, 10)
+                                self.match_df = self.dcp1.compute_match(self.match_group, 10)
 
-                                match_df['value'] = [str(value) for value in list(match_df['value'])]
+                                match_df = self.match_df.copy()
+                                match_df['value'] = [str(value) for value in list(self.match_df['value'])]
 
                                 match_data = match_df.to_dict('records') if match_df is not None else dict()
 
@@ -478,11 +497,17 @@ class Dashboard(QWebEngineView):
 
             # Filter data for Spectre
             df1 = pd.DataFrame({'Mode': self.dcp1.df['mode'], 'Value': np.abs(self.dcp1.df['value']),
-                                'Group': ['Group 1' for i in range(self.dcp1.df.shape[0])]}) \
+                                'Group': ['Group 1' if self.match_group is None else 'Reference' for i in range(self.dcp1.df.shape[0])]}) \
                 if self.dcp1 is not None else None
-            df2 = pd.DataFrame({'Mode': self.dcp2.df['mode'], 'Value': np.abs(self.dcp2.df['value']),
-                                'Group': ['Group 2' for i in range(self.dcp2.df.shape[0])]}) \
-                if self.dcp2 is not None else None
+
+            if self.dcp2 is not None:
+                df2 = pd.DataFrame({'Mode': self.dcp2.df['mode'], 'Value': np.abs(self.dcp2.df['value']),
+                                    'Group': ['Group 2' for i in range(self.dcp2.df.shape[0])]})
+            elif self.match_group is not None:
+                df2 = pd.DataFrame({'Mode': self.match_df['mode'], 'Value': np.abs(self.match_df['value']),
+                                    'Group': ['Match' for i in range(self.match_df.shape[0])]})
+            else:
+                df2 = None
 
             return pd.concat([df1, df2])
 
