@@ -1,14 +1,10 @@
 # This Python file uses the following encoding: utf-8
 import scipy.io as scp
-import numpy as np
 import numpy.linalg as la
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn import metrics
 import cmath
 from nilearn import plotting, surface
 from nibabel.freesurfer.io import (read_annot, write_annot)
-from .mode import Mode
 from utils import *
 
 
@@ -58,7 +54,7 @@ class Decomposition:
 
         labels = list(ATLAS['networks'][atlas].keys())
         netidx = [ATLAS['networks'][atlas][network]['index'] for network in
-               ATLAS['networks'][atlas]]
+                  ATLAS['networks'][atlas]]
 
         # Global Variables contain MATLAB (1->) vs. Python (0->) indices
         netindex = [np.add(np.asarray(netidx[i]), -1) for i in range(len(netidx))]

@@ -10,14 +10,17 @@ if __name__ == '__main__':
 
     if not Path(TARGET_DIR).exists():
         Path(TARGET_DIR).mkdir()
-    if not Path(TARGET_DIR).exists():
+    if not Path(CACHE_DIR).exists():
         Path(CACHE_DIR).mkdir()
 
     clear_target()
     clear_cache()
 
+    if not CACHE_DIR.joinpath('log.log').exists():
+        CACHE_DIR.joinpath('log.log').open(mode='w')
+
     logging.getLogger('werkzeug').setLevel(logging.ERROR)
-    logging.basicConfig(filename=TARGET_DIR.joinpath('log.log').as_posix(),
+    logging.basicConfig(filename=CACHE_DIR.joinpath('log.log').as_posix(),
                         filemode='a',
                         format='%(asctime)s,%(msecs)d | %(levelname)s — %(message)s',
                         datefmt='%H:%M:%S',

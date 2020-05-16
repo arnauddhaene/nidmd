@@ -50,9 +50,7 @@ class Dashboard(QWebEngineView):
             external_stylesheets=[dbc.themes.FLATLY]
         )
 
-        if not TARGET_DIR.joinpath('log.log').exists():
-            with open(TARGET_DIR.joinpath('log.log').as_posix(), 'w'): pass
-        self.logfile = open(TARGET_DIR.joinpath('log.log').as_posix(), 'r')
+        self.logfile = open(CACHE_DIR.joinpath('log.log').as_posix(), 'r')
 
         self._set_app_layout()
 
