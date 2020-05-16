@@ -39,6 +39,7 @@ class Dashboard(QWebEngineView):
 
         self.dcp1 = None
         self.dcp2 = None
+        self.match_group = None
         self.atlas = None
         self.progress = 0
         self.sampling_time = None
@@ -131,7 +132,7 @@ class Dashboard(QWebEngineView):
                        html.Div(['Group 1: Drag and Drop or ', html.A('Select Files')]), \
                        html.Div(['Group 2: Drag and Drop or ', html.A('Select Files')])
             elif value == 3:  # Matching Modes
-                return "col-6", uploadStyle, uploadStyle, {}, {}, "Group", "Subjects",  \
+                return "col-6", uploadStyle, uploadStyle, {}, {}, "Reference Group", "Match Group",  \
                        html.Div(['Reference Group: Drag and Drop or ', html.A('Select Files')]), \
                        html.Div(['Match Group: Drag and Drop or ', html.A('Select Files')])
 
@@ -240,6 +241,7 @@ class Dashboard(QWebEngineView):
                 if setting != 1:
                     if contents2 is not None:
                         if setting == 2:  # Comparison
+
                             self.dcp2 = _parse_files(contents2, names2)
                             self.dcp2.run()
                             df2 = self.dcp2.df[['mode', 'value', 'damping_time', 'period']]
@@ -257,22 +259,25 @@ class Dashboard(QWebEngineView):
                         if setting == 3:  # Mode Matching
 
                             self.match_group = _parse_files(contents2, names2)
+                            self.match_group.run()
 
                             if self.dcp1 is not None:
 
-                                d = self.dcp1.match_modes(self.match_group.data)
+                                match_df = self.dcp1.compute_match(self.match_group, 10)
 
-                                match_df['value'] = [str(value) for value in list(df2['value'])]
+                                match_df['value'] = [str(value) for value in list(match_df['value'])]
 
-                                match_data = df2.to_dict('records') if df2 is not None else dict()
+                                match_data = match_df.to_dict('records') if match_df is not None else dict()
 
                                 match_columns = [dict(name='#', id='mode'), dict(name='Value', id='value'),
-                                            dict(name='Damping Time', id='damping_time'),
-                                            dict(name='Period', id='period')] if df1 is not None else [
-                                    {"name": "none", "id": "none"}]
+                                                 dict(name='Damping Time', id='damping_time'),
+                                                 dict(name='Period', id='period')] if match_df is not None else [
+                                                {"name": "none", "id": "none"}]
                                 tab2 = html.Div(DataTable(
                                     id="table-2", data=match_data, columns=match_columns, **table_config
-                                ), className="container") if self.dcp2 is not None else None
+                                ), className="container") if self.match_group is not None else None
+
+                                disabled = False
 
             return names1, names2, tab1, tab2, disabled
 
@@ -317,8 +322,11 @@ class Dashboard(QWebEngineView):
                         message += "Group missing. "
                         error = True
                 elif setting == 3:
-                    if self.dcp1 or self.match_group is None:
-                        message += "File(s) missing. "
+                    if self.dcp1 is None:
+                        message += "Reference group missing. "
+                        error = True
+                    if self.match_group is None:
+                        message += "Match group missing. "
                         error = True
                 elif self.atlas is None:
                     message += "Parsing unsuccessful, no atlas found. Please use a .mat file with the data under key 'TCS' or 'TCSnf'. "
@@ -444,7 +452,7 @@ class Dashboard(QWebEngineView):
             :return decomposition: Decomposition instance
             """
 
-            logging.info("Parsing {} files".format(len(files)))
+            logging.info("Parsing {0} file{1}".format(len(files), 's' if len(files) > 1 else ''))
 
             dcp = Decomposition()
 
@@ -457,7 +465,6 @@ class Dashboard(QWebEngineView):
 
                 for key in data.keys():
                     if key[:2] != '__':
-                        print(key)
                         d = data[key]
 
                 dcp.add_data(d, self.sampling_time)

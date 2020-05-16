@@ -1,6 +1,10 @@
 # This Python file uses the following encoding: utf-8
 import scipy.io as scp
+import numpy as np
 import numpy.linalg as la
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics
 import cmath
 from nilearn import plotting, surface
 from nibabel.freesurfer.io import (read_annot, write_annot)
@@ -28,14 +32,14 @@ class Decomposition:
             # )
 
             # Get Dynamic Modes from filenames
-            X, Y, self.atlas = self._check_data(  # this defines X, Y, N, T
+            self.X, self.Y, self.atlas = self._check_data(  # this defines X, Y, N, T
                 self.data
             )
 
             # this defines eigVal, eigVec, eigIdx, A
-            self.eigVal, self.eigVec, self.eigIdx, self.A = self._get_decomposition(X, Y)
+            self.eigVal, self.eigVec, self.eigIdx, self.A = self._get_decomposition(self.X, self.Y)
 
-            self.Z = la.inv(self.eigVec) @ X
+            self.Z = la.inv(self.eigVec) @ self.X
 
             # this defines the general data frame
             self.df = self._compute(self.eigVal, self.eigVec, self.eigIdx, self.Z)
@@ -403,39 +407,95 @@ class Decomposition:
 
         return ox
 
-    def _match_mode(self, other):
+    @staticmethod
+    def _match_modes(TC, S, m):
         """
-        Match mode to group (self)
+        Match modes using Time Series data and eigenvectors of reference group.
+        Please forgive me for the MATLAB-like code.
+
+        :param TC: Time Series data
+        :param S: matrix of column eigenvectors
+        :param m: number of modes to analyse
+        :return:
+        """
+
+        S_inv = la.inv(S)
+
+        N, T = TC.shape
+
+        B = np.empty([m, 1], dtype=complex)
+        A = np.empty([m, m], dtype=complex)
+
+        T2, T1, atlas = Decomposition._check_data([TC])
+        T2 = T2.T
+        T1 = T1.T
+
+        for r in range(m):
+
+            r1 = S[:, r].reshape(N, 1) @ S_inv[r, :].reshape(1, N)
+
+            for c in range(r, m):
+
+                c1 = S[:, c].reshape(N, 1) @ S_inv[c, :].reshape(1, N)
+
+                if r != c:
+
+                    M = (c1.T @ r1 + r1.T @ c1)
+
+                    A[r, c] = T1.flatten() @ (T1 @ M.T).flatten()
+
+                    A[c, r] = A[r, c]
+
+                else:
+
+                    A[r, c] = 2 * T1.flatten() @ (T1 @ r1.T @ r1).flatten()
+
+            B[r] = 2 * T2.flatten() @ (T1 @ r1.T).flatten()
+
+        d = la.solve(A, B)
+
+        return np.around(d, decimals=8)
+
+    def compute_match(self, other, m):
+        """
+        Match modes to group (self)
 
         :param other: Decomposition instance of subject
+        :param m: number of modes approximated
         :return: pd.DataFrame containing 'mode', 'value', 'damping_time', 'period', 'conjugate'
         """
 
-        modes = []
+        # First the modes should be matched with myself to get regression params
 
-        atlas = ATLAS['atlas'][str(val.shape[0])]
+        logging.info('Fetching reference mode matching for regression parameter estimation.')
+
+        borderline = self.eigVal[self.eigIdx][m].conj() == self.eigVal[self.eigIdx][m + 1]
+        own = self._match_modes(self.X, self.eigVec[:, self.eigIdx], (m + 1) if borderline else m)
+
+        # Top 10 modes are used in the dashboard
+        reg = LinearRegression().fit(np.abs(own[:10]).reshape(-1, 1), np.abs(self.eigVal[self.eigIdx][:10]).reshape(-1, 1))
+
+        logging.info('Regression parameters estimated.')
+        logging.info('Fetching mode estimation for match group.')
+
+        others = self._match_modes(other.X, self.eigVec[:, self.eigIdx], (m + 1) if borderline else m)
+
+        # complex prediction of top
+        others = reg.intercept_ + reg.coef_ * others
+        others = others.flatten()
+
+        logging.info("Matching modes approximtion predicted.")
+
+        modes = []
 
         order = 1
         idx = 0
-        val_sorted = val[index]
 
-        labels = list(ATLAS['networks'][atlas].keys())
+        while idx < others.shape[0]:
 
+            conj = (idx < others.shape[0] - 1) and (others[idx] == others[idx + 1].conjugate())
 
-        while idx < index.shape[0]:
-
-            conj = (idx < index.shape[0] - 1) and (val_sorted[idx] == val_sorted[idx + 1].conjugate())
-
-            # TODO: modify sampling time with user input
-
-            value = val_sorted[idx]
-
-            strength_real = []
-            strength_imag = []
-
-            for n, network in enumerate(labels):
-                strength_real.append(np.mean(np.abs(np.real(vec_sorted[netindex[n], idx]))))
-                strength_imag.append(np.mean(np.abs(np.imag(vec_sorted[netindex[n], idx]))))
+            value = others[idx]
 
             modes.append(
                 dict(
