@@ -267,7 +267,7 @@ class Decomposition:
         Match other time-series to spatial modes. Annex A2 of Casorso et al. 2019.
 
         :param data: time-series data of other group
-        :param N: amount of modes to match
+        :param m: amount of modes to match
         :return: eigenvalues
         """
 

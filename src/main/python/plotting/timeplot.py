@@ -15,7 +15,7 @@ class TimePlot:
 
         self.df = df
 
-    def figure(self):
+    def figure(self, amount=6):
         """
         Plotly figure of spectre
 
@@ -33,7 +33,7 @@ class TimePlot:
 
             df = self.df[self.df.Group == 'Group {}'.format(group)]
 
-            for mode in range(1, 5):
+            for mode in range(1, amount):
 
                 activity = df[df.Mode == mode].Activity.to_list()[0]
 

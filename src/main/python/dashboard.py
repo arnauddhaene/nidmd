@@ -3,6 +3,7 @@ import base64
 import threading
 import scipy.io as sio
 import dash
+import plotly.express as px
 from dash_table import DataTable
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -43,17 +44,16 @@ class Dashboard(QWebEngineView):
         self.match_df = None
         self.atlas = None
         self.progress = 0
-        self.sampling_time = None
         self.valid = False  # put to true if decomposition can run
         self.imag = False
 
         self.app = dash.Dash(
-            external_stylesheets=[dbc.themes.FLATLY]
+            external_stylesheets=[dbc.themes.COSMO]
         )
 
         self.logfile = open(CACHE_DIR.joinpath('log.log').as_posix(), 'r')
 
-        self._set_app_layout()
+        self.app.layout = self._set_app_layout()
 
         threading.Thread(target=self.run_dash, daemon=True).start()
         # self.run_dash()
@@ -146,7 +146,7 @@ class Dashboard(QWebEngineView):
             if setting is None:
                 raise PreventUpdate
             elif setting == 1:  # Analysis
-                return 'Modes', 'Disabled'
+                return 'Data', 'Disabled'
             elif setting == 2:  # Comparison
                 return 'Group 1', 'Group 2'
             elif setting == 3:  # Mode Matching
@@ -177,12 +177,43 @@ class Dashboard(QWebEngineView):
                         its time-series data matched to the spatial modes of the reference group."
 
 
+
+        @self.app.callback([
+            Output('animated-progress-1', 'style'),
+            Output('animated-progress-2', 'style'),
+        ], [
+            Input('upload-1', 'contents'),
+            Input('upload-2', 'contents')
+        ], [
+            State('setting', 'value')
+        ])
+        def progress_file(contents1, contents2, setting):
+
+            if setting is None:
+                raise PreventUpdate
+            else:
+                show = {}
+                hide = {'display': 'none'}
+
+                if setting == 1:
+                    return show if self.dcp1 is None else hide, hide
+                elif setting == 2:
+                    return show if self.dcp1 is None and contents1 is not None else hide, \
+                           show if self.dcp2 is None and contents2 is not None else hide
+                elif setting == 3:
+                    return show if self.dcp1 is None and contents1 is not None else hide, \
+                           show if self.match_df is None and contents2 is not None else hide
+                else:
+                    return hide, hide
+
         @self.app.callback([
             Output('selected-files-group-1-p', 'children'),
             Output('selected-files-group-2-p', 'children'),
             Output('table-1-tab', 'children'),
             Output('table-2-tab', 'children'),
-            Output('table-2-tab', 'disabled')
+            Output('table-2-tab', 'disabled'),
+            Output('animated-progress-1-div', 'style'),
+            Output('animated-progress-2-div', 'style')
         ], [
             Input('upload-1', 'contents'),
             Input('upload-2', 'contents'),
@@ -238,14 +269,15 @@ class Dashboard(QWebEngineView):
             if [contents1, contents2, names1, names2].count(None) == 4:
                 raise PreventUpdate
             else:
-                self.sampling_time = float(time)
 
                 if contents1 is not None:
-                    self.dcp1 = _parse_files(contents1, names1)
+
+                    logging.info("Adding contents to Analysis / Group 1 / Reference Group.")
+
+                    self.dcp1 = _parse_files(contents1, names1, float(time))
                     self.dcp1.run()
                     df1 = self.dcp1.df[['mode', 'value', 'damping_time', 'period']]
-                    df1['value'] = [str(value) for value in list(df1['value'])]
-                    data1 = df1.to_dict('records') if df1 is not None else dict()
+                    data1 = _format_table(df1).to_dict('records') if df1 is not None else dict()
                     columns1 = [dict(name='#', id='mode'), dict(name='Value', id='value'),
                                 dict(name='Damping Time', id='damping_time'),
                                 dict(name='Period', id='period')] if df1 is not None else [
@@ -258,14 +290,15 @@ class Dashboard(QWebEngineView):
                     if contents2 is not None:
                         if setting == 2:  # Comparison
 
-                            self.dcp2 = _parse_files(contents2, names2)
+                            logging.info("Adding contents to Group 2.")
+
+                            self.dcp2 = _parse_files(contents2, names2, float(time))
                             self.dcp2.run()
                             df2 = self.dcp2.df[['mode', 'value', 'damping_time', 'period']]
-                            df2['value'] = [str(value) for value in list(df2['value'])]
-                            data2 = df2.to_dict('records') if df2 is not None else dict()
+                            data2 = _format_table(df2).to_dict('records') if df2 is not None else dict()
                             columns2 = [dict(name='#', id='mode'), dict(name='Value', id='value'),
                                         dict(name='Damping Time', id='damping_time'),
-                                        dict(name='Period', id='period')] if df1 is not None else [
+                                        dict(name='Period', id='period')] if df2 is not None else [
                                 {"name": "none", "id": "none"}]
                             tab2 = html.Div(DataTable(
                                 id="table-2", data=data2, columns=columns2, **table_config
@@ -274,17 +307,18 @@ class Dashboard(QWebEngineView):
 
                         if setting == 3:  # Mode Matching
 
-                            self.match_group = _parse_files(contents2, names2)
+                            logging.info("Adding contents to Match Group.")
+
+                            self.match_group = _parse_files(contents2, names2, float(time))
                             self.match_group.run()
 
                             if self.dcp1 is not None:
 
-                                self.match_df = self.dcp1.compute_match(self.match_group, 10)
+                                self.match_df = self.dcp1.compute_match(self.match_group, 20)
 
                                 match_df = self.match_df.copy()
-                                match_df['value'] = [str(value) for value in list(self.match_df['value'])]
 
-                                match_data = match_df.to_dict('records') if match_df is not None else dict()
+                                match_data = _format_table(match_df).to_dict('records') if match_df is not None else dict()
 
                                 match_columns = [dict(name='#', id='mode'), dict(name='Value', id='value'),
                                                  dict(name='Damping Time', id='damping_time'),
@@ -296,10 +330,24 @@ class Dashboard(QWebEngineView):
 
                                 disabled = False
 
-            return names1, names2, tab1, tab2, disabled
+            dumbo = "Types = Group 1: {0}, Group 2: {1}, Match: {2}".format(type(self.dcp1), type(self.dcp2), type(self.match_group))
+
+            logging.debug(dumbo)
+
+            hide = {'display': 'none'}
+            show = {}
+
+            def format(list):
+                if type(list) == list:
+                    return html.P('\n'.join(list))
+                else:
+                    return html.P(list)
+
+            return format(names1), format(names2), tab1, tab2, \
+                   disabled, hide if contents1 is not None else show, hide if contents2 is not None else show
 
         @self.app.callback(
-            Output('imag-label', 'children')
+            Output('imag-setting', 'options')
         , [
             Input('imag-setting', 'value')
         ])
@@ -311,7 +359,9 @@ class Dashboard(QWebEngineView):
 
             logging.info(message)
 
-            return "Plotting imaginary values" if self.imag else "Not plotting imaginary values"
+            options = [{"label": message, "value": 1}]
+
+            return options
 
         @self.app.callback([
             Output('message-alert', 'children'),
@@ -335,8 +385,8 @@ class Dashboard(QWebEngineView):
                         message += "No file(s) chosen. "
                         error = True
                 elif setting == 2:
-                    if self.dcp1 or self.dcp2 is None:
-                        message += "Group missing. "
+                    if self.dcp1 is None or self.dcp2 is None:
+                        message += "Group {} missing. ".format(2 if self.dcp2 is None else 1)
                         error = True
                 elif setting == 3:
                     if self.dcp1 is None:
@@ -347,9 +397,6 @@ class Dashboard(QWebEngineView):
                         error = True
                 elif self.atlas is None:
                     message += "Parsing unsuccessful, no atlas found. Please use a .mat file with the data under key 'TCS' or 'TCSnf'. "
-                    error = True
-                if self.sampling_time is None:
-                    message += "Sampling time missing. "
                     error = True
             else:
                 message += "No setting chosen. "
@@ -362,13 +409,35 @@ class Dashboard(QWebEngineView):
 
             return message, {} if error else {'display':'none'}, {} if error else {'display':'none'}
 
+        @self.app.callback([
+            Output('app-layout', 'children')
+        ], [
+            Input('reset', 'n_clicks')
+        ])
+        def rst(n):
+
+            if n is None:
+                raise PreventUpdate
+            else:
+                self.dcp1 = None
+                self.dcp2 = None
+                self.match_group = None
+                self.match_df = None
+                self.atlas = None
+                self.progress = 0
+                self.valid = False  # put to true if decomposition can run
+                self.imag = False
+
+                return [self._set_app_layout()]
 
         @self.app.callback(
             Output('spectre', 'figure')
         ,[
             Input('run', 'n_clicks')
+        ], [
+            State('number-of-modes', 'value')
         ])
-        def compute_spectre(n):
+        def compute_spectre(n, nom):
 
             if n is None or not self.valid:
                 raise PreventUpdate
@@ -384,8 +453,10 @@ class Dashboard(QWebEngineView):
             Output('timeplot', 'figure')
             , [
                 Input('run', 'n_clicks')
-            ])
-        def compute_timeplot(n):
+            ], [
+            State('number-of-modes', 'value')
+        ])
+        def compute_timeplot(n, nom):
 
             if n is None or not self.valid:
                 raise PreventUpdate
@@ -395,14 +466,16 @@ class Dashboard(QWebEngineView):
 
                 t = TimePlot(_filter_time())
 
-                return t.figure()
+                return t.figure(nom + 1)
 
         @self.app.callback(
             Output('radar', 'figure')
         , [
             Input('run', 'n_clicks')
+        ], [
+            State('number-of-modes', 'value')
         ])
-        def compute_radar(n):
+        def compute_radar(n, nom):
 
             if n is None or not self.valid:
                 raise PreventUpdate
@@ -412,15 +485,17 @@ class Dashboard(QWebEngineView):
 
                 r = Radar(*_filter_radar())
 
-                return r.figure(self.imag)
+                return r.figure(self.imag, nom + 1)
 
         @self.app.callback([
             Output('brains', 'children'),
             Output('progress-div', 'style')
         ], [
             Input('run', 'n_clicks')
+        ], [
+            State('number-of-modes', 'value')
         ])
-        def compute_brain(n):
+        def compute_brain(n, nom):
 
             if n is None or not self.valid:
                 raise PreventUpdate
@@ -430,9 +505,9 @@ class Dashboard(QWebEngineView):
 
                 brains = []
 
-                self.progress += 10
+                self.progress += 10.0
 
-                for mode in range(1, 4):
+                for mode in range(1, nom + 1):
 
                     b = Brain(*_filter_brain(mode))
 
@@ -443,7 +518,7 @@ class Dashboard(QWebEngineView):
                                                                                        "filename": "mode {}".format(mode)},
                                                               "displaylogo": False})]))
 
-                    self.progress += 30
+                    self.progress += 90.0 / nom
 
                 return brains, {'display': 'none'}
 
@@ -460,16 +535,19 @@ class Dashboard(QWebEngineView):
             # only add text after 5% progress to ensure text isn't squashed too much
             return progress, f"{progress} %" if progress >= 5 else ""
 
-        def _parse_files(contents, files):
+        def _parse_files(contents, files, sampling_time):
             """
             Parse incoming .mat files.
 
             :param contents: list of Base64 encoded contents
             :param files: list of names
+            :param sampling_time: sampling time of data
             :return decomposition: Decomposition instance
             """
 
-            logging.info("Parsing {0} file{1}".format(len(files), 's' if len(files) > 1 else ''))
+            logging.info("Parsing {0} file{1} with sampling time {2}".format(len(files),
+                                                                             's' if len(files) > 1 else '',
+                                                                             sampling_time))
 
             dcp = Decomposition()
 
@@ -484,7 +562,7 @@ class Dashboard(QWebEngineView):
                     if key[:2] != '__':
                         d = data[key]
 
-                dcp.add_data(d, self.sampling_time)
+                dcp.add_data(d, sampling_time)
 
             dcp.run()
             self.atlas = dcp.atlas
@@ -551,62 +629,110 @@ class Dashboard(QWebEngineView):
 
             return self.atlas, mode1, mode2, order
 
+        def _format_table(df):
+
+            def _set_precision(number):
+                if number == np.inf:
+                    return 'inf'
+
+                if type(number) != str:
+                    number = str(number)
+                splat = number.split('.')
+                splat[1] = splat[1][:5] if len(splat[1]) > 5 else splat[1]
+                return ".".join([splat[0], splat[1]])
+
+            def _handle_complex(number):
+                print("HELLO")
+                splat = [str(number.real), str(number.imag)]
+                set = [_set_precision(splat[0]), _set_precision(splat[1])]
+                return "{0} +/- {1} j".format(set[0], set[1])
+
+            def _format_list(p):
+                f = _handle_complex if type(p[0]) == np.complex128 else _set_precision
+                return [f(e) for e in p]
+
+            df['value'] = _format_list(df['value'])
+            df['damping_time'] = _format_list(df['damping_time'])
+            df['period'] = _format_list(df['period'])
+
+            return df
+
         self.app.run_server(debug=False, port=port, host=address)
 
     def _set_app_layout(self):
 
         logging.info("Setting Application Layout")
 
-        self.app.layout = html.Div([
-            # SETTING CHOICE RADIO ROW
-            html.Div([dbc.FormGroup([
-                # dbc.Label("Decomposition Setting", html_for="setting", className="col-4"),
-                html.Div(children=[
-                    html.H4("Dynamic Mode Toolbox"),
-                    html.P(id="description")],
-                    className="col-6 ml-5 mt-2"),
-                dbc.Col(
-                    dbc.RadioItems(
-                        id="setting",
-                        options=[
-                            {"label": "Analysis", "value": 1},
-                            {"label": "Comparision", "value": 2},
-                            {"label": "Mode Matching", "value": 3}
-                        ],
-                    ), className="col-4 mt-4")], row=True)],
-                className="row", style={'margin-top': '25px'}
-            ),
-            # FILE SELECTION + LOGGER
+        return html.Div([
+            html.Div(id="dummy", style=dict(display="none")),
             html.Div(children=[
-                # file selection info
-                html.Div(children=[dbc.Card(
-                            dbc.CardBody([
-                                    html.H5("Selection", className="card-title col-2"),
-                                    html.H6("Sampling Time"),
-                                    dcc.Input(id="sampling-time", placeholder="Sampling Time (s)",
-                                              className="form-control col-1 mt-2 ml-2 mb-2"),
-                                    dbc.FormGroup(
-                                        [
-                                            dbc.Label("Not plotting imaginary values", id="imag-label"),
-                                            dbc.Checklist(
-                                                options=[
-                                                    {"label": "Plot imaginary values", "value": 1},
-                                                ],
-                                                value=[],
-                                                id="imag-setting",
-                                                switch=True,
+                # SETTING CHOICE RADIO ROW
+                html.Div([dbc.FormGroup([
+                    # dbc.Label("Decomposition Setting", html_for="setting", className="col-4"),
+                    html.Div(children=[
+                        html.H4("Dynamic Mode Toolbox"),
+                        html.P(id="description")],
+                        className="ml-5 mt-2"),
+                    dbc.Col(
+                        dbc.RadioItems(
+                            id="setting",
+                            options=[
+                                {"label": "Analysis", "value": 1},
+                                {"label": "Comparison", "value": 2},
+                                {"label": "Mode Matching", "value": 3}
+                            ],
+                        ), className="ml-5 mt-4")], row=True)],
+                    className="col-5", style={'margin-top': '25px'}
+                ),
+                # FILE SELECTION + LOGGER
+                html.Div(children=[
+                    # file selection info
+                    html.Div(children=[dbc.Card(
+                                dbc.CardBody([
+                                    html.H5("Selection", className="card-title"),
+                                    html.Div(className="row", children=[
+                                        html.Div(className="col-6", children=[
+                                            dbc.FormGroup(
+                                                [
+                                                    dbc.Label("Sampling Time (seconds)", className="mt-2"),
+                                                    dbc.Input(id="sampling-time", type="number", placeholder="0.72",
+                                                              value=0.72, className="col-3"),
+                                                    dbc.Label("Number of modes to plot", className="mt-2"),
+                                                    dbc.Input(id="number-of-modes", type="number", placeholder="5",
+                                                              value=5, className="col-3"),
+                                                    dbc.Checklist(
+                                                        options=[
+                                                            {"label": "Plot imaginary values", "value": 1},
+                                                        ],
+                                                        value=[],
+                                                        id="imag-setting",
+                                                        switch=True, className="mt-2"
+                                                    ),
+                                                ]
                                             ),
-                                        ]
-                                    ),
-                                    html.H6(id="selected-files-group-1-t"),
-                                    html.P(id="selected-files-group-1-p"),
-                                    html.H6(id="selected-files-group-2-t"),
-                                    html.P(id="selected-files-group-2-p"),
-                                    dbc.Button("Run Decomposition", color="primary", id="run"),
-                                    html.Div(id="message-alert", className="text-danger mt-2")
-                            ]))],
-                         id="file-selection-card",
-                         className="col-12 mt-2 mb-2 mr-2 ml-2")
+                                        ]),
+                                        html.Div(className="col-6", children=[
+                                            dbc.Label(id="selected-files-group-1-t"),
+                                            html.P(id="selected-files-group-1-p"),
+                                            html.Div(id="animated-progress-1-div", className="mb-2", children=[
+                                                dbc.Progress(value=80, id="animated-progress-1", striped=True,
+                                                             animated="animated", style={'display': 'none'})
+                                            ]),
+                                            dbc.Label(id="selected-files-group-2-t"),
+                                            html.P(id="selected-files-group-2-p"),
+                                            html.Div(id="animated-progress-2-div", className="mb-2", children=[
+                                                dbc.Progress(value=80, id="animated-progress-2", striped=True,
+                                                             animated="animated", style={'display': 'none'})
+                                            ]),
+                                        ]),
+                                    ]),
+                                        dbc.Button("Run Decomposition", color="primary", id="run", className="mr-2"),
+                                        dbc.Button("Reset", color="secondary", id="reset"),
+                                        html.Div(id="message-alert", className="text-danger mt-2")
+                                ]))],
+                             id="file-selection-card",
+                             className="col-12 mt-2 mb-2 mr-2 ml-2")
+                ], className="col-7"),
             ], className="row"),
             # UPLOAD ROW
             html.Div([
@@ -676,7 +802,7 @@ class Dashboard(QWebEngineView):
                                         html.P('Loading cortical surface graphs...', className="mt-4"),
                                         dcc.Interval(id="progress-interval", n_intervals=0, interval=500),
                                         dbc.Progress(id="progress", style={'width': '70%', 'align':'center'}),
-                                    ], className="col-12", id="progress-div")
+                                    ], className="col-12 my-4 mx-4", id="progress-div")
                             ])
                         ], className="row"),
                         label="Graphs"),
@@ -699,4 +825,4 @@ class Dashboard(QWebEngineView):
                         label="Log", id='log-tab')
                 ]
             ),
-        ])
+        ], id="app-layout")

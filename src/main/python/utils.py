@@ -56,7 +56,7 @@ ATLAS2D = dict(schaefer=pd.read_json(RES_DIR.joinpath('schaefer.json').as_posix(
                glasser=pd.read_json(RES_DIR.joinpath('glasser.json').as_posix()))
 
 # Colors
-COLORS = ['#50514f', '#f25f5c', '#ffe066', '#247ba0', '#70c1b3']
+COLORS = ['#1abc9c', '#2ecc71', '#3498db', '#9b59b6', '#34495e', '#f1c40f', '#e67e22', '#e74c3c', '#95a5a6']
 
 
 def matplotlib_to_plotly(cmap, pl_entries=255):

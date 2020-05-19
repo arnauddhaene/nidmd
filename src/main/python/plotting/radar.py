@@ -16,7 +16,7 @@ class Radar:
         self.df = df
         self.networks = networks
 
-    def figure(self, imag=False, amount=4):
+    def figure(self, imag=False, amount=6):
         """
         Get Figure
 
@@ -29,7 +29,7 @@ class Radar:
                             subplot_titles=("Real", "Imaginary"))
         colors = COLORS
 
-        for mode in range(1, amount + 1):
+        for mode in range(1, amount):
 
             for group in list(np.unique(self.df.group)):
 
