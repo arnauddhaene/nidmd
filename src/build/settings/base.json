@@ -2,5 +2,7 @@
     "app_name": "DynamicModeToolbox",
     "author": "Arnaud Dhaene",
     "main_module": "src/main/python/dmd/main.py",
-    "version": "0.0.0"
+    "version": "0.0.0",
+    "hidden_imports": ["sklearn.neighbors._typedefs", "sklearn.utils._cython_blas", "sklearn.neighbors._quad_tree",
+        "sklearn.tree", "sklearn.tree._utils"]
 }
