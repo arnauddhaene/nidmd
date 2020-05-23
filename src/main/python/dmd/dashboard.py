@@ -558,9 +558,11 @@ class Dashboard(QWebEngineView):
 
                 data = sio.loadmat(mat)
 
-                for key in data.keys():
+                for key in mat.keys():
                     if key[:2] != '__':
-                        d = data[key]
+                        d = mat[key]
+                        logging.info("Extracted matrice from file {} from key {}".format(filename, key))
+                        continue
 
                 dcp.add_data(d, sampling_time)
 

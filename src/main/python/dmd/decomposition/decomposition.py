@@ -9,58 +9,95 @@ from utils import *
 
 
 class Decomposition:
-    def __init__(self):
+    def __init__(self, data=None, filenames=None):
+        """
+        Decomposition constructor
 
-        self.data = []
+        :param data: [list of Array-like]
+        :param filenames: [list of str]
+        """
+
+        if data is None and filenames is None:
+            self.data = []
+            self.X = None
+            self.Y = None
+            self.atlas = None
+            self.eigVal = None
+            self.eigVec = None
+            self.eigIdx = None
+            self.A = None
+            self.Z = None
+            self.df = None
+        else:
+            if data is not None:
+                assert isinstance(data, list)
+                for d in data:
+                    self.add_data(d)
+            elif filenames is not None:
+                assert isinstance(filenames, list)
+                for f in filenames:
+                    self._extract_data(f)
+
+            self.run()
 
     def run(self):
-        """
-        Run decomposition
+        """ Run decomposition. """
 
-        :return:
-        """
+        assert self.data is not None
 
-        if self.data is not None:
+        # Split data in X and Y
+        self.X, self.Y = self._check_data(self.data)
 
-            # Get Dynamic Modes from filenames
-            # X, Y, self.atlas = self._check_data(  # this defines X, Y, N, T
-            #         self.data
-            # )
+        # Perform eigendecomposition
+        self.eigVal, self.eigVec, self.eigIdx, self.A = self._get_decomposition(self.X, self.Y)
 
-            # Get Dynamic Modes from filenames
-            self.X, self.Y, self.atlas = self._check_data(  # this defines X, Y, N, T
-                self.data
-            )
+        # Fetch time course for each mode
+        self.Z = la.inv(self.eigVec) @ self.X
 
-            # this defines eigVal, eigVec, eigIdx, A
-            self.eigVal, self.eigVec, self.eigIdx, self.A = self._get_decomposition(self.X, self.Y)
-
-            self.Z = la.inv(self.eigVec) @ self.X
-
-            # this defines the general data frame
-            self.df = self._compute(self.eigVal, self.eigVec, self.eigIdx, self.Z)
+        # Define general data frame
+        self.df = self._compute(self.eigVal, self.eigVec, self.eigIdx, self.Z)
 
     def _compute(self, val, vec, index, time):
+        """
+        Compute general data frame
+
+        :param val: [Array-like] eigenvalues
+        :param vec: [Array-like] eigenvectors
+        :param index: [Array-like] sorting index of eigendecomposition
+        :param time: [Array-like] time course of each mode
+        :return: [pd.DataFrame] general data frame
+        """
 
         modes = []
 
-        atlas = ATLAS['atlas'][str(val.shape[0])]
+        assert val.shape[0] == vec.shape[0]
+        assert vec.shape[0] == vec.shape[1]
+        assert index.shape[0] == val.shape[0]
+        assert time.shape[0] == val.shape[0]
+        assert self.atlas is not None
+        assert self.sampling_time is not None
 
         order = 1
         idx = 0
+
+        # Sort eigendecomposition and time course matrix
         val_sorted = val[index]
         vec_sorted = vec[:, index]
         time_sorted = time[index, :]
 
-        labels = list(ATLAS['networks'][atlas].keys())
-        netidx = [ATLAS['networks'][atlas][network]['index'] for network in
-                  ATLAS['networks'][atlas]]
+        # Fetch network labels
+        labels = list(ATLAS['networks'][self.atlas].keys())
+
+        # Fetch indices of networks ROIs
+        netidx = [ATLAS['networks'][self.atlas][network]['index'] for network in
+                  ATLAS['networks'][self.atlas]]
 
         # Global Variables contain MATLAB (1->) vs. Python (0->) indices
         netindex = [np.add(np.asarray(netidx[i]), -1) for i in range(len(netidx))]
 
         while idx < index.shape[0]:
 
+            # Check if mode iterated on is a complex conjugate with the next
             conj = (idx < index.shape[0] - 1) and (val_sorted[idx] == val_sorted[idx + 1].conjugate())
 
             value = val_sorted[idx]
@@ -92,269 +129,140 @@ class Decomposition:
 
         return pd.DataFrame(modes)
 
-    @staticmethod
-    def reset():
-        """
-        Reset
-        """
-        clear_cache()
-        reset_target()
-
-    def _create_mode_dirs(self, how_many_modes):
-        """
-        Make directories to store created files.
-
-        :param how_many_modes: how many modes should be created
-        :return modes: list of paths
-        """
-        reset_target()
-
-        modes = [self._create_mode_dir(mode + 1) for mode in range(how_many_modes)]
-
-        return modes
-
-    @staticmethod
-    def _create_mode_dir(mode):
-        """
-        Create individual mode directory
-        :param mode: mode number
-        :return: path
-        """
-        name = 'mode-{}'.format(mode)
-        Path(TARGET_DIR.joinpath(name)).mkdir()
-
-        return name
-
-    def save_HTML(self, surf='inflated', colorbar='RdYlGn', shadow=True):
-        """
-        Save 3D brain surface plots to html files.
-
-        :return htmls: list of dict of hemispheric .html filepaths
-        """
-        htmls = []
-
-        for mode in range(len(self.annots)):
-            
-            htmls.append(mode)
-            htmls[mode] = {}
-            
-            for hemi in ['left', 'right']:
-
-                dir = Path(self.annots[mode][hemi]).parent
-
-                # TODO ADD FILE EXTENSION PROBLEM
-                htmls[mode][hemi] = dir.joinpath('{}.html'.format(hemi))
-
-                labels = surface.load_surf_data(TARGET_DIR.joinpath(self.annots[mode][hemi]).as_posix())
-
-                args = {'surf_mesh': FSAVERAGE['{0}_{1}'.format(surf[:4], hemi)],
-                        'surf_map': labels,
-                        'cmap': colorbar,
-                        'bg_map': FSAVERAGE['sulc_{}'.format(hemi)] if shadow else None,
-                        'symmetric_cmap': False,
-                        'colorbar_fontsize': 10,
-                        'title': 'Dynamic Mode {0}: {1} hemisphere'.format(str(mode+1), hemi),
-                        'title_fontsize': 12}
-
-                view = plotting.view_surf(**args)
-
-                view.save_as_html(TARGET_DIR.joinpath(htmls[mode][hemi]))
-        
-        return htmls
-
-
-    def _write_labels(self, modedir, eigenVector):
-        """
-        Write Data mapping .annot file for Dynamic Modes.
-
-        :param modedir: directory of mode
-        :param eigenVector: eigenvector of selected Dynamic Mode.
-        :return writepath: dict of 'left' and 'right' hemispheric .annot filepaths
-        """
-        writepath = {}
-
-        for hemi in ['left', 'right']:
-            # extract parcellation
-            labels, ctab, names = read_annot(RES_DIR.joinpath(ATLAS['label'][self.atlas][hemi]))
-
-            # initialize new color tab
-            atlasLength = ctab.shape[0]
-            newCtab = np.empty((atlasLength, 5))
-
-            # first row is always the same as old colortab
-            newCtab[0] = ctab[0]
-
-            # change color according to eigenvector values
-            scale = 127 / (np.max(eigenVector) - np.min(eigenVector))
-            mean = np.mean(eigenVector)
-
-            for roi in range(1, atlasLength):
-                eigVecIdx = (roi - 1) if (hemi == 'left') else (roi + (atlasLength - 2))
-                color = 127 + scale * (eigenVector[eigVecIdx] - mean)
-                newCtab[roi] = np.array([color, color, color, 0, labels[roi]])
-
-            writepath[hemi] = Path(modedir).joinpath('{}.annot'.format(hemi))
-
-            write_annot(TARGET_DIR.joinpath(writepath[hemi]), labels, newCtab, names, fill_ctab=True)
-
-        return writepath
-
-    def _get_decomposition(self, X, Y):
+    def _get_decomposition(self, x, y):
         """
         Get dynamic modes by Least Squares optimization.
         To use the index simply use eigVal[eigIdx] and eigVec[:,eigIdx]
 
-        :param X: data for t (1->T)
-        :param Y: data for t (0->T-1)
-        :return eigVal: eigenvalues of dynamic mode decomposition
-        :return eigVec: eigenvectors of dynamic mode decomposition
-        :return eigIdx: eigen-indices for descendent sorting
-        :return A: decomposition matrix
+        :param X: [Array-like] data for t (1->T)
+        :param Y: [Array-like] data for t (0->T-1)
+        :return eigVal: [Array-like] eigenvalues of dynamic mode decomposition
+        :return eigVec: [Array-like] eigenvectors of dynamic mode decomposition
+        :return eigIdx: [Array-like] eigenindices for descendent sorting
+        :return A: [Array-like] decomposition matrix
         """
-        A = (X @ Y.T) @ (np.linalg.inv(Y @ Y.T))
+        x = np.asarray(x)
+        y = np.asarray(y)
+        assert isinstance(x, np.ndarray)
+        assert isinstance(y, np.ndarray)
+        assert x.shape == y.shape
+
+        a = (x @ y.T) @ (np.linalg.inv(y @ y.T))
 
         # extract eigenvalues and eigenvectors
-        eigVal, eigVec = np.linalg.eig(A)
+        eig_val, eig_vec = np.linalg.eig(a)
 
         # sort descending - from https://stackoverflow.com/questions/8092920/
         # simply use index for later use
-        eigIdx = np.abs(eigVal).argsort()[::-1]
+        eig_idx = np.abs(eig_val).argsort()[::-1]
 
         # adjust eigenvectors' phases for orthogonality
-        eigVec = self._adjust_phase(eigVec)
+        eig_vec = self._adjust_phase(eig_vec)
 
-        return eigVal, eigVec, eigIdx, A
+        return eig_val, eig_vec, eig_idx, a
 
     @staticmethod
     def _check_data(data):
         """
         Check and format data into autoregressive model.
 
-        :param data: list of NumPy arrays
-        :return X: data for t (1->T)
-        :return Y: data for t (0->T-1)
-        :return atlas: cortical parcellations 'glasser' or 'schaefer'
+        :param data: [list of Array-like]
+        :return X: [Array-like] data for t (1->T)
+        :return Y: [Array-like] data for t (0->T-1)
         """
-        # 'empty' arrays for creating X and Y
-        X = np.array([]).reshape(data[0].shape[0], 0)
-        Y = np.array([]).reshape(data[0].shape[0], 0)
 
-        for matrice in data:
+        assert isinstance(data, list)
+
+        # 'empty' arrays for creating X and Y
+        x = np.array([]).reshape(data[0].shape[0], 0)
+        y = np.array([]).reshape(data[0].shape[0], 0)
+
+        for matrix in data:
+
+            matrix = np.asarray(matrix)
+            assert isinstance(matrix, np.ndarray)
+            assert str(matrix.shape[0]) in ATLAS['atlas'].keys()
+
             # check for zero rows
             # indices of rows that are zero (full zero ROIs)
-            zIdx = np.where(~matrice.any(axis=1))[0]
-            if zIdx.shape[0] > 0:
-                logging.warning("ROIError: Matrice contains " + str(zIdx.shape) + " zero rows.")
+            z_idx = np.where(~matrix.any(axis=1))[0]
+            if z_idx.shape[0] > 0:
+                logging.warning("Matrice contains " + str(z_idx.shape) + " zero rows.")
 
             # normalize matrices
-            matriceN, _, _ = Decomposition.normalize(matrice, direction=1, demean=True, destandard=False)
+            matrix_n, _, _ = Decomposition.normalize(matrix, direction=1, demean=True, destandard=True)
 
             # concatenate matrices
-            Xn = matriceN[:, 1:  ]
-            Yn = matriceN[:,  :-1]
-            X = np.concatenate((X, Xn), axis=1)
-            Y = np.concatenate((Y, Yn), axis=1)
+            x_temp = matrix_n[:, 1:  ]
+            y_temp = matrix_n[:,  :-1]
+            x = np.concatenate((x, x_temp), axis=1)
+            y = np.concatenate((y, y_temp), axis=1)
 
-        if str(X.shape[0]) in ATLAS['atlas'].keys():
-            atlas = ATLAS['atlas'][str(X.shape[0])]
-            return X, Y, atlas
-        else:
-            logging.error("ROIError: Number of ROIs does not correspond to any known parcellation.")
-            return X, Y, None
+        return x, y
 
-    def match_modes(self, data, m):
-        """
-        Match other time-series to spatial modes. Annex A2 of Casorso et al. 2019.
-
-        :param data: time-series data of other group
-        :param m: amount of modes to match
-        :return: eigenvalues
-        """
-
-        S = self.eigVec[:, self.eigIdx]
-        S_inv = la.inv(S)
-        N = S.shape[0]
-
-        b = np.empty([m, 1], dtype=complex)
-        C = np.empty([m, m], dtype=complex)
-
-        T2, T1, atlas = self._check_data(data)
-
-        T2 = T2.T
-        T1 = T1.T
-
-        if atlas != self.atlas:
-            logging.error("ATLAS of reference and match group do not correspond.")
-
-        for r in range(m):
-
-            r1 = S[:, r].reshape(N, 1) @ S_inv[r, :].reshape(1, N)
-
-            for c in range(r, m):
-
-                c1 = S[:, c].reshape(N, 1) @ S_inv[c, :].reshape(1, N)
-
-                if r != c:
-
-                    M = (c1.T @ r1 + r1.T @ c1)
-
-                    C[r, c] = T1.flatten() @ (T1 @ M.T).flatten()
-
-                    C[c, r] = C[r, c]
-
-                else:
-
-                    C[r, c] = 2 * T1.flatten() @ (T1 @ r1.T @ r1).flatten()
-
-            b[r] = 2 * T2.flatten() @ (T1 @ r1.T).flatten()
-
-        return np.around(la.solve(C, b), decimals=8)
-
-    def _extract_data(self, filenames):
+    def _extract_data(self, filename):
         """
         Extracts fMRI data from files.
         Supported formats are: .mat
 
-        :param filenames: list of filenames
-        :return data: list of NumPy arrays
-        """
-        data = []
-
-        if isinstance(filenames, list):
-            for file in filenames:
-                if file_format(file) == '.mat':
-                    mat = scp.loadmat(file)
-                    data.append(mat['TCSnf'])
-
-        return data
-
-    def add_data(self, data, sampling_time):
-        """
-        Add data to decomposition.
-
-        :param data: data matrix (N x T)
-        :param sampling_time: sampling time (s)
+        :param filename: [str] filename containing .mat matrix
         """
 
-        self.sampling_time = sampling_time
+        assert file_format(filename) == '.mat'
+        mat = scp.loadmat(filename)
+        for key in mat.keys():
+            if key[:2] != '__':
+                d = mat[key]
+                logging.info("Extracted matrice from file {} from key {}".format(filename, key))
+                continue
+
+        self.add_data(d)
+
+    def add_data(self, data, sampling_time=None):
+        """
+        Add data to decomposition. Also defines Decomposition.atlas
+
+        :param data: [Array-like] data matrix (N x T)
+        :param sampling_time: [float] sampling time (s)
+        """
+
+        data = np.asarray(data)
+        assert isinstance(data, np.ndarray)
+        # Verify that data is correctly formatted
+        assert str(data.shape[0]) in ATLAS['atlas'].keys()
+
+        if len(self.data) == 0:
+            self.atlas = ATLAS['atlas'][str(data.shape[0])]
+            logging.info('Data added to Decomposition using {} atlas.'.format(self.atlas))
+        else:
+            assert self.atlas == ATLAS['atlas'][str(data.shape[0])]
+
+        if self.sampling_time is None and sampling_time is not None:
+            self.sampling_time = float(sampling_time)
 
         self.data.append(data)
 
     @staticmethod
-    def normalize(X, direction=1, demean=True, destandard=True):
+    def normalize(data, direction=1, demean=True, destandard=True):
         """
         Normalize the original data set.
 
-        :param x: data
-        :param direction: 0 for columns, 1 for rows, None for global
-        :param demean: demean
-        :param destandard: remove standard deviation (to 1)
-        :return x: standardized data
-        :return mean: mean of original data
+        :param x: [Array-like] data
+        :param direction: [int] 0 for columns, 1 for rows, None for global
+        :param demean: [boolean] demean
+        :param destandard: [boolean] remove standard deviation (to 1)
+        :return x: [Array-like] standardized data
+        :return mean: [float] mean of original data
+        :return std: [float] standard deviation of original data
         """
-        x = X.copy()
-        r, c = x.shape
-        std_x = np.std(x, axis=direction)
+
+        # Handle data
+        x = data.copy()
+        x = np.asarray(x)
+        assert isinstance(x, np.ndarray)
+
+        # Fetch statistical information
+        std = np.std(x, axis=direction)
         mean = np.mean(x, axis=direction)
 
         # removal of mean
@@ -363,18 +271,21 @@ class Decomposition:
 
         # removal of standard deviation
         if destandard:
-            x /= std_x.reshape((std_x.shape[0]), 1)
+            x /= std.reshape((std.shape[0]), 1)
 
-        return x, mean, std_x
+        return x, mean, std
 
     @staticmethod
     def _adjust_phase(x):
         """
-        Adjust phase as to have orthogonal eigenVectors
+        Adjust phase as to have orthogonal vectors
 
-        :param x: original eigenvectors
-        :return ox: orthogonalized eigenvectors
+        :param x: [Array-like] original vectors
+        :return ox: [Array-like] orthogonal vectors
         """
+
+        x = np.asarray(x)
+        assert isinstance(x, np.ndarray)
 
         # create empty instance for ox
         ox = np.empty(shape=x.shape, dtype=complex)
@@ -404,61 +315,65 @@ class Decomposition:
         return ox
 
     @staticmethod
-    def _match_modes(TC, S, m):
+    def _match_modes(tc, s, m):
         """
         Match modes using Time Series data and eigenvectors of reference group.
         Please forgive me for the MATLAB-like code.
 
-        :param TC: Time Series data
-        :param S: matrix of column eigenvectors
+        :param tc: Time Series data
+        :param s: matrix of column eigenvectors
         :param m: number of modes to analyse
         :return:
         """
 
-        S_inv = la.inv(S)
+        s_inv = la.inv(s)
 
-        N, T = TC.shape
+        n, t = tc.shape
 
-        B = np.empty([m, 1], dtype=complex)
-        A = np.empty([m, m], dtype=complex)
+        b = np.empty([m, 1], dtype=complex)
+        a = np.empty([m, m], dtype=complex)
 
-        T2, T1, atlas = Decomposition._check_data([TC])
-        T2 = T2.T
-        T1 = T1.T
+        if ATLAS['atlas'][str(tc.shape[0])] != ATLAS['atlas'][str(s.shape[0])]:
+            logging.error("ATLAS of reference and match group do not correspond.")
+
+        t2, t1 = Decomposition._check_data([tc])
+        t2 = t2.T
+        t1 = t1.T
 
         for r in range(m):
 
-            r1 = S[:, r].reshape(N, 1) @ S_inv[r, :].reshape(1, N)
+            r1 = s[:, r].reshape(n, 1) @ s_inv[r, :].reshape(1, n)
 
             for c in range(r, m):
 
-                c1 = S[:, c].reshape(N, 1) @ S_inv[c, :].reshape(1, N)
+                c1 = s[:, c].reshape(n, 1) @ s_inv[c, :].reshape(1, n)
 
                 if r != c:
 
                     M = (c1.T @ r1 + r1.T @ c1)
 
-                    A[r, c] = T1.flatten() @ (T1 @ M.T).flatten()
+                    a[r, c] = t1.flatten() @ (t1 @ M.T).flatten()
 
-                    A[c, r] = A[r, c]
+                    a[c, r] = a[r, c]
 
                 else:
 
-                    A[r, c] = 2 * T1.flatten() @ (T1 @ r1.T @ r1).flatten()
+                    a[r, c] = 2 * t1.flatten() @ (t1 @ r1.T @ r1).flatten()
 
-            B[r] = 2 * T2.flatten() @ (T1 @ r1.T).flatten()
+            b[r] = 2 * t2.flatten() @ (t1 @ r1.T).flatten()
 
-        d = la.solve(A, B)
+        d = la.solve(a, b)
 
         return np.around(d, decimals=8)
 
     def compute_match(self, other, m):
         """
-        Match modes to group (self)
+        Get matched modes for match group with self (reference group).
+        Predicts amplification of approximated modes using linear regression.
 
-        :param other: Decomposition instance of subject
-        :param m: number of modes approximated
-        :return: pd.DataFrame containing 'mode', 'value', 'damping_time', 'period', 'conjugate'
+        :param other: [Decomposition]
+        :param m: [int] number of modes approximated
+        :return: [pd.DataFrame] containing 'mode', 'value', 'damping_time', 'period', 'conjugate'
         """
 
         # First the modes should be matched with myself to get regression params
