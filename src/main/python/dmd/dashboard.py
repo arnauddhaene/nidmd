@@ -533,7 +533,7 @@ class Dashboard(QWebEngineView):
             # use n_intervals constrained to be in 0-100
             progress = min(self.progress % 110, 100)
             # only add text after 5% progress to ensure text isn't squashed too much
-            return progress, f"{progress} %" if progress >= 5 else ""
+            return progress, "{} %".format(progress if progress >= 5 else "")
 
         def _parse_files(contents, files, sampling_time):
             """

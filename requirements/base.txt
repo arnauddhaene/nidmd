@@ -9,12 +9,12 @@ fbs==0.8.6
 Flask==1.1.2
 Flask-Caching==1.8.0
 Flask-Compress==1.4.0
-matplotlib==3.2.1
+matplotlib==3.0.3
 nbformat==5.0.6
 nibabel==3.0.2
 nilearn==0.6.2
 numpy==1.18.2
-pandas==1.0.3
+pandas==0.25.3
 plotly==4.6.0
 PyQt5==5.9.2
 scikit-learn==0.22.2.post1

@@ -48,7 +48,7 @@ def _get_surface():
 
     return FSAVERAGE, SURFACE
 
-ATLAS = json.load(open(RES_DIR.joinpath('ATLAS.JSON')))
+ATLAS = json.load(open(RES_DIR.joinpath('ATLAS.JSON').as_posix()))
 # Use surface as follows: go.Mesh3d(**SURFACE['pial_left'], vertexcolor=...)
 FSAVERAGE, SURFACE = _get_surface()
 # 2D coordinates for ATLASSES
