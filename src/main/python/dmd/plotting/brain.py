@@ -10,26 +10,26 @@ class Brain:
         """
         Constructor
 
-        :param atlas: cortical parcellation { 'schaefer', 'glasser' } (string)
+        :param atlas: [str] cortical parcellation { 'schaefer', 'glasser' }
         :param mode1: intensity information (object with 'intensity', 'conjugate')
         :param mode2: intensity information for comparison (object with 'intensity', 'conjugate')
         """
 
         self.atlas = ATLAS2D[atlas]
 
-        # if not mode1.order == mode2.order:
-            # TODO: RAISE ERROR
         self.mode1 = mode1
         self.mode2 = mode2
         self.order = order
 
-    def _get_intensity(self, modes, imag=False):
+    @staticmethod
+    def _get_intensity(modes, imag=False):
         """
         Add mode
 
-        :param modes: modes (list of objects)
-        :param imag: get imaginary values
-        :return: rows, intensity
+        :param modes: [pd.DataFrame] with columns 'conjugate' and 'intensity'
+        :param imag: [boolean] get imaginary values
+        :return rows: [list] index list of number of figure rows
+        :return intensity: [list of Array-like]
         """
 
         rows = []
@@ -60,20 +60,18 @@ class Brain:
 
         return rows, intensity
 
-
     def figure(self, imag=False):
         """
-        Get Plotly figure
+        Get Figure.
 
-        :param imag: plot imaginary values
-        :return: Plotly figure instance
+        :param imag: [boolean] Plot imaginary values
+        :return: [go.Figure]
         """
 
         # Analysis
         if self.mode2 is None:
 
             rows, intensity = self._get_intensity([self.mode1], imag)
-
             labels = ['Real'] if len(rows) == 1 else ['Real', 'Imaginary']
 
         # Comparison
@@ -87,14 +85,11 @@ class Brain:
                 if self.mode1.conjugate:
                     labels = ['G1 Real', 'G1 Imaginary','G2 Real']
                 else:
-                    labels = ['G1 Real', 'G2 Real','G2 Imaginary']
+                    labels = ['G1 Real', 'G2 Real', 'G2 Imaginary']
             else:
-                labels = ['G1 Real', 'G1 Imaginary', 'G2 Real','G2 Imaginary']
+                labels = ['G1 Real', 'G1 Imaginary', 'G2 Real', 'G2 Imaginary']
 
-        fig = make_subplots(rows=len(rows), cols=1,
-                            # shared_xaxes=True,  # specs=[[{}], [{}]] if len(rows) == 2 else [[{}]],
-                            horizontal_spacing=0.05,
-                            vertical_spacing=0.05)
+        fig = make_subplots(rows=len(rows), cols=1, horizontal_spacing=0.05, vertical_spacing=0.05)
 
         for row in rows:
 
@@ -117,42 +112,31 @@ class Brain:
                 else:
                     col = 'black'
 
-                fig.add_trace(go.Scatter(x=x,
-                                         y=y,
-                                         fill='toself',
-                                         mode='lines',
-                                         line=dict(color='black', width=0.5),
-                                         fillcolor=col,
-                                         name=region if region else None,
-                                         hoverinfo=None),
+                fig.add_trace(go.Scatter(x=x, y=y, fill='toself', mode='lines', line=dict(color='black', width=0.5),
+                                         fillcolor=col, name=region if region else None, hoverinfo=None),
                               row=row, col=1)
 
-            fig.add_trace(go.Scatter(x=[300, 1100], y=[-25, -25],
-                                     text=['left', 'right'],
-                                     mode='text'),
+            fig.add_trace(go.Scatter(x=[300, 1100], y=[-25, -25], text=['left', 'right'], mode='text'),
                           row=row, col=1)
 
         axis_config = dict(showgrid=False, showline=False, visible=False, ticks='',
                            showticklabels=False, zeroline=False, showspikes=False)
 
-        fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                          showlegend=False, title_text='Mode {}'.format(self.order if self.order is not None else ''),
-                          height=150+len(rows)*200)
+        fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', showlegend=False,
+                          title_text='Mode {}'.format(self.order if self.order is not None else ''),
+                          height=150 + len(rows) * 200)
 
         for i, label in enumerate(labels):
 
             fig.layout['xaxis' + str(i + 1)].update(axis_config)
-            fig.layout['yaxis' + str(i + 1)].update({**axis_config,
-                                                     **dict(scaleanchor='x' + str(i + 1), scaleratio=1,
-                                                            title=labels[i], visible=True)})
+            fig.layout['yaxis' + str(i + 1)].update({**axis_config, **dict(scaleanchor='x' + str(i + 1), scaleratio=1,
+                                                                           title=labels[i], visible=True)})
 
+        # Hack to get a colorbar
         fig.add_trace(go.Scatter(x=[200, 200], y=[-20, -20],
-                                 marker=dict(size=0.01, opacity=1,
-                                             cmax=0.1, cmin=-0.1,
-                                             color=[-0.1, 0.1],
+                                 marker=dict(size=0.01, opacity=1, cmax=0.1, cmin=-0.1, color=[-0.1, 0.1],
                                              colorbar=dict(title="Activity", len=.7, nticks=3),
                                              colorscale=COOLWARM),
-                                 mode="markers")
-                      )
+                                 mode="markers"))
 
         return fig

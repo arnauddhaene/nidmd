@@ -10,16 +10,15 @@ class TimePlot:
         """
         Constructor
 
-        :param df: dataframe containing 'Mode', 'Activity', 'Group'
+        :param df: [pd.DataFrame] containing 'Mode', 'Activity', 'Group'
         """
-
         self.df = df
 
     def figure(self, amount=6):
         """
-        Plotly figure of spectre
+        Get Figure
 
-        :return: Plotly Figure instance
+        :return: [go.Figure]
         """
         groups = np.unique(self.df['Group']).shape[0]
 
@@ -38,11 +37,9 @@ class TimePlot:
                 activity = df[df.Mode == mode].Activity.to_list()[0]
 
                 fig.add_trace(go.Scatter(x=list(np.array(range(activity.shape[0]))), y=activity,
-                                         legendgroup='Mode {}'.format(mode),
+                                         legendgroup='Mode {}'.format(mode), showlegend=True if group == 1 else False,
                                          name='Mode {}'.format(mode),
-                                         showlegend=True if group == 1 else False,
-                                         line=dict(color=colors[mode])
-                                         ),
+                                         line=dict(color=colors[mode])),
                               row=group, col=1)
 
         fig.update_traces(hovertemplate=None)

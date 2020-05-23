@@ -8,9 +8,9 @@ class Radar:
 
     def __init__(self, df, networks):
         """
+        Constructor.
 
-
-        :param df: dataframe containing 'mode', 'group', 'strength_real', 'strength_imaginary'
+        :param df: [pd.DataFrame] containing 'mode', 'group', 'strength_real', 'strength_imaginary'
         """
 
         self.df = df
@@ -20,9 +20,9 @@ class Radar:
         """
         Get Figure
 
-        :param amount: number of modes to plot
-        :param imag: add imaginary values
-        :return: Plotly Figure instance
+        :param imag: [boolean] add imaginary values
+        :param amount: [int] number of modes to plot
+        :return: [go.Figure]
         """
 
         fig = make_subplots(rows=1, cols=2 if imag else 1, specs=[[{'type': 'polar'}] * (2 if imag else 1)],
@@ -45,40 +45,33 @@ class Radar:
         """
         Adds adequate trace to figure
 
-        :param fig: Plotly Figure
-        :param mode: mode (1, 2, ...)
-        :param comp: 'real' or 'imag'
-        :param group: group (1, 2, )
-        :param color: line color in css standards
+        :param fig: [go.Figure]
+        :param mode: [int] mode (1, 2, ...)
+        :param comp: [str] 'real' or 'imag'
+        :param group: [int] group (1, 2, )
+        :param color: [str] line color in css standards
         """
 
         r_r = self.df.loc[(self.df['mode'] == mode) & (self.df['group'] == group)].strength_real.to_list()[0]
         r_i = self.df.loc[(self.df['mode'] == mode) & (self.df['group'] == group)].strength_imag.to_list()[0]
 
         fig.add_trace(go.Scatterpolar(
-            r=self._close(r_r),
-            theta=self._close(self.networks),
-            mode="lines",
-            legendgroup='Mode {0} Group {1}'.format(mode, group),
-            name='Mode {0} Group {1}'.format(mode, group),
-            showlegend=True,
-            line=dict(color=color, dash='dash' if group != 1 else None),
-            subplot="polar1"
+            r=self._close(r_r), theta=self._close(self.networks), mode="lines",
+            legendgroup='Mode {0} Group {1}'.format(mode, group), showlegend=True,
+            name='Mode {0} Group {1}'.format(mode, group), subplot="polar1",
+            line=dict(color=color, dash='dash' if group != 1 else None)
         ), row=1, col=1)
 
         if imag:
             fig.add_trace(go.Scatterpolar(
-                r=self._close(r_i),
-                theta=self._close(self.networks),
-                mode="lines",
-                legendgroup='Mode {0} Group {1}'.format(mode, group),
-                name='Mode {0} Group {1}'.format(mode, group),
-                showlegend=False,
+                r=self._close(r_i), theta=self._close(self.networks), mode="lines",
+                legendgroup='Mode {0} Group {1}'.format(mode, group), showlegend=False,
+                name='Mode {0} Group {1}'.format(mode, group), subplot="polar2",
                 line=dict(color=color, dash='dash' if group != 1 else None),
-                subplot="polar2"
             ), row=1, col=2)
 
     @staticmethod
-    def _close(l):
-        l.append(l[0])
-        return l
+    def _close(li):
+        assert isinstance(li, list)
+        li.append(li[0])
+        return li
