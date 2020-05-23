@@ -4,6 +4,7 @@ import sys
 from utils import *
 from dashboard import Dashboard
 import logging
+import sklearn
 
 if __name__ == '__main__':
 
