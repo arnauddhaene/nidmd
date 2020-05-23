@@ -125,7 +125,7 @@ class Dashboard(QWebEngineView):
             show = {}
             hide = dict(display="none")
 
-            style = dict(height="60px", lineHeight="60px", borderWidth="1px", borderStle="dashed", borderRadius="5px",
+            style = dict(height="60px", lineHeight="60px", borderWidth="1px", borderStyle="dashed", borderRadius="5px",
                          textAlign="center", margin="10px")
 
             if value is None:
