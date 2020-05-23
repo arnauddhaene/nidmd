@@ -1,7 +1,7 @@
 
-# Dynamic Mode Decomposition
+# Dynamic Mode Decomposition Dashboard
 
-Based on [Casorso et al., 2019][2], the dynamic mode decomposition algorithm allows for a dynamic analysis of cortical neurological activation. 
+Based on [Casorso et al., 2019][2], the dynamic mode decomposition algorithm allows for a dynamic analysis of cortical neurological activation. Here, a dashboard is developed to allow users to analyse their data using standardized and publication-quality visualizations of the dynamic modes.
 
 ## Installation
 
