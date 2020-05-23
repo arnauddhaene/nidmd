@@ -3,13 +3,11 @@ import base64
 import threading
 import scipy.io as sio
 import dash
-import plotly.express as px
 from dash_table import DataTable
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.exceptions import PreventUpdate
-from flask_caching import Cache
 from dash.dependencies import (Input, Output, State)
 from PyQt5.QtCore import *
 from PyQt5.QtWebEngineWidgets import *
@@ -22,46 +20,55 @@ from plotting import *
 class Dashboard(QWebEngineView):
 
     def __init__(self):
-        """
-        Constructor.
+        """ Constructor. """
 
-        """
-        # the figure is now accessible via self.figure
         QWebEngineView.__init__(self)
+
+        # Display full screen
         self.showMaximized()
 
+        # Handle download requests for Plotly image saving
         QtWebEngineWidgets.QWebEngineProfile.defaultProfile().downloadRequested.connect(
-            self.on_downloadRequested
+            self.on_download_requested
         )
 
-        address = {'address': '127.0.0.1',
-                   'port': 8000
-        }
+        # Define local host address
+        host = dict(address='127.0.0.1', port=8000)
 
+        # Initialize decompositions
         self.dcp1 = None
         self.dcp2 = None
         self.match_group = None
         self.match_df = None
         self.atlas = None
+
+        # Used for cortical surface representation loading
         self.progress = 0
-        self.valid = False  # put to true if decomposition can run
+
+        # Input data valid and visualization can be launched
+        self.valid = False
+
+        # Display imaginary values in visualization
         self.imag = False
 
+        # Fetch and add Dash Bootstrap Component theme
         self.app = dash.Dash(
             external_stylesheets=[dbc.themes.COSMO]
         )
 
+        # Initialize log file
         self.logfile = open(CACHE_DIR.joinpath('log.log').as_posix(), 'r')
 
-        self.app.layout = self._set_app_layout()
+        # Fetch app layout
+        self.app.layout = self._get_app_layout()
 
+        # Use threading to launch Dash App
         threading.Thread(target=self.run_dash, daemon=True).start()
-        # self.run_dash()
 
-        self.load(QUrl("http://{0}:{1}".format(address['address'], address['port'])))
+        self.load(QUrl("http://{0}:{1}".format(host['address'], host['port'])))
 
     @QtCore.pyqtSlot("QWebEngineDownloadItem*")
-    def on_downloadRequested(self, download):
+    def on_download_requested(self, download):
         old_path = download.url().path()  # download.path()
         suffix = QtCore.QFileInfo(old_path).suffix()
         path, _ = QtWidgets.QFileDialog.getSaveFileName(
@@ -428,7 +435,7 @@ class Dashboard(QWebEngineView):
                 self.valid = False  # put to true if decomposition can run
                 self.imag = False
 
-                return [self._set_app_layout()]
+                return [self._get_app_layout()]
 
         @self.app.callback(
             Output('spectre', 'figure')
@@ -550,6 +557,7 @@ class Dashboard(QWebEngineView):
                                                                              sampling_time))
 
             dcp = Decomposition()
+            d = None
 
             for content, name in zip(contents, files):
                 type, string = content.split(',')
@@ -558,11 +566,14 @@ class Dashboard(QWebEngineView):
 
                 data = sio.loadmat(mat)
 
-                for key in mat.keys():
+                for key in data.keys():
                     if key[:2] != '__':
-                        d = mat[key]
-                        logging.info("Extracted matrice from file {} from key {}".format(filename, key))
+                        d = data[key]
+                        logging.info("Extracted matrice from file {} from key {}".format(name, key))
                         continue
+
+                if d is None:
+                    logging.error("Invalid .mat file, no matrices inside.")
 
                 dcp.add_data(d, sampling_time)
 
@@ -605,7 +616,6 @@ class Dashboard(QWebEngineView):
             return pd.concat([df1, df2])
 
         def _filter_radar():
-
 
             logging.info("Filtering Radar data")
 
@@ -661,170 +671,162 @@ class Dashboard(QWebEngineView):
 
         self.app.run_server(debug=False, port=port, host=address)
 
-    def _set_app_layout(self):
+    @staticmethod
+    def _get_app_layout():
 
         logging.info("Setting Application Layout")
 
-        return html.Div([
+        return html.Div(id="app-layout", children=[
             html.Div(id="dummy", style=dict(display="none")),
-            html.Div(children=[
-                # SETTING CHOICE RADIO ROW
-                html.Div([dbc.FormGroup([
-                    # dbc.Label("Decomposition Setting", html_for="setting", className="col-4"),
-                    html.Div(children=[
-                        html.H4("Dynamic Mode Toolbox"),
-                        html.P(id="description")],
-                        className="ml-5 mt-2"),
-                    dbc.Col(
-                        dbc.RadioItems(
-                            id="setting",
-                            options=[
-                                {"label": "Analysis", "value": 1},
-                                {"label": "Comparison", "value": 2},
-                                {"label": "Mode Matching", "value": 3}
-                            ],
-                        ), className="ml-5 mt-4")], row=True)],
-                    className="col-5", style={'margin-top': '25px'}
-                ),
-                # FILE SELECTION + LOGGER
-                html.Div(children=[
-                    # file selection info
-                    html.Div(children=[dbc.Card(
-                                dbc.CardBody([
-                                    html.H5("Selection", className="card-title"),
-                                    html.Div(className="row", children=[
-                                        html.Div(className="col-6", children=[
-                                            dbc.FormGroup(
-                                                [
-                                                    dbc.Label("Sampling Time (seconds)", className="mt-2"),
-                                                    dbc.Input(id="sampling-time", type="number", placeholder="0.72",
-                                                              value=0.72, className="col-3"),
-                                                    dbc.Label("Number of modes to plot", className="mt-2"),
-                                                    dbc.Input(id="number-of-modes", type="number", placeholder="5",
-                                                              value=5, className="col-3"),
-                                                    dbc.Checklist(
-                                                        options=[
-                                                            {"label": "Plot imaginary values", "value": 1},
-                                                        ],
-                                                        value=[],
-                                                        id="imag-setting",
-                                                        switch=True, className="mt-2"
-                                                    ),
-                                                ]
-                                            ),
-                                        ]),
-                                        html.Div(className="col-6", children=[
-                                            dbc.Label(id="selected-files-group-1-t"),
-                                            html.P(id="selected-files-group-1-p"),
-                                            html.Div(id="animated-progress-1-div", className="mb-2", children=[
-                                                dbc.Progress(value=80, id="animated-progress-1", striped=True,
-                                                             animated="animated", style={'display': 'none'})
-                                            ]),
-                                            dbc.Label(id="selected-files-group-2-t"),
-                                            html.P(id="selected-files-group-2-p"),
-                                            html.Div(id="animated-progress-2-div", className="mb-2", children=[
-                                                dbc.Progress(value=80, id="animated-progress-2", striped=True,
-                                                             animated="animated", style={'display': 'none'})
-                                            ]),
+            # ####################### #
+            # HEADER + FILE SELECTION
+            # ####################### #
+            html.Div(className="row", children=[
+                # HEADER = TITLE + DESCRIPTION + SETTING
+                html.Div(className="col-5", style={'margin-top': '25px'}, children=[
+                    dbc.FormGroup(row=True, children=[
+                        html.Div(className="ml-5 mt-2", children=[
+                            # TITLE
+                            html.H4("Dynamic Mode Toolbox"),
+                            # DESCRIPTION
+                            html.P(id="description")]),
+                        dbc.Col(className="ml-5 mt-4", children=[
+                            # SETTING
+                            dbc.RadioItems(id="setting", options=[
+                                    {"label": "Analysis", "value": 1},
+                                    {"label": "Comparison", "value": 2},
+                                    {"label": "Mode Matching", "value": 3}
+                            ])
+                        ])
+                    ])
+                ]),
+                # FILE SELECTION
+                html.Div(className="col-7", children=[
+                    html.Div(className="col-12 mt-2 mb-2 mr-2 ml-2", id="file-selection-card", children=[
+                        dbc.Card(dbc.CardBody(children=[
+                            # TITLE
+                            html.H5("Selection", className="card-title"),
+                            html.Div(className="row", children=[
+                                # SELECTION INPUT
+                                html.Div(className="col-6", children=[
+                                    dbc.FormGroup(children=[
+                                        dbc.Label("Sampling Time (seconds)", className="mt-2"),
+                                        dbc.Input(id="sampling-time", type="number", placeholder="0.72",
+                                                  value=0.72, className="col-3"),
+                                        dbc.Label("Number of modes to plot", className="mt-2"),
+                                        dbc.Input(id="number-of-modes", type="number", placeholder="5",
+                                                  value=5, className="col-3"),
+                                        dbc.Checklist(className="mt-2", id="imag-setting",
+                                                      value=[], switch=True, options=[
+                                            {"label": "Plot imaginary values", "value": 1}
                                         ]),
                                     ]),
-                                        dbc.Button("Run Decomposition", color="primary", id="run", className="mr-2"),
-                                        dbc.Button("Reset", color="secondary", id="reset"),
-                                        html.Div(id="message-alert", className="text-danger mt-2")
-                                ]))],
-                             id="file-selection-card",
-                             className="col-12 mt-2 mb-2 mr-2 ml-2")
-                ], className="col-7"),
-            ], className="row"),
-            # UPLOAD ROW
-            html.Div([
-                # UPLOAD 1
-                html.Div([dcc.Upload(
-                    id='upload-1',
-                    # Allow multiple files to be uploaded
-                    multiple=True)],
-                    className="col-6", id='upload-1-div',
-                ),
-                # UPLOAD 2
-                html.Div([dcc.Upload(
-                    id='upload-2',
-                    # Allow multiple files to be uploaded
-                    multiple=True)],
-                    className="col-6")
-            ], className="row", id="upload-row"),
-            # TABS
-            dbc.Tabs(
-                [
-                    ## PLOTS
-                    dbc.Tab(
-                        html.Div(children=[
-                            # left panel - radar, spectre, temporal information
-                            html.Div(className="col-5", children=[
-                                # radar plots
-                                html.Div(className="row", children=[
-                                    html.Div(
-                                        [dcc.Graph(id="radar",
-                                                   config={"toImageButtonOptions": {"width": None,
-                                                                                    "height": None,
-                                                                                    "format": "svg",
-                                                                                    "filename": "radar"},
-                                                           "displaylogo": False})],
-                                         className="col-12")
                                 ]),
-                                # spectre
-                                html.Div(className="row", children=[
-                                    html.Div(
-                                        [dcc.Graph(id="spectre",
-                                                   config={"toImageButtonOptions": {"width": None,
-                                                                                    "height": None,
-                                                                                    "format": "svg",
-                                                                                    "filename": "spectre"},
-                                                           "displaylogo": False})],
-                                        className="col-12")
-                                ]),
-                                # timeplot
-                                html.Div(className="row", children=[
-                                    html.Div(
-                                        [dcc.Graph(id="timeplot",
-                                                   config={"toImageButtonOptions": {"width": None,
-                                                                                    "height": None,
-                                                                                    "format": "svg",
-                                                                                    "filename": "timeplot"},
-                                                           "displaylogo": False})],
-                                        className="col-12")
+                                # SELECTED FILES
+                                html.Div(className="col-6", children=[
+                                    dbc.Label(id="selected-files-group-1-t"),
+                                    html.P(id="selected-files-group-1-p"),
+                                    html.Div(className="mb-2", id="animated-progress-1-div", children=[
+                                        dbc.Progress(value=80, id="animated-progress-1", striped=True,
+                                                     animated="animated", style={'display': 'none'})
+                                    ]),
+                                    dbc.Label(id="selected-files-group-2-t"),
+                                    html.P(id="selected-files-group-2-p"),
+                                    html.Div(id="animated-progress-2-div", className="mb-2", children=[
+                                        dbc.Progress(value=80, id="animated-progress-2", striped=True,
+                                                     animated="animated", style={"display": "none"})
+                                    ]),
                                 ]),
                             ]),
-                            # right panel - brains
-                            # brains
-                            html.Div(className="col-7", children=[
-                                html.Div(className="col-12", id="brains"),
-                                # progress
-                                html.Div(
-                                    [
-                                        html.P('Loading cortical surface graphs...', className="mt-4"),
-                                        dcc.Interval(id="progress-interval", n_intervals=0, interval=500),
-                                        dbc.Progress(id="progress", style={'width': '70%', 'align':'center'}),
-                                    ], className="col-12 my-4 mx-4", id="progress-div")
-                            ])
-                        ], className="row"),
-                        label="Graphs"),
-
-                    ## TABLE 1
-                    dbc.Tab(label="Group A", id="table-1-tab"),
-
-                    ## TABLE 2
-                    dbc.Tab(label="Group B", disabled=True, id="table-2-tab"),
-
-                    ## LOG
-                    dbc.Tab(
-                        html.Div(children=[
-                            dcc.Interval(
-                                id='log-update',
-                                interval=1000  # in milliseconds
-                            ),
-                            html.Div(children=[html.P("———— APP START ————")], id='log')],
-                            className="col-6", id="log-div"),
-                        label="Log", id='log-tab')
-                ]
-            ),
-        ], id="app-layout")
+                            # BUTTONS + ALERT MESSAGE
+                            html.Div(children=[
+                                dbc.Button("Run Decomposition", color="primary", id="run", className="mr-2"),
+                                dbc.Button("Reset", color="secondary", id="reset"),
+                                html.Div(id="message-alert", className="text-danger mt-2")
+                            ]),
+                        ]))
+                    ]),
+                ]),
+            ]),
+            # ########## #
+            # UPLOAD ROW
+            # ########## #
+            html.Div(className="row", id="upload-row", children=[
+                # UPLOAD 1
+                html.Div(className="col-6", id="upload-1-div", children=[
+                    dcc.Upload(id="upload-1", multiple=True)
+                ]),
+                # UPLOAD 2
+                html.Div(className="col-6", id="upload-2-div", children=[
+                    dcc.Upload(id="upload-2", multiple=True)
+                ])
+            ]),
+            # ####### #
+            # CONTENT #
+            # ####### #
+            # TABS = GRAPHS + TABLE 1 + TABLE 2 + LOG
+            dbc.Tabs(children=[
+                # GRAPHS
+                dbc.Tab(label="Graphs", children=[
+                    html.Div(className="row", children=[
+                        # LEFT PANEL = RADAR + SPECTRE + TIMEPLOT
+                        html.Div(className="col-5", children=[
+                            # RADAR
+                            html.Div(className="row", children=[
+                                html.Div(className="col-12", children=[
+                                    dcc.Graph(id="radar",
+                                              config=dict(displaylogo=False,
+                                                          toImageButtonOption=dict(
+                                                              width=None, height=None,
+                                                              format="svg", filename="radar")))
+                                ]),
+                            ]),
+                            # SPECTRE
+                            html.Div(className="row", children=[
+                                html.Div(className="col-12", children=[
+                                    dcc.Graph(id="spectre",
+                                              config=dict(displaylogo=False,
+                                                          toImageButtonOption=dict(
+                                                              width=None, height=None,
+                                                              format="svg", filename="spectre")))
+                                ]),
+                            ]),
+                            # TIMEPLOT
+                            html.Div(className="row", children=[
+                                html.Div(className="col-12", children=[
+                                    dcc.Graph(id="timeplot",
+                                              config=dict(displaylogo=False,
+                                                          toImageButtonOption=dict(
+                                                              width=None, height=None,
+                                                              format="svg", filename="timeplot")))
+                                ]),
+                            ]),
+                        ]),
+                        # RIGHT PANEL = BRAINS + PROGRESS
+                        html.Div(className="col-7", children=[
+                            # BRAINS
+                            html.Div(className="col-12", id="brains"),
+                            # PROGRESS
+                            html.Div(className="col-12 my-4 mx-4", id="progress-div", children=[
+                                html.P('Loading cortical surface graphs...', className="mt-4"),
+                                dcc.Interval(id="progress-interval", n_intervals=0, interval=500),
+                                dbc.Progress(id="progress", style=dict(width='70%', align='center')),
+                            ]),
+                        ]),
+                    ]),
+                ]),
+                # TABLE 1
+                dbc.Tab(label="Group A", id="table-1-tab"),
+                # TABLE 2
+                dbc.Tab(label="Group B", disabled=True, id="table-2-tab"),
+                # LOG
+                dbc.Tab(label="Log", id='log-tab', children=[
+                    html.Div(className="col-6", id="log-div", children=[
+                        dcc.Interval(id='log-update', interval=1000),  # interval in milliseconds
+                        html.Div(id='log', children=[
+                            html.P("———— APP START ————"),
+                        ]),
+                    ]),
+                ]),
+            ]),
+        ])

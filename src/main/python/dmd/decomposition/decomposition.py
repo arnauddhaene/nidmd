@@ -3,8 +3,6 @@ import scipy.io as scp
 import numpy.linalg as la
 from sklearn.linear_model import LinearRegression
 import cmath
-from nilearn import plotting, surface
-from nibabel.freesurfer.io import (read_annot, write_annot)
 from utils import *
 
 
