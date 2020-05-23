@@ -1,7 +1,9 @@
 import io
 import base64
 import threading
+
 import scipy.io as sio
+
 import dash
 from dash_table import DataTable
 import dash_bootstrap_components as dbc
@@ -9,9 +11,11 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.exceptions import PreventUpdate
 from dash.dependencies import (Input, Output, State)
+
 from PyQt5.QtCore import *
 from PyQt5.QtWebEngineWidgets import *
 from PyQt5 import QtWebEngineWidgets, QtCore, QtWidgets
+
 from decomposition import Decomposition
 from utils import *
 from plotting import *
@@ -116,29 +120,26 @@ class Dashboard(QWebEngineView):
             Input('setting', 'value')
         ])
         def input_setting(value):
+            """ Modify input setting. """
 
-            uploadStyle = {
-                'height': '60px',
-                'lineHeight': '60px',
-                'borderWidth': '1px',
-                'borderStyle': 'dashed',
-                'borderRadius': '5px',
-                'textAlign': 'center',
-                'margin': '10px'
-            }
+            show = {}
+            hide = dict(display="none")
+
+            style = dict(height="60px", lineHeight="60px", borderWidth="1px", borderStle="dashed", borderRadius="5px",
+                         textAlign="center", margin="10px")
 
             if value is None:
-                return "row", {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, "Selected files", \
+                return "row", hide, hide, hide, hide, "Selected files", \
                        None, None, None
             elif value == 1:  # Analysis
-                return "col-12", uploadStyle, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, None, None, \
+                return "col-12", style, hide, hide, hide, None, None, \
                        html.Div(['Drag and Drop or ', html.A('Select Files')]), None
             elif value == 2:  # Comparison
-                return "col-6", uploadStyle, uploadStyle, {}, {}, "Group 1", "Group 2", \
+                return "col-6", style, style, show, show, "Group 1", "Group 2", \
                        html.Div(['Group 1: Drag and Drop or ', html.A('Select Files')]), \
                        html.Div(['Group 2: Drag and Drop or ', html.A('Select Files')])
             elif value == 3:  # Matching Modes
-                return "col-6", uploadStyle, uploadStyle, {}, {}, "Reference Group", "Match Group",  \
+                return "col-6", style, style, show, show, "Reference Group", "Match Group",  \
                        html.Div(['Reference Group: Drag and Drop or ', html.A('Select Files')]), \
                        html.Div(['Match Group: Drag and Drop or ', html.A('Select Files')])
 
@@ -160,30 +161,28 @@ class Dashboard(QWebEngineView):
                 return 'Reference', 'Match'
 
         @self.app.callback(
-            Output('description', 'children')
-        , [
-            Input('setting', 'value')
-        ])
+            Output('description', 'children'),
+            [Input('setting', 'value')]
+        )
         def update_description(value):
+            """ Descriptions. """
 
             if value is None:
                 return "Based on 'Dynamic mode decomposition of resting-state and task fMRI' by Casorso et al, \
                         the dmd dashboard allows you to analyse, compare, and display the decomposition of your \
                         fMRI time-series data. Click on the radio buttons on the right to get started!"
-            elif value == 1: # Analysis
+            elif value == 1:  # Analysis
                 return "Analysis: this setting allows you to analyse the decomposition of one or multiple time-series \
                        files. Simply input the sampling time, select the one or multiple files you want to analyse, \
                        and the rest is done automatically."
-            elif value == 2: # Comparison
-                return "Comparison: this setting allows you to compare the decomposition of two groups of one or multiple time-series \
-                       files. Simply input the sampling time, select the groups of one or multiple files you want to compare, \
-                       and the rest is done automatically."
-            elif value == 3: # Matching Modes
+            elif value == 2:  # Comparison
+                return "Comparison: this setting allows you to compare the decomposition of two groups of one or \
+                       multiple time-series files. Simply input the sampling time, select the groups of one or \
+                       multiple files you want to compare, and the rest is done automatically."
+            elif value == 3:  # Matching Modes
                 return "Matching Modes: this setting allow you to match one group's modes to anothers. The selection \
                         toolbar on the left will take the reference group files, while the one on the right will have \
                         its time-series data matched to the spatial modes of the reference group."
-
-
 
         @self.app.callback([
             Output('animated-progress-1', 'style'),
@@ -195,6 +194,7 @@ class Dashboard(QWebEngineView):
             State('setting', 'value')
         ])
         def progress_file(contents1, contents2, setting):
+            """ Progress bar for file upload. """
 
             if setting is None:
                 raise PreventUpdate
@@ -237,41 +237,22 @@ class Dashboard(QWebEngineView):
             tab1 = None
             tab2 = None
             disabled = True
-            message = ""
-            error = False
 
             table_config = dict(
-                fixed_rows={'headers': True, 'data': 0},
-                style_cell={'padding': '5px'},
-                style_header={
-                    'backgroundColor': 'white',
-                    'fontWeight': 'bold',
-                    'font-family': 'Helvetica',
-                    'padding': '0px 5px'
-                },
-                style_data={'font-family': 'Helvetica'},
-                style_data_conditional=[
-                    {
-                        'if': {'row_index': 'odd'},
-                        'backgroundColor': 'rgb(248, 248, 248)'
-                    }
-                ],
-                style_cell_conditional=[
-                    {
-                        'if': {'column_id': 'Mode'},
-                        'textAlign': 'left'
-                    },
-                    {'if': {'column_id': 'Mode'},
-                     'width': '15%'},
-                    {'if': {'column_id': 'Value'},
-                     'width': '30%'},
-                    {'if': {'column_id': 'Damping Time'},
-                     'width': '35%'},
-                    {'if': {'column_id': 'Period'},
-                     'width': '20%'},
-                ],
+                fixed_rows=dict(headers=True, data=0),
+                style_cell=dict(padding="5px"),
+                style_header=dict(backgroundColor="white",
+                                  fontWeight="bold",
+                                  fontFamily="Helvetica",
+                                  padding="0px 5px"),
+                style_data=dict(fontFamily="Helvetica"),
+                style_data_conditional=[{'if': dict(row_index="odd"),  # if is a keyword
+                                        **dict(backgroundColor="rgb(248, 248, 248)")}],
                 style_as_list_view=True
             )
+
+            columns = [dict(name='#', id='mode'), dict(name='Value', id='value'),
+                       dict(name='Damping Time', id='damping_time'), dict(name='Period', id='period')]
 
             if [contents1, contents2, names1, names2].count(None) == 4:
                 raise PreventUpdate
@@ -284,14 +265,8 @@ class Dashboard(QWebEngineView):
                     self.dcp1 = _parse_files(contents1, names1, float(time))
                     self.dcp1.run()
                     df1 = self.dcp1.df[['mode', 'value', 'damping_time', 'period']]
-                    data1 = _format_table(df1).to_dict('records') if df1 is not None else dict()
-                    columns1 = [dict(name='#', id='mode'), dict(name='Value', id='value'),
-                                dict(name='Damping Time', id='damping_time'),
-                                dict(name='Period', id='period')] if df1 is not None else [
-                        {"name": "none", "id": "none"}]
-                    tab1 = html.Div(DataTable(
-                        id="table-1", data=data1, columns=columns1, **table_config
-                    ), className="container") if self.dcp1 is not None else None
+
+                    tab1 = _create_table(df1, id="table-1", columns=columns, config=table_config)
 
                 if setting != 1:
                     if contents2 is not None:
@@ -302,14 +277,8 @@ class Dashboard(QWebEngineView):
                             self.dcp2 = _parse_files(contents2, names2, float(time))
                             self.dcp2.run()
                             df2 = self.dcp2.df[['mode', 'value', 'damping_time', 'period']]
-                            data2 = _format_table(df2).to_dict('records') if df2 is not None else dict()
-                            columns2 = [dict(name='#', id='mode'), dict(name='Value', id='value'),
-                                        dict(name='Damping Time', id='damping_time'),
-                                        dict(name='Period', id='period')] if df2 is not None else [
-                                {"name": "none", "id": "none"}]
-                            tab2 = html.Div(DataTable(
-                                id="table-2", data=data2, columns=columns2, **table_config
-                            ), className="container") if self.dcp2 is not None else None
+
+                            tab2 = _create_table(df2, id="table-2", columns=columns, config=table_config)
                             disabled = False
 
                         if setting == 3:  # Mode Matching
@@ -322,36 +291,28 @@ class Dashboard(QWebEngineView):
                             if self.dcp1 is not None:
 
                                 self.match_df = self.dcp1.compute_match(self.match_group, 20)
-
                                 match_df = self.match_df.copy()
+                                match_data = _format_table(match_df).to_dict('records') if match_df is not None else {}
 
-                                match_data = _format_table(match_df).to_dict('records') if match_df is not None else dict()
-
-                                match_columns = [dict(name='#', id='mode'), dict(name='Value', id='value'),
-                                                 dict(name='Damping Time', id='damping_time'),
-                                                 dict(name='Period', id='period')] if match_df is not None else [
-                                                {"name": "none", "id": "none"}]
-                                tab2 = html.Div(DataTable(
-                                    id="table-2", data=match_data, columns=match_columns, **table_config
-                                ), className="container") if self.match_group is not None else None
-
+                                tab2 = _create_table(match_data, id="table-2", columns=columns, config=table_config)
                                 disabled = False
 
-            dumbo = "Types = Group 1: {0}, Group 2: {1}, Match: {2}".format(type(self.dcp1), type(self.dcp2), type(self.match_group))
+            deb = "Types = Group 1: {0}, Group 2: {1}, Match: {2}".format(type(self.dcp1), type(self.dcp2),
+                                                                            type(self.match_group))
 
-            logging.debug(dumbo)
+            logging.debug(deb)
 
             hide = {'display': 'none'}
             show = {}
 
-            def format(list):
-                if type(list) == list:
-                    return html.P('\n'.join(list))
+            def indent(lines):
+                if isinstance(lines, list):
+                    return html.P('\n'.join(lines))
                 else:
-                    return html.P(list)
+                    return html.P(lines)
 
-            return format(names1), format(names2), tab1, tab2, \
-                   disabled, hide if contents1 is not None else show, hide if contents2 is not None else show
+            return indent(names1), indent(names2), tab1, tab2, disabled, hide if contents1 is not None else show, \
+                   hide if contents2 is not None else show
 
         @self.app.callback(
             Output('imag-setting', 'options')
@@ -359,6 +320,7 @@ class Dashboard(QWebEngineView):
             Input('imag-setting', 'value')
         ])
         def imag_switch(switch):
+            """ Switch between displaying and not displaying imaginary values. """
 
             self.imag = switch == [1]
 
@@ -380,6 +342,15 @@ class Dashboard(QWebEngineView):
             State('setting', 'value')
         ])
         def validate(n, setting):
+            """
+            Validate input
+
+            :param n:  [int] onClick() "Run Decomposition" button
+            :param setting: [int] value of setting radio
+            :return message: [str] error message
+            :return style: [dict] show or hide error message
+            :return style: [dict] show or hide upload row
+            """
 
             message = ""
             error = False
@@ -403,7 +374,7 @@ class Dashboard(QWebEngineView):
                         message += "Match group missing. "
                         error = True
                 elif self.atlas is None:
-                    message += "Parsing unsuccessful, no atlas found. Please use a .mat file with the data under key 'TCS' or 'TCSnf'. "
+                    message += "Parsing unsuccessful, no atlas found. Be sure to use a .mat file. "
                     error = True
             else:
                 message += "No setting chosen. "
@@ -414,7 +385,9 @@ class Dashboard(QWebEngineView):
             else:
                 self.valid = True
 
-            return message, {} if error else {'display':'none'}, {} if error else {'display':'none'}
+            hide = dict(display="none")
+
+            return message, {} if error else hide, {} if error else hide
 
         @self.app.callback([
             Output('app-layout', 'children')
@@ -422,6 +395,7 @@ class Dashboard(QWebEngineView):
             Input('reset', 'n_clicks')
         ])
         def rst(n):
+            """ Reset Application. """
 
             if n is None:
                 raise PreventUpdate
@@ -432,7 +406,7 @@ class Dashboard(QWebEngineView):
                 self.match_df = None
                 self.atlas = None
                 self.progress = 0
-                self.valid = False  # put to true if decomposition can run
+                self.valid = False
                 self.imag = False
 
                 return [self._get_app_layout()]
@@ -445,7 +419,13 @@ class Dashboard(QWebEngineView):
             State('number-of-modes', 'value')
         ])
         def compute_spectre(n, nom):
+            """
+            Compute Spectre figure
 
+            :param n: [int] onClick() "Run Decomposition" button
+            :param nom: [int] number of modes
+            :return: [go.Figure] figure
+            """
             if n is None or not self.valid:
                 raise PreventUpdate
             else:
@@ -464,7 +444,13 @@ class Dashboard(QWebEngineView):
             State('number-of-modes', 'value')
         ])
         def compute_timeplot(n, nom):
+            """
+            Compute Timeplot figure
 
+            :param n: [int] onClick() "Run Decomposition" button
+            :param nom: [int] number of modes
+            :return: [go.Figure] figure
+            """
             if n is None or not self.valid:
                 raise PreventUpdate
             else:
@@ -483,7 +469,13 @@ class Dashboard(QWebEngineView):
             State('number-of-modes', 'value')
         ])
         def compute_radar(n, nom):
+            """
+            Compute Radar figure
 
+            :param n: [int] onClick() "Run Decomposition" button
+            :param nom: [int] number of modes
+            :return: [go.Figure] figure
+            """
             if n is None or not self.valid:
                 raise PreventUpdate
             else:
@@ -503,7 +495,14 @@ class Dashboard(QWebEngineView):
             State('number-of-modes', 'value')
         ])
         def compute_brain(n, nom):
+            """
+            Compute brain figures
 
+            :param n: [int] onClick() "Run Decomposition" button
+            :param nom: [int] number of modes
+            :return brains: [list of html.Div] figures
+            :return style: [dict] hide progress Div
+            """
             if n is None or not self.valid:
                 raise PreventUpdate
             else:
@@ -518,16 +517,17 @@ class Dashboard(QWebEngineView):
 
                     b = Brain(*_filter_brain(mode))
 
-                    brains.append(html.Div([dcc.Graph(figure=b.figure(self.imag),
-                                                      config={"toImageButtonOptions": {"width": None,
-                                                                                       "height": None,
-                                                                                       "format": "svg",
-                                                                                       "filename": "mode {}".format(mode)},
-                                                              "displaylogo": False})]))
+                    brains.append(html.Div(children=[
+                        dcc.Graph(figure=b.figure(self.imag), config=dict(displaylogo=False,
+                                                                          toImageButtonOption=dict(
+                                                                              width=None, height=None,
+                                                                              format="svg",
+                                                                              filename="mode {}".format(mode))))
+                    ]))
 
                     self.progress += 90.0 / nom
 
-                return brains, {'display': 'none'}
+                return brains, dict(display="none")
 
         @self.app.callback([
             Output("progress", "value"),
@@ -536,11 +536,18 @@ class Dashboard(QWebEngineView):
             Input("progress-interval", "n_intervals")
         ])
         def progress(n):
+            """
+            Update progress bar
+            Inspired from - https://stackoverflow.com/questions/59241705/dash-progress-bar-for-reading-files
+            """
             # check progress of some background process, in this example we'll just
             # use n_intervals constrained to be in 0-100
-            progress = min(self.progress % 110, 100)
+            prog = min(self.progress % 110, 100)
             # only add text after 5% progress to ensure text isn't squashed too much
-            return progress, "{} %".format(progress if progress >= 5 else "")
+            return prog, "{} %".format(prog if prog >= 5 else "")
+
+        # UTILITY FUNCTIONS
+        # placed in run_dash because of daemon=True
 
         def _parse_files(contents, files, sampling_time):
             """
@@ -583,10 +590,10 @@ class Dashboard(QWebEngineView):
             return dcp
 
         def _filter_spectre():
+            """ Filter df for Spectre Figure. """
 
             logging.info("Filtering Spectre data")
 
-            # Filter data for Spectre
             df1 = pd.DataFrame({'Mode': self.dcp1.df['mode'], 'Value': np.abs(self.dcp1.df['value']),
                                 'Group': ['Group 1' if self.match_group is None else 'Reference' for i in range(self.dcp1.df.shape[0])]}) \
                 if self.dcp1 is not None else None
@@ -603,6 +610,7 @@ class Dashboard(QWebEngineView):
             return pd.concat([df1, df2])
 
         def _filter_time():
+            """ Filter df for Timeplot Figure. """
 
             logging.info("Filtering TimePlot data")
 
@@ -616,6 +624,7 @@ class Dashboard(QWebEngineView):
             return pd.concat([df1, df2])
 
         def _filter_radar():
+            """ Filter df for Radar Figure. """
 
             logging.info("Filtering Radar data")
 
@@ -633,6 +642,15 @@ class Dashboard(QWebEngineView):
             return pd.concat([df1, df2]), networks
 
         def _filter_brain(order):
+            """
+            Filter brain information.
+
+            :param order: [int] mode order
+            :return atlas: [str] cortical atlas
+            :return mode1: [pd.DataFrame] for mode 1
+            :return mode2: [pd.DataFrame] for mode 2
+            :return order: [int] mode order
+            """
 
             logging.info("Filtering Brain data for Mode {}".format(order))
 
@@ -642,6 +660,12 @@ class Dashboard(QWebEngineView):
             return self.atlas, mode1, mode2, order
 
         def _format_table(df):
+            """
+            Format table
+
+            :param df: [pd.DataFrame] data
+            :return: [pd.DataFrame]
+            """
 
             def _set_precision(number):
                 if number == np.inf:
@@ -656,8 +680,8 @@ class Dashboard(QWebEngineView):
             def _handle_complex(number):
                 print("HELLO")
                 splat = [str(number.real), str(number.imag)]
-                set = [_set_precision(splat[0]), _set_precision(splat[1])]
-                return "{0} +/- {1} j".format(set[0], set[1])
+                sett = [_set_precision(splat[0]), _set_precision(splat[1])]
+                return "{0} +/- {1} j".format(sett[0], sett[1])
 
             def _format_list(p):
                 f = _handle_complex if type(p[0]) == np.complex128 else _set_precision
@@ -668,6 +692,24 @@ class Dashboard(QWebEngineView):
             df['period'] = _format_list(df['period'])
 
             return df
+
+        def _create_table(df, id=None, columns=None, config=None):
+            """
+            Create table.
+
+            :param df: [pd.DataFrame] data
+            :param id: [str] id in app.layout
+            :param columns: [list] following Dash rules
+            :param config: [dict] of config elements for table
+            :return: [html.Div] containing DataTable
+            """
+            if df is None:
+                return None
+            else:
+                data = _format_table(df).to_dict('records')
+
+                return html.Div(className="container mt-4", children=[
+                    DataTable(id=id, data=data, columns=columns, **config)])
 
         self.app.run_server(debug=False, port=port, host=address)
 
@@ -716,10 +758,8 @@ class Dashboard(QWebEngineView):
                                         dbc.Label("Number of modes to plot", className="mt-2"),
                                         dbc.Input(id="number-of-modes", type="number", placeholder="5",
                                                   value=5, className="col-3"),
-                                        dbc.Checklist(className="mt-2", id="imag-setting",
-                                                      value=[], switch=True, options=[
-                                            {"label": "Plot imaginary values", "value": 1}
-                                        ]),
+                                        dbc.Checklist(className="mt-2", id="imag-setting", value=[], switch=True,
+                                                      options=[dict(label="Plot Imaginary Values", value=1)]),
                                     ]),
                                 ]),
                                 # SELECTED FILES

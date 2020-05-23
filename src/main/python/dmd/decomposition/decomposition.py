@@ -26,6 +26,7 @@ class Decomposition:
             self.A = None
             self.Z = None
             self.df = None
+            self.sampling_time = None
         else:
             if data is not None:
                 assert isinstance(data, list)
