@@ -292,9 +292,8 @@ class Dashboard(QWebEngineView):
 
                                 self.match_df = self.dcp1.compute_match(self.match_group, 20)
                                 match_df = self.match_df.copy()
-                                match_data = _format_table(match_df).to_dict('records') if match_df is not None else {}
 
-                                tab2 = _create_table(match_data, id="table-2", columns=columns, config=table_config)
+                                tab2 = _create_table(match_df, id="table-2", columns=columns, config=table_config)
                                 disabled = False
 
             deb = "Types = Group 1: {0}, Group 2: {1}, Match: {2}".format(type(self.dcp1), type(self.dcp2),
@@ -582,11 +581,12 @@ class Dashboard(QWebEngineView):
 
                 data = sio.loadmat(mat)
 
-                for key in data.keys():
-                    if key[:2] != '__':
-                        d = data[key]
-                        logging.info("Extracted matrice from file {} from key {}".format(name, key))
-                        continue
+                key = list(data.keys())[-1]
+                if key[:2] != '__':
+                    d = data[key]
+                    logging.info("Extracted matrice from file {} from key {}".format(name, key))
+                else:
+                    logging.error(".mat file incorrectly formatted.")
 
                 if d is None:
                     logging.error("Invalid .mat file, no matrices inside.")
@@ -762,10 +762,10 @@ class Dashboard(QWebEngineView):
                                     dbc.FormGroup(children=[
                                         dbc.Label("Sampling Time (seconds)", className="mt-2"),
                                         dbc.Input(id="sampling-time", type="number", placeholder="0.72",
-                                                  value=0.72, className="col-3"),
+                                                  value=0.72, className="col-6"),
                                         dbc.Label("Number of modes to plot", className="mt-2"),
                                         dbc.Input(id="number-of-modes", type="number", placeholder="5",
-                                                  value=5, className="col-3"),
+                                                  value=5, className="col-6"),
                                         dbc.Checklist(className="mt-2", id="imag-setting", value=[], switch=True,
                                                       options=[dict(label="Plot Imaginary Values", value=1)]),
                                     ]),
