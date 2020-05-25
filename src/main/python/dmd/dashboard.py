@@ -44,6 +44,8 @@ class Dashboard(QWebEngineView):
         self.dcp2 = None
         self.match_group = None
         self.match_df = None
+        self.match_x = None
+        self.match_y = None
         self.atlas = None
 
         # Used for cortical surface representation loading
@@ -290,7 +292,7 @@ class Dashboard(QWebEngineView):
 
                             if self.dcp1 is not None:
 
-                                self.match_df = self.dcp1.compute_match(self.match_group, 20)
+                                self.match_df, self.match_x, self.match_y = self.dcp1.compute_match(self.match_group, 20)
                                 match_df = self.match_df.copy()
 
                                 tab2 = _create_table(match_df, id="table-2", columns=columns, config=table_config)
@@ -403,6 +405,8 @@ class Dashboard(QWebEngineView):
                 self.dcp2 = None
                 self.match_group = None
                 self.match_df = None
+                self.match_x = None
+                self.match_y = None
                 self.atlas = None
                 self.progress = 0
                 self.valid = False
@@ -429,20 +433,18 @@ class Dashboard(QWebEngineView):
                 raise PreventUpdate
             else:
 
-                # if self.match_group is None:
+                if self.match_group is None:
 
                     logging.info("Computing spectre of dynamical modes")
                     s = Spectre(_filter_spectre())
                     return s.figure()
 
-                # else:
-                #
-                #     d = {}
-                #
-                #     d['x'] = self.
-                #     d['y'] =
-                #
-                #     return Spectre.correlation(pd.DataFrame(d))
+                else:
+
+                    assert self.match_x is not None
+                    assert self.match_y is not None
+                    logging.info("Computing spectre of dynamical modes")
+                    return Spectre.correlation(pd.DataFrame({'Approximated': self.match_x, 'Real': self.match_y}))
 
         @self.app.callback(
             Output('timeplot', 'figure')
@@ -584,7 +586,7 @@ class Dashboard(QWebEngineView):
                 key = list(data.keys())[-1]
                 if key[:2] != '__':
                     d = data[key]
-                    logging.info("Extracted matrice from file {} from key {}".format(name, key))
+                    logging.info("Extracted matrix from file {} from key {}".format(name, key))
                 else:
                     logging.error(".mat file incorrectly formatted.")
 
@@ -869,7 +871,7 @@ class Dashboard(QWebEngineView):
                 dbc.Tab(label="Group B", disabled=True, id="table-2-tab"),
                 # LOG
                 dbc.Tab(label="Log", id='log-tab', children=[
-                    html.Div(className="col-6", id="log-div", children=[
+                    html.Div(className="col-12", id="log-div", children=[
                         dcc.Interval(id='log-update', interval=1000),  # interval in milliseconds
                         html.Div(id='log', children=[
                             html.P("———— APP START ————"),

@@ -18,6 +18,6 @@ pandas==0.25.3
 plotly==4.6.0
 PyQt5==5.9.2
 scikit-learn==0.22.2.post1
-scipy==1.4.1
+scipy==1.2.0
 sip==4.19.8
 sklearn==0.0

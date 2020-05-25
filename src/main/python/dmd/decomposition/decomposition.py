@@ -373,19 +373,21 @@ class Decomposition:
         :param other: [Decomposition]
         :param m: [int] number of modes approximated
         :return: [pd.DataFrame] containing 'mode', 'value', 'damping_time', 'period', 'conjugate'
-        :return x: TODO
-        :return y: TODO
+        :return x: [Array-like] vector containing absolute value of top 10 approximated eigenvalues of self
+        :return y: [Array-like] vector containing absolute value of real 10 eigenvalues of self
         """
 
         # First the modes should be matched with myself to get regression params
-
         logging.info('Fetching reference mode matching for regression parameter estimation.')
 
         borderline = self.eigVal[self.eigIdx][m].conj() == self.eigVal[self.eigIdx][m + 1]
-        own = self._match_modes(self.X, self.eigVec[:, self.eigIdx], (m + 1) if borderline else m)
+        mm = (m + 1) if borderline else m
+
+        own = self._match_modes(self.X, self.eigVec[:, self.eigIdx], mm)
+        assert np.asarray(own).shape[0] == mm
 
         # Top 10 modes are used in the dashboard
-        reg = LinearRegression().fit(np.abs(own[:10]).reshape(-1, 1), np.abs(self.eigVal[self.eigIdx][:10]).reshape(-1, 1))
+        reg = LinearRegression().fit(np.abs(own).reshape(-1, 1), np.abs(self.eigVal[self.eigIdx][:mm]).reshape(-1, 1))
 
         logging.info('Regression parameters estimated.')
         logging.info('Fetching mode estimation for match group.')
@@ -393,7 +395,7 @@ class Decomposition:
         others = self._match_modes(other.X, self.eigVec[:, self.eigIdx], (m + 1) if borderline else m)
 
         # complex prediction of top
-        others = reg.intercept_ + reg.coef_ * others
+        others = reg.intercept_ + reg.coef_ * others[:10]
         others = others.flatten()
 
         logging.info("Matching modes approximation predicted.")
@@ -422,4 +424,4 @@ class Decomposition:
             order += 1
             idx += 1 if not conj else 2
 
-        return pd.DataFrame(modes)
+        return pd.DataFrame(modes), np.abs(own.flatten()), np.abs(self.eigVal[self.eigIdx][:mm])
