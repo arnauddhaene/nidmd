@@ -186,7 +186,7 @@ class Dashboard(QWebEngineView):
                 return "Matching Modes: this setting allow you to match one group's modes to anothers. The selection \
                         toolbar on the left will take the reference group files, while the one on the right will have \
                         its time-series data matched to the spatial modes of the reference group.", \
-                       "Please make sure that you upload the Reference group before the Match group!"
+                       "Please upload the Reference group before the Match group."
 
         @self.app.callback([
             Output('animated-progress-1', 'style'),
@@ -244,6 +244,7 @@ class Dashboard(QWebEngineView):
             tab2 = None
             disabled = True
             error = False
+            message = ""
 
             table_config = dict(
                 fixed_rows=dict(headers=True, data=0),
@@ -267,9 +268,9 @@ class Dashboard(QWebEngineView):
 
                 try:
 
-                    if contents1 is not None:
+                    if contents1 is not None and self.dcp1 is None:
 
-                        logging.info("Adding contents to Analysis / Group 1 / Reference Group.")
+                        logging.info("Adding contents to {}.".format("Group 1" if setting == 2 else "Reference Group"))
 
                         self.dcp1 = _parse_files(contents1, names1, float(time))
                         self.dcp1.run()
@@ -278,7 +279,7 @@ class Dashboard(QWebEngineView):
                         tab1 = _create_table(df1, id="table-1", columns=columns, config=table_config)
 
                     if setting != 1:
-                        if contents2 is not None:
+                        if contents2 is not None and (self.dcp2 is None or self.match_group is None):
                             if setting == 2:  # Comparison
 
                                 logging.info("Adding contents to Group 2.")
@@ -311,7 +312,7 @@ class Dashboard(QWebEngineView):
                     error = True
 
             deb = "Types = Group 1: {0}, Group 2: {1}, Match: {2}".format(type(self.dcp1), type(self.dcp2),
-                                                                            type(self.match_group))
+                                                                          type(self.match_group))
 
             logging.debug(deb)
 
@@ -320,7 +321,7 @@ class Dashboard(QWebEngineView):
 
             def indent(lines):
                 if isinstance(lines, list):
-                    return html.P('\n'.join(lines))
+                    return html.P(', \n'.join(lines))
                 else:
                     return html.P(lines)
 
