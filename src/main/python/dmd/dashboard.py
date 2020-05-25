@@ -125,7 +125,7 @@ class Dashboard(QWebEngineView):
             show = {}
             hide = dict(display="none")
 
-            style = dict(height="60px", lineHeight="60px", borderWidth="1px", borderStle="dashed", borderRadius="5px",
+            style = dict(height="60px", lineHeight="60px", borderWidth="1px", borderStyle="dashed", borderRadius="5px",
                          textAlign="center", margin="10px")
 
             if value is None:
@@ -687,7 +687,6 @@ class Dashboard(QWebEngineView):
                 return ".".join([splat[0], splat[1]])
 
             def _handle_complex(number):
-                print("HELLO")
                 splat = [str(number.real), str(number.imag)]
                 sett = [_set_precision(splat[0]), _set_precision(splat[1])]
                 return "{0} +/- {1} j".format(sett[0], sett[1])
