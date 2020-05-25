@@ -132,7 +132,7 @@ class Dashboard(QWebEngineView):
                 return "row", hide, hide, hide, hide, "Selected files", \
                        None, None, None
             elif value == 1:  # Analysis
-                return "col-12", style, hide, hide, hide, None, None, \
+                return "col-12", style, hide, hide, hide, "Selected files", None, \
                        html.Div(['Drag and Drop or ', html.A('Select Files')]), None
             elif value == 2:  # Comparison
                 return "col-6", style, style, show, show, "Group 1", "Group 2", \
@@ -430,11 +430,20 @@ class Dashboard(QWebEngineView):
                 raise PreventUpdate
             else:
 
-                logging.info("Computing spectre of dynamical modes")
+                # if self.match_group is None:
 
-                s = Spectre(_filter_spectre())
+                    logging.info("Computing spectre of dynamical modes")
+                    s = Spectre(_filter_spectre())
+                    return s.figure()
 
-                return s.figure()
+                # else:
+                #
+                #     d = {}
+                #
+                #     d['x'] = self.
+                #     d['y'] =
+                #
+                #     return Spectre.correlation(pd.DataFrame(d))
 
         @self.app.callback(
             Output('timeplot', 'figure')

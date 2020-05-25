@@ -373,6 +373,8 @@ class Decomposition:
         :param other: [Decomposition]
         :param m: [int] number of modes approximated
         :return: [pd.DataFrame] containing 'mode', 'value', 'damping_time', 'period', 'conjugate'
+        :return x: TODO
+        :return y: TODO
         """
 
         # First the modes should be matched with myself to get regression params
@@ -394,7 +396,7 @@ class Decomposition:
         others = reg.intercept_ + reg.coef_ * others
         others = others.flatten()
 
-        logging.info("Matching modes approximtion predicted.")
+        logging.info("Matching modes approximation predicted.")
 
         modes = []
 

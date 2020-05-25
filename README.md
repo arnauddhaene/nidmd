@@ -41,7 +41,7 @@ fbs run
 
 When the window appears, you should be greeted with a short description, an input setting choice, and a card with selection information and settings.
 
-Once you select a setting, the description is modified and instructs users how to proceed. Usually, files need to be added using the upload bar and setting need to be checked. When files are loaded and settings chosen, users can click on the`Run Decomposition` button and the visualization is launched.
+Once you select a setting, the description is modified and instructs users how to proceed. Usually, files need to be added using the upload bar and selection settings need to be updated. When files are loaded and settings chosen, users can click on the`Run Decomposition` button and the visualization is launched.
 
 #### Analysis
 

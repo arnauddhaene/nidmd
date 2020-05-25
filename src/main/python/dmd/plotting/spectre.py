@@ -24,3 +24,13 @@ class Spectre:
         fig.update_layout(hovermode="x unified", legend_orientation="v", legend_title_text='')
 
         return fig
+
+    @staticmethod
+    def correlation(df):
+        """
+        Get linear trendline figure.
+
+        :param df: [pd.DataFrame] with 'x', 'y' columns
+        :return: [go.Figure]
+        """
+        return px.scatter(df, x="x", y="y", trendline="ols")
