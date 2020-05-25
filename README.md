@@ -37,6 +37,22 @@ Assuming this installation runs without errors, you should be able to launch the
 fbs run
 ```
 
+#### Segmentation fault on Linux
+
+If you get the following error on Linux,
+
+```
+[1:1:0100/000000.386942:ERROR:broker_posix.cc(41)] Invalid node channel message
+Segmentation fault (core dumped)
+```
+
+Run the following command before using `fbs run` again:
+
+```
+export QT_XCB_GL_INTEGRATION=xcb_egl
+```
+
+
 ### Setting
 
 When the window appears, you should be greeted with a short description, an input setting choice, and a card with selection information and settings.
