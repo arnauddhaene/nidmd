@@ -156,14 +156,15 @@ class Dashboard(QWebEngineView):
             if setting is None:
                 raise PreventUpdate
             elif setting == 1:  # Analysis
-                return 'Data', 'Disabled'
+                return 'Data', ''
             elif setting == 2:  # Comparison
                 return 'Group 1', 'Group 2'
             elif setting == 3:  # Mode Matching
                 return 'Reference', 'Match'
 
         @self.app.callback(
-            Output('description', 'children'),
+            [Output('description', 'children'),
+             Output('warning', 'children')],
             [Input('setting', 'value')]
         )
         def update_description(value):
@@ -172,19 +173,20 @@ class Dashboard(QWebEngineView):
             if value is None:
                 return "Based on 'Dynamic mode decomposition of resting-state and task fMRI' by Casorso et al, \
                         the dmd dashboard allows you to analyse, compare, and display the decomposition of your \
-                        fMRI time-series data. Click on the radio buttons on the right to get started!"
+                        fMRI time-series data. Click on the radio buttons below to get started!", ""
             elif value == 1:  # Analysis
                 return "Analysis: this setting allows you to analyse the decomposition of one or multiple time-series \
                        files. Simply input the sampling time, select the one or multiple files you want to analyse, \
-                       and the rest is done automatically."
+                       and the rest is done automatically.", ""
             elif value == 2:  # Comparison
                 return "Comparison: this setting allows you to compare the decomposition of two groups of one or \
                        multiple time-series files. Simply input the sampling time, select the groups of one or \
-                       multiple files you want to compare, and the rest is done automatically."
+                       multiple files you want to compare, and the rest is done automatically.", ""
             elif value == 3:  # Matching Modes
                 return "Matching Modes: this setting allow you to match one group's modes to anothers. The selection \
                         toolbar on the left will take the reference group files, while the one on the right will have \
-                        its time-series data matched to the spatial modes of the reference group."
+                        its time-series data matched to the spatial modes of the reference group.", \
+                       "Please make sure that you upload the Reference group before the Match group!"
 
         @self.app.callback([
             Output('animated-progress-1', 'style'),
@@ -222,7 +224,9 @@ class Dashboard(QWebEngineView):
             Output('table-2-tab', 'children'),
             Output('table-2-tab', 'disabled'),
             Output('animated-progress-1-div', 'style'),
-            Output('animated-progress-2-div', 'style')
+            Output('animated-progress-2-div', 'style'),
+            Output('import-alert', 'children'),
+            Output('import-alert', 'style'),
         ], [
             Input('upload-1', 'contents'),
             Input('upload-2', 'contents'),
@@ -239,6 +243,7 @@ class Dashboard(QWebEngineView):
             tab1 = None
             tab2 = None
             disabled = True
+            error = False
 
             table_config = dict(
                 fixed_rows=dict(headers=True, data=0),
@@ -260,43 +265,50 @@ class Dashboard(QWebEngineView):
                 raise PreventUpdate
             else:
 
-                if contents1 is not None:
+                try:
 
-                    logging.info("Adding contents to Analysis / Group 1 / Reference Group.")
+                    if contents1 is not None:
 
-                    self.dcp1 = _parse_files(contents1, names1, float(time))
-                    self.dcp1.run()
-                    df1 = self.dcp1.df[['mode', 'value', 'damping_time', 'period']]
+                        logging.info("Adding contents to Analysis / Group 1 / Reference Group.")
 
-                    tab1 = _create_table(df1, id="table-1", columns=columns, config=table_config)
+                        self.dcp1 = _parse_files(contents1, names1, float(time))
+                        self.dcp1.run()
+                        df1 = self.dcp1.df[['mode', 'value', 'damping_time', 'period']]
 
-                if setting != 1:
-                    if contents2 is not None:
-                        if setting == 2:  # Comparison
+                        tab1 = _create_table(df1, id="table-1", columns=columns, config=table_config)
 
-                            logging.info("Adding contents to Group 2.")
+                    if setting != 1:
+                        if contents2 is not None:
+                            if setting == 2:  # Comparison
 
-                            self.dcp2 = _parse_files(contents2, names2, float(time))
-                            self.dcp2.run()
-                            df2 = self.dcp2.df[['mode', 'value', 'damping_time', 'period']]
+                                logging.info("Adding contents to Group 2.")
 
-                            tab2 = _create_table(df2, id="table-2", columns=columns, config=table_config)
-                            disabled = False
+                                self.dcp2 = _parse_files(contents2, names2, float(time))
+                                self.dcp2.run()
+                                df2 = self.dcp2.df[['mode', 'value', 'damping_time', 'period']]
 
-                        if setting == 3:  # Mode Matching
-
-                            logging.info("Adding contents to Match Group.")
-
-                            self.match_group = _parse_files(contents2, names2, float(time))
-                            self.match_group.run()
-
-                            if self.dcp1 is not None:
-
-                                self.match_df, self.match_x, self.match_y = self.dcp1.compute_match(self.match_group, 20)
-                                match_df = self.match_df.copy()
-
-                                tab2 = _create_table(match_df, id="table-2", columns=columns, config=table_config)
+                                tab2 = _create_table(df2, id="table-2", columns=columns, config=table_config)
                                 disabled = False
+
+                            if setting == 3:  # Mode Matching
+
+                                logging.info("Adding contents to Match Group.")
+
+                                self.match_group = _parse_files(contents2, names2, float(time))
+                                self.match_group.run()
+
+                                if self.dcp1 is None:
+                                    raise ImportError("Please upload Reference group before Match group.")
+                                else:
+                                    self.match_df, self.match_x, self.match_y = self.dcp1.compute_match(self.match_group, 20)
+                                    match_df = self.match_df.copy()
+
+                                    tab2 = _create_table(match_df, id="table-2", columns=columns, config=table_config)
+                                    disabled = False
+
+                except Exception as e:
+                    message = str(e)
+                    error = True
 
             deb = "Types = Group 1: {0}, Group 2: {1}, Match: {2}".format(type(self.dcp1), type(self.dcp2),
                                                                             type(self.match_group))
@@ -313,7 +325,7 @@ class Dashboard(QWebEngineView):
                     return html.P(lines)
 
             return indent(names1), indent(names2), tab1, tab2, disabled, hide if contents1 is not None else show, \
-                   hide if contents2 is not None else show
+                   hide if contents2 is not None else show, message, show if error else hide
 
         @self.app.callback(
             Output('imag-setting', 'options')
@@ -371,8 +383,8 @@ class Dashboard(QWebEngineView):
                     if self.dcp1 is None:
                         message += "Reference group missing. "
                         error = True
-                    if self.match_group is None:
-                        message += "Match group missing. "
+                    if self.match_df is None:
+                        message += "Match group is loading. Please wait. "
                         error = True
                 elif self.atlas is None:
                     message += "Parsing unsuccessful, no atlas found. Be sure to use a .mat file. "
@@ -586,7 +598,7 @@ class Dashboard(QWebEngineView):
                 key = list(data.keys())[-1]
                 if key[:2] != '__':
                     d = data[key]
-                    logging.info("Extracted matrix from file {} from key {}".format(name, key))
+                    logging.info("Extracting matrix from file {} from key {}".format(name, key))
                 else:
                     logging.error(".mat file incorrectly formatted.")
 
@@ -594,6 +606,7 @@ class Dashboard(QWebEngineView):
                     logging.error("Invalid .mat file, no matrices inside.")
 
                 dcp.add_data(d, sampling_time)
+
 
             dcp.run()
             self.atlas = dcp.atlas
@@ -741,7 +754,9 @@ class Dashboard(QWebEngineView):
                             # TITLE
                             html.H4("Dynamic Mode Toolbox"),
                             # DESCRIPTION
-                            html.P(id="description")]),
+                            html.P(id="description"),
+                            html.P(id="warning", className="text-danger mt-1"),
+                        ]),
                         dbc.Col(className="ml-5 mt-4", children=[
                             # SETTING
                             dbc.RadioItems(id="setting", options=[
@@ -786,6 +801,7 @@ class Dashboard(QWebEngineView):
                                         dbc.Progress(value=80, id="animated-progress-2", striped=True,
                                                      animated="animated", style={"display": "none"})
                                     ]),
+                                    html.Div(id="import-alert", className="text-danger mt-2")
                                 ]),
                             ]),
                             # BUTTONS + ALERT MESSAGE

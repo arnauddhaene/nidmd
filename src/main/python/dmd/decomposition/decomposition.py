@@ -228,7 +228,9 @@ class Decomposition:
         data = np.asarray(data)
         assert isinstance(data, np.ndarray)
         # Verify that data is correctly formatted
-        assert str(data.shape[0]) in ATLAS['atlas'].keys()
+        if str(data.shape[0]) not in ATLAS['atlas'].keys():
+            raise ImportError('Imported matrix does not correspond to a cortical atlas. '
+                              '# of ROI analysed: {}'.format(data.shape[0]))
 
         if len(self.data) == 0:
             self.atlas = ATLAS['atlas'][str(data.shape[0])]
