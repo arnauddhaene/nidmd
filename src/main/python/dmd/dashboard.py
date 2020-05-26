@@ -268,13 +268,15 @@ class Dashboard(QWebEngineView):
 
                 try:
 
-                    if contents1 is not None and self.dcp1 is None:
+                    if contents1 is not None:
 
                         logging.info("Adding contents to {}.".format("Group 1" if setting == 2 else "Reference Group"))
 
                         self.dcp1 = _parse_files(contents1, names1, float(time))
                         self.dcp1.run()
                         df1 = self.dcp1.df[['mode', 'value', 'damping_time', 'period']]
+
+                        logging.info("Creating Data Table for {}.".format("Group 1" if setting == 2 else "Reference Group"))
 
                         tab1 = _create_table(df1, id="table-1", columns=columns, config=table_config)
 
@@ -732,8 +734,8 @@ class Dashboard(QWebEngineView):
             else:
                 data = _format_table(df).to_dict('records')
 
-                return html.Div(className="container mt-4", children=[
-                    DataTable(id=id, data=data, columns=columns, **config)])
+                return html.Div(className="container mt-4", children=[DataTable(id=id, data=data,
+                                                                                columns=columns, **config)])
 
         self.app.run_server(debug=False, port=port, host=address)
 

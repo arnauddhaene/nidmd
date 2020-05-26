@@ -33,10 +33,5 @@ class Spectre:
         :param df: [pd.DataFrame] with 'x', 'y' columns
         :return: [go.Figure]
         """
-        fig = px.scatter(df, x="Approximated", y="Real", trendline="ols", color="Group",
+        return px.scatter(df, x="Approximated", y="Real", trendline="ols",
                          title="Reference Group Regression Approximation")
-
-        fig.update_traces(hovertemplate=None)
-        fig.update_layout(hovermode="x unified", legend_orientation="v", legend_title_text='', )
-
-        return fig
