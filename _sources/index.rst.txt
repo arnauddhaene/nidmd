@@ -1,7 +1,13 @@
 Welcome to dmd's documentation!
 ===============================
 
+.. automodule:: dmd.main
+.. automodule:: dmd.utils
 .. automodule:: dmd.decomposition.decomposition
+.. automodule:: dmd.plotting.brain
+.. automodule:: dmd.plotting.spectre
+.. automodule:: dmd.plotting.radar
+.. automodule:: dmd.plotting.timeplot
 
 .. toctree::
    :maxdepth: 2
