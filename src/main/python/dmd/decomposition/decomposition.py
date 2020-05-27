@@ -133,8 +133,8 @@ class Decomposition:
         Get dynamic modes by Least Squares optimization.
         To use the index simply use eigVal[eigIdx] and eigVec[:,eigIdx]
 
-        :param X: [Array-like] data for t (1->T)
-        :param Y: [Array-like] data for t (0->T-1)
+        :param x: [Array-like] data for t (1->T)
+        :param y: [Array-like] data for t (0->T-1)
         :return eigVal: [Array-like] eigenvalues of dynamic mode decomposition
         :return eigVec: [Array-like] eigenvectors of dynamic mode decomposition
         :return eigIdx: [Array-like] eigenindices for descendent sorting

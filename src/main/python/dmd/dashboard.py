@@ -89,14 +89,10 @@ class Dashboard(QWebEngineView):
 
     def run_dash(self, address='127.0.0.1', port=8000):
         """
-        Run Dash
+        Run Dash.
 
-        Parameters
-        ----------
-        address : str
-            address of localhost
-        port : int
-            port of localhost
+        :param address: [str] address
+        :param port: [int] port
         """
 
         @self.app.callback(
