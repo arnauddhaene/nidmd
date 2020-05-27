@@ -28,7 +28,7 @@ Classes
         
         Parameters
         ----------
-        address: str
+        address : str
             address of localhost
-        port: int
+        port : int
             port of localhost
