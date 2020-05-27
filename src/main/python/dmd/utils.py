@@ -13,7 +13,7 @@ from nilearn.surface import load_surf_mesh
 # Directories
 
 # Absolute path to DynamicModeToolbox directory
-ROOT_DIR = (Path.cwd().parent.parent.parent if Path.cwd().name == 'python' else Path.cwd())
+ROOT_DIR = (Path.cwd().parent.parent.parent.parent if Path.cwd().name == 'dmd' else Path.cwd())
 # Resource directory
 RES_DIR = ROOT_DIR.joinpath('src/main/resources')
 # Target directory for file output

@@ -22,6 +22,9 @@ from plotting import *
 
 
 class Dashboard(QWebEngineView):
+    """
+    The Dashboard is where the Dash web-app lives.
+    """
 
     def __init__(self):
         """ Constructor. """
@@ -88,8 +91,12 @@ class Dashboard(QWebEngineView):
         """
         Run Dash
 
-        :param address: address (str)
-        :param port: port (int)
+        Parameters
+        ----------
+        address: str
+            address of localhost
+        port: int
+            port of localhost
         """
 
         @self.app.callback(
