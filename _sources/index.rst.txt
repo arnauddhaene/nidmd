@@ -1,7 +1,7 @@
 Welcome to dmd's documentation!
 ===============================
 
-.. automodule:: dmd.main
+.. automodule:: dmd.decomposition.decomposition
 
 .. toctree::
    :maxdepth: 2
