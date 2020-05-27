@@ -12,8 +12,8 @@ from nilearn.surface import load_surf_mesh
 
 # Directories
 
-# Absolute path to DynamicModeToolbox directory
-ROOT_DIR = (Path.cwd().parent.parent.parent.parent if Path.cwd().name == 'dmd' else Path.cwd())
+# Absolute path to dmd directory (where `fbs run` should be launched)
+ROOT_DIR = Path.cwd()
 # Resource directory
 RES_DIR = ROOT_DIR.joinpath('src/main/resources')
 # Target directory for file output
