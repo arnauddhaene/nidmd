@@ -16,9 +16,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtWebEngineWidgets import *
 from PyQt5 import QtWebEngineWidgets, QtCore, QtWidgets
 
-from decomposition import Decomposition
-from utils import *
-from plotting import *
+from dmd.decomposition import Decomposition
+from dmd.utils import *
+from dmd.plotting import *
 
 
 class Dashboard(QWebEngineView):

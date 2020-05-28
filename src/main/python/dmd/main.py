@@ -1,8 +1,14 @@
+"""
+main.py
+=======
+
+main
+"""
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtWidgets import QApplication, QMainWindow
 import sys
-from utils import *
-from dashboard import Dashboard
+from dmd.utils import *
+from dmd.dashboard import Dashboard
 import logging
 
 if __name__ == '__main__':

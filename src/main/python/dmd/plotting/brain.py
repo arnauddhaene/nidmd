@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from utils import *
+from dmd.utils import *
 
 
 class Brain:

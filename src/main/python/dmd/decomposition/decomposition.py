@@ -1,18 +1,27 @@
-# This Python file uses the following encoding: utf-8
+"""
+decomposition.py
+================
+The core class to define a decomposition.
+"""
+
 import scipy.io as scp
 import numpy.linalg as la
 from sklearn.linear_model import LinearRegression
 import cmath
-from utils import *
+from dmd.utils import *
 
 
 class Decomposition:
+    """Decomposition"""
+
     def __init__(self, data=None, filenames=None):
         """
         Decomposition constructor
 
-        :param data: [list of Array-like]
-        :param filenames: [list of str]
+        Parameters
+        ----------
+            data (list of Array-like) - Preprocessed time-series fMRI data
+            filenames (list of str) - filenames of .mat files containing data
         """
 
         if data is None and filenames is None:
