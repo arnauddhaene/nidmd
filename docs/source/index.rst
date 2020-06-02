@@ -3,8 +3,9 @@ Welcome to dmd's documentation!
 
 .. include:: includeme
 
-.. automodule:: dmd.main
 .. automodule:: dmd.utils
+	:members:
+    :undoc-members:
 .. automodule:: dmd.decomposition.decomposition
     :members:
     :undoc-members:
@@ -12,8 +13,14 @@ Welcome to dmd's documentation!
     :members:
     :undoc-members:
 .. automodule:: dmd.plotting.spectre
+	:members:
+    :undoc-members:
 .. automodule:: dmd.plotting.radar
+	:members:
+    :undoc-members:
 .. automodule:: dmd.plotting.timeplot
+	:members:
+    :undoc-members:
 
 .. toctree::
    :maxdepth: 2
