@@ -1,7 +1,10 @@
 """
-__init__
+Plotting code for dmd
 """
+
 from .brain import Brain
-from .spectre import Spectre
 from .radar import Radar
-from .timeplot import TimePlot
+from .timeplot import Timeplot
+from .spectre import Spectre
+
+__all__ = ['Brain', 'Radar', 'Spectre', 'Timeplot']

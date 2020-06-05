@@ -1,8 +1,7 @@
 # This Python file uses the following encoding: utf-8
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from dmd.utils import *
-
+from .errors import AtlasError
 
 class Brain:
 
@@ -15,7 +14,10 @@ class Brain:
         :param mode2: intensity information for comparison (object with 'intensity', 'conjugate')
         """
 
-        self.atlas = ATLAS2D[atlas]
+        if atlas not in ['schaefer', 'glasser']:
+            raise AtlasError
+
+        self.atlas = pd.read_json('data/' + atlas + '.json')
 
         self.mode1 = mode1
         self.mode2 = mode2

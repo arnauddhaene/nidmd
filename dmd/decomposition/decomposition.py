@@ -4,11 +4,17 @@ decomposition.py
 The core class to define a decomposition.
 """
 
-import scipy.io as scp
-import numpy.linalg as la
-from sklearn.linear_model import LinearRegression
 import cmath
-from dmd.utils import *
+import logging
+import scipy.io as scp
+import numpy as np
+import numpy.linalg as la
+import pandas as pd
+
+from sklearn.linear_model import LinearRegression
+
+from dmd.datasets.atlas import Atlas
+from dmd.errors import AtlasError
 
 
 class Decomposition:
@@ -94,11 +100,11 @@ class Decomposition:
         time_sorted = time[index, :]
 
         # Fetch network labels
-        labels = list(ATLAS['networks'][self.atlas].keys())
+        labels = list(self.atlas.networks.keys())
 
         # Fetch indices of networks ROIs
-        netidx = [ATLAS['networks'][self.atlas][network]['index'] for network in
-                  ATLAS['networks'][self.atlas]]
+        netidx = [self.atlas.networks[network]['index'] for network in
+                  self.atlas.networks]
 
         # Global Variables contain MATLAB (1->) vs. Python (0->) indices
         netindex = [np.add(np.asarray(netidx[i]), -1) for i in range(len(netidx))]
@@ -123,7 +129,7 @@ class Decomposition:
                     value=value,
                     intensity=vec_sorted[:, idx],
                     damping_time=(-1 / np.log(np.abs(value))) * self.sampling_time,
-                    period=((2 * PI) / np.abs(np.angle(value))) * self.sampling_time if conj else np.inf,
+                    period=((2 * np.PI) / np.abs(np.angle(value))) * self.sampling_time if conj else np.inf,
                     conjugate=conj,
                     networks=labels,
                     strength_real=strength_real,
@@ -189,13 +195,12 @@ class Decomposition:
 
             matrix = np.asarray(matrix)
             assert isinstance(matrix, np.ndarray)
-            assert str(matrix.shape[0]) in ATLAS['atlas'].keys()
 
             # check for zero rows
             # indices of rows that are zero (full zero ROIs)
             z_idx = np.where(~matrix.any(axis=1))[0]
             if z_idx.shape[0] > 0:
-                logging.warning("Matrice contains " + str(z_idx.shape) + " zero rows.")
+                logging.warning('Matrix contains {} zero rows.'.format(z_idx.shape))
 
             # normalize matrices
             matrix_n, _, _ = Decomposition.normalize(matrix, direction=1, demean=True, destandard=True)
@@ -216,12 +221,11 @@ class Decomposition:
         :param filename: [str] filename containing .mat matrix
         """
 
-        assert file_format(filename) == '.mat'
         mat = scp.loadmat(filename)
         for key in mat.keys():
             if key[:2] != '__':
                 d = mat[key]
-                logging.info("Extracted matrice from file {} from key {}".format(filename, key))
+                logging.info("Extracted matrix from file {} from key {}".format(filename, key))
                 continue
 
         self.add_data(d)
@@ -237,15 +241,12 @@ class Decomposition:
         data = np.asarray(data)
         assert isinstance(data, np.ndarray)
         # Verify that data is correctly formatted
-        if str(data.shape[0]) not in ATLAS['atlas'].keys():
-            raise ImportError('Imported matrix does not correspond to a cortical atlas. '
-                              '# of ROI analysed: {}'.format(data.shape[0]))
+        try:
+            self.atlas = Atlas(data.shape[0])
+        except AtlasError:
+            raise ImportError('Data import attempt failed.')
 
-        if len(self.data) == 0:
-            self.atlas = ATLAS['atlas'][str(data.shape[0])]
-            logging.info('Data added to Decomposition using {} atlas.'.format(self.atlas))
-        else:
-            assert self.atlas == ATLAS['atlas'][str(data.shape[0])]
+        logging.info('Data added to Decomposition using {} atlas.'.format(self.atlas))
 
         if self.sampling_time is None and sampling_time is not None:
             self.sampling_time = float(sampling_time)
@@ -257,7 +258,7 @@ class Decomposition:
         """
         Normalize the original data set.
 
-        :param x: [Array-like] data
+        :param data: [Array-like] data
         :param direction: [int] 0 for columns, 1 for rows, None for global
         :param demean: [boolean] demean
         :param destandard: [boolean] remove standard deviation (to 1)
@@ -310,14 +311,14 @@ class Decomposition:
             phi = 0.5 * np.arctan(2 * (a @ b) / (b.T @ b - a.T @ a))
 
             # compute normalised a, b
-            anorm = np.linalg.norm(math.cos(phi) * a - math.sin(phi) * b)
-            bnorm = np.linalg.norm(math.sin(phi) * a + math.cos(phi) * b)
+            anorm = np.linalg.norm(np.cos(phi) * a - np.sin(phi) * b)
+            bnorm = np.linalg.norm(np.sin(phi) * a + np.cos(phi) * b)
 
             if bnorm > anorm:
                 if phi < 0:
-                    phi -= PI / 2
+                    phi -= np.PI / 2
                 else:
-                    phi += PI / 2
+                    phi += np.PI / 2
 
             adjed = np.multiply(x[:, j], cmath.exp(complex(0, 1) * phi))
             ox[:, j] = adjed if np.mean(adjed) >= 0 else -1 * adjed
@@ -343,8 +344,9 @@ class Decomposition:
         b = np.empty([m, 1], dtype=complex)
         a = np.empty([m, m], dtype=complex)
 
-        if ATLAS['atlas'][str(tc.shape[0])] != ATLAS['atlas'][str(s.shape[0])]:
-            logging.error("ATLAS of reference and match group do not correspond.")
+        if tc.shape[0] != s.shape[0]:
+            logging.error("Cortical parcellation of reference and match group do not correspond.")
+            raise AtlasError("Cortical parcellation of reference and match groups do not correspond.")
 
         t2, t1 = Decomposition._check_data([tc])
         t2 = t2.T
@@ -427,7 +429,7 @@ class Decomposition:
                     mode=order,
                     value=value,
                     damping_time=(-1 / np.log(np.abs(value))) * self.sampling_time,
-                    period=((2 * PI) / np.abs(np.angle(value))) * self.sampling_time if conj else np.inf,
+                    period=((2 * np.PI) / np.abs(np.angle(value))) * self.sampling_time if conj else np.inf,
                     conjugate=conj
                 )
             )
