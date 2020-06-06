@@ -12,15 +12,16 @@ import numpy.linalg as la
 import pandas as pd
 
 from sklearn.linear_model import LinearRegression
+from pathlib import *
 
-from dmd.datasets.atlas import Atlas
-from dmd.errors import AtlasError
+from ..datasets.atlas import Atlas
+from ..errors import AtlasError
 
 
 class Decomposition:
     """Decomposition"""
 
-    def __init__(self, data=None, filenames=None):
+    def __init__(self, data=None, filenames=None, sampling_time=None):
         """
         Decomposition constructor
 
@@ -30,29 +31,34 @@ class Decomposition:
             filenames (list of str) - filenames of .mat files containing data
         """
 
-        if data is None and filenames is None:
-            self.data = []
-            self.X = None
-            self.Y = None
-            self.atlas = None
-            self.eigVal = None
-            self.eigVec = None
-            self.eigIdx = None
-            self.A = None
-            self.Z = None
-            self.df = None
-            self.sampling_time = None
-        else:
-            if data is not None:
+        self.sampling_time = sampling_time
+        self.data = []
+        self.X = None
+        self.Y = None
+        self.atlas = None
+        self.eigVal = None
+        self.eigVec = None
+        self.eigIdx = None
+        self.A = None
+        self.Z = None
+        self.df = None
+
+        if data is not None:
+            if isinstance(data, np.ndarray):
+                self.add_data(data)
+            else:
                 assert isinstance(data, list)
                 for d in data:
                     self.add_data(d)
-            elif filenames is not None:
+        elif filenames is not None:
+            if isinstance(filenames, str):
+                self._extract_data(filenames)
+            else:
                 assert isinstance(filenames, list)
                 for f in filenames:
                     self._extract_data(f)
 
-            self.run()
+        self.run()
 
     def run(self):
         """ Run decomposition. """
@@ -89,7 +95,9 @@ class Decomposition:
         assert index.shape[0] == val.shape[0]
         assert time.shape[0] == val.shape[0]
         assert self.atlas is not None
-        assert self.sampling_time is not None
+
+        if self.sampling_time is None:
+            self.sampling_time = 1.0
 
         order = 1
         idx = 0
@@ -129,9 +137,8 @@ class Decomposition:
                     value=value,
                     intensity=vec_sorted[:, idx],
                     damping_time=(-1 / np.log(np.abs(value))) * self.sampling_time,
-                    period=((2 * np.PI) / np.abs(np.angle(value))) * self.sampling_time if conj else np.inf,
+                    period=((2 * np.pi) / np.abs(np.angle(value))) * self.sampling_time if conj else np.inf,
                     conjugate=conj,
-                    networks=labels,
                     strength_real=strength_real,
                     strength_imag=strength_imag,
                     activity=np.real(time_sorted[idx, :])
@@ -221,6 +228,8 @@ class Decomposition:
         :param filename: [str] filename containing .mat matrix
         """
 
+        assert Path(filename).exists()
+
         mat = scp.loadmat(filename)
         for key in mat.keys():
             if key[:2] != '__':
@@ -230,12 +239,11 @@ class Decomposition:
 
         self.add_data(d)
 
-    def add_data(self, data, sampling_time=None):
+    def add_data(self, data):
         """
         Add data to decomposition. Also defines Decomposition.atlas
 
         :param data: [Array-like] data matrix (N x T)
-        :param sampling_time: [float] sampling time (s)
         """
 
         data = np.asarray(data)
@@ -247,9 +255,6 @@ class Decomposition:
             raise ImportError('Data import attempt failed.')
 
         logging.info('Data added to Decomposition using {} atlas.'.format(self.atlas))
-
-        if self.sampling_time is None and sampling_time is not None:
-            self.sampling_time = float(sampling_time)
 
         self.data.append(data)
 
@@ -316,9 +321,9 @@ class Decomposition:
 
             if bnorm > anorm:
                 if phi < 0:
-                    phi -= np.PI / 2
+                    phi -= np.pi / 2
                 else:
-                    phi += np.PI / 2
+                    phi += np.pi / 2
 
             adjed = np.multiply(x[:, j], cmath.exp(complex(0, 1) * phi))
             ox[:, j] = adjed if np.mean(adjed) >= 0 else -1 * adjed
@@ -429,7 +434,7 @@ class Decomposition:
                     mode=order,
                     value=value,
                     damping_time=(-1 / np.log(np.abs(value))) * self.sampling_time,
-                    period=((2 * np.PI) / np.abs(np.angle(value))) * self.sampling_time if conj else np.inf,
+                    period=((2 * np.pi) / np.abs(np.angle(value))) * self.sampling_time if conj else np.inf,
                     conjugate=conj
                 )
             )

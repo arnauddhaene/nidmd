@@ -1,26 +1,29 @@
 # This Python file uses the following encoding: utf-8
+import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from .errors import AtlasError
+import matplotlib.cm as cm
+
+from .colors import colorscale
 
 class Brain:
 
-    def __init__(self, atlas, mode1, mode2=None, order=None):
+    def __init__(self, df1, order, coords_2d, df2=None):
         """
         Constructor
 
-        :param atlas: [str] cortical parcellation { 'schaefer', 'glasser' }
-        :param mode1: intensity information (object with 'intensity', 'conjugate')
-        :param mode2: intensity information for comparison (object with 'intensity', 'conjugate')
+        :param df1: intensity information (object with 'intensity', 'conjugate')
+        :param order: order of the mode
+        :param coords_2d: [pd.DataFrame] 2D cortical parcellation coordinates data frame
+        :param df2: intensity information for comparison (object with 'intensity', 'conjugate')
         """
 
-        if atlas not in ['schaefer', 'glasser']:
-            raise AtlasError
-
-        self.atlas = pd.read_json('data/' + atlas + '.json')
-
-        self.mode1 = mode1
-        self.mode2 = mode2
+        self.coords_2d = coords_2d
+        self.mode1 = df1.loc[order - 1][['intensity', 'conjugate']]
+        if df2 is not None:
+            self.mode2 = df2.loc[order - 1][['intensity', 'conjugate']]
+        else:
+            self.mode2 = None
         self.order = order
 
     @staticmethod
@@ -62,11 +65,12 @@ class Brain:
 
         return rows, intensity
 
-    def figure(self, imag=False):
+    def figure(self, imag=False, colormap='coolwarm'):
         """
         Get Figure.
 
         :param imag: [boolean] Plot imaginary values
+        :param colormap: [matplotlib colorscale] 'coolwarm' by default
         :return: [go.Figure]
         """
 
@@ -95,8 +99,8 @@ class Brain:
 
         for row in rows:
 
-            for id in range(1, list(self.atlas['.id'])[-1] + 1):
-                roi = self.atlas[self.atlas['.id'] == id]
+            for id in range(1, list(self.coords_2d['.id'])[-1] + 1):
+                roi = self.coords_2d[self.coords_2d['.id'] == id]
                 x = roi['.long']
                 y = roi['.lat']
                 region = roi['region'].iloc[0] if roi['region'].size != 0 else None
@@ -110,7 +114,7 @@ class Brain:
 
                     val = intensity[row - 1][indice]
 
-                    col = 'rgb({0},{1},{2})'.format(*cm.coolwarm(val)[:3])
+                    col = 'rgb({0},{1},{2})'.format(*cm.get_cmap(colormap)(val)[:3])
                 else:
                     col = 'black'
 
@@ -138,7 +142,7 @@ class Brain:
         fig.add_trace(go.Scatter(x=[200, 200], y=[-20, -20],
                                  marker=dict(size=0.01, opacity=1, cmax=0.1, cmin=-0.1, color=[-0.1, 0.1],
                                              colorbar=dict(title="Activity", len=.7, nticks=3),
-                                             colorscale=COOLWARM),
+                                             colorscale=colorscale(colormap)),
                                  mode="markers"))
 
         return fig

@@ -27,9 +27,21 @@ class Atlas:
             raise AtlasError('Number of ROIs ({}) incoherent with any installed cortical parcellation.'.format(nroi))
 
         self.size = nroi
-        self.parcellation = metadata['atlas'][str(nroi)]
-        self.coords_2d = pd.read_json(Path.joinpath(datapath, '{}.json'.format(self.parcellation)))
-        self.networks = metadata['networks'][self.parcellation]
+        self.name = metadata['atlas'][str(nroi)]
+        self.coords_2d = pd.read_json(Path.joinpath(datapath, '{}.json'.format(self.name)))
+        self.networks = metadata['networks'][self.name]
+
+    def __eq__(self, other):
+        """
+        Check that two Atlas instances use the same cortical parcellation
+        :param other: [Atlas] other atlas instance
+        :return: [boolean]
+        """
+        
+        if isinstance(other, Atlas):
+            return self.size == other.size
+
+        return False
 
     @staticmethod
     def _get_surface():

@@ -1,20 +1,33 @@
 # This Python file uses the following encoding: utf-8
+import numpy as np
+import pandas as pd
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from dmd.utils import *
+
+from .colors import colorlist
 
 
 class Radar:
 
-    def __init__(self, df, networks):
+    def __init__(self, df1, atlas, df2=None):
         """
         Constructor.
 
-        :param df: [pd.DataFrame] containing 'mode', 'group', 'strength_real', 'strength_imaginary'
+        :param df1: [pd.DataFrame] df gotten from Decomposition.df
+        :param atlas: [dmd.datasets.Atlas] from Decomposition
+        :param df2: [pd.DataFrame] df gotten from Decomposition.df
         """
 
-        self.df = df
-        self.networks = networks
+        df1_ = df1.copy()
+        df1_['group'] = [1] * df1_.shape[0]
+        if df2 is not None:
+            df2_ = df2.copy()
+            df2_['group'] = [2] * df2_.shape[0]
+        else:
+            df2_ = None
+
+        self.df = pd.concat([df1_, df2_])
+        self.networks = list(atlas.networks.keys())
 
     def figure(self, imag=False, amount=6):
         """
@@ -27,13 +40,12 @@ class Radar:
 
         fig = make_subplots(rows=1, cols=2 if imag else 1, specs=[[{'type': 'polar'}] * (2 if imag else 1)],
                             subplot_titles=("Real", "Imaginary"))
-        colors = COLORS
 
         for mode in range(1, amount):
 
             for group in list(np.unique(self.df.group)):
 
-                self._add_trace(fig, mode, group, colors[mode], imag)
+                self._add_trace(fig, mode, group, colorlist[mode], imag)
 
         fig.update_layout(polar1=dict(radialaxis_range=[0, 0.1]),
                           polar2=dict(radialaxis_range=[0, 0.1]) if imag else None,

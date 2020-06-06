@@ -15,6 +15,6 @@ decomposition           --- Dynamic Mode Decomposition
 
 from pathlib import *
 
-ROOT_DIR = Path.cwd()
+ROOT_DIR = Path(__file__).parent
 
-__all__ = ['decomposition', 'plotting', 'datasets', 'cm']
+__all__ = ['decomposition', 'plotting', 'datasets']
