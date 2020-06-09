@@ -1,0 +1,275 @@
+
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radarplot &#8212; dmd  documentation</title>
+    <link href="https://www.epfl.ch/css/epfl.css" media="all" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="../_static/sphinx-epfl.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/jquery.hoverIntent.minified.js"></script>
+    <script src="../_static/jquery.treeview.minified.js"></script>
+    <script src="../_static/epfl-navigation.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Dynamic Mode Toolbox - Tutorial" href="../dmd-tutorial.html" />
+    <script src="http://s7.addthis.com/js/250/addthis_widget.js#username=xa-4c1a9d5b3161cf7a" type="text/javascript"></script>
+
+  </head><body>
+    <a name="top"></a>
+    <div id="accessibility" class="hidden" title="École Polytechnique Fédérale de Lausanne - Quick access">
+      <ul>
+        <li><a href="http://www.epfl.ch/accessibility.en.shtml" title="Specific informations for persons with disabilities" accesskey="0">Accessibility</a></li>
+        <li><a href="http://www.epfl.ch/" title="EPFL's homepage"  accesskey="1">Homepage</a></li>
+        <li><a href="#navigation" accesskey="2">Navigation within EPFL sites</a></li>
+        <li><a href="#main-navigation" accesskey="3">Navigation within this site</a></li>
+        <li><a href="#search" id="searchlink" accesskey="4">Jump to search field</a></li>
+        <li><a href="#content" accesskey="5">Jump to page content</a></li>
+        <li><a href="mailto:webmaster@epfl.ch" accesskey="9">Technical contact</a></li>
+      </ul>
+    </div>
+    <div id="header">
+      <div id="nav-logo"><a href="http://www.epfl.ch" title="EPFL's homepage"></a></div>
+      <div id="nav-menus">
+        <a name="navigation" id="navigation"></a>
+        <ul id="main-menus">
+          <li class="portal menu" id="public-menu-link">
+          </li>
+          <li class="school menu" id="school-menu-link">
+          </li>
+          <li class="short menu" id="brief-menu-link">
+          </li>
+        </ul>
+      </div>
+
+      <div class="local-color" id="nav-search">
+        <div id="search-box">
+          <a name="search"></a>
+          <form name="search" action="http://search.epfl.ch/process_web2010" id="searchform">
+            <input class="hidden" type="radio" name="engine" id="search-engine-person" value="person" checked="checked" title="Find a person" />
+            <label for="search-engine-person" class="current" title="Find a person">Person</label>
+            <input class="hidden" type="radio" name="engine" id="search-engine-place" value="place" title="Find a place"/>
+            <label for="search-engine-place" title="Find a place">Place</label>
+            <input class="hidden" type="radio" name="engine" id="search-engine-epfl" value="epfl" title="Search within EPFL sites"/>
+            <label for="search-engine-epfl" title="Search within EPFL sites"><acronym title="École Polytechnique Fédérale de Lausanne">EPFL</acronym> Web</label>
+            <input class="hidden" type="radio" name="engine" id="search-engine-local" value="local"  title="Search within this site"/>
+            <label for="search-engine-local" title="Search within this site">On this site</label>
+            <input type="hidden" name="lang" value="en" />
+            <input type="text" class="search" name="q" value="" id="searchfield" /><button type="submit" class="search-button"  title="Search">Search</button>
+          </form>
+        </div>
+      </div>
+      <div class="clear"></div>
+    </div>
+    <div id="main-content">
+
+    <ul id="breadcrumbs">
+      <li><a href="http://www.epfl.ch/" title="EPFL Homepage">EPFL</a></li>
+      <li><a href="../index.html">dmd  documentation</a></li>
+      
+      <li class="last">Radarplot</li>
+    </ul>
+    <div class="clear"></div>
+    
+    <p class="h1"><a href="../index.html">dmd  documentation</a></p>
+    <div id="main-navigation" class="navigation-bar">
+        <p class="caption"><span class="caption-text">Table of contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../core.html">Core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decomposition.html">Decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../timeseries.html">TimeSeries</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../brain.html">Brain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../radar.html">Radar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../spectre.html">Spectre</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../timeplot.html">TimePlot</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../datasets.html">Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../atlas.html">Atlas</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dmd-tutorial.html">Dynamic Mode Toolbox - Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../dmd-tutorial.html#Installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dmd-tutorial.html#Importing-the-adequate-modules">Importing the adequate modules</a></li>
+</ul>
+</li>
+</ul>
+
+        <div class="clear"></div>
+    </div>
+    
+    
+    
+
+  <div id="tools">
+    <div class="button share">
+        <a class="addthis_button_compact" href="http://www.addthis.com/bookmark.php?v=250&amp;username=xa-4c1a9d5b3161cf7a">
+        <button class="icon"></button>
+        <span class="label">Share</span>
+        </a>
+    </div>
+    <div class="button print">
+        <a href="javascript:window.print()">
+        <button class="icon"></button>
+        <span class="label">Print</span>
+        </a>
+    </div>
+
+
+  
+  </div>
+  <div id="content" class="content">
+    
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-plot-radar-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="radarplot">
+<span id="sphx-glr-auto-examples-plot-radar-py"></span><h1>Radarplot<a class="headerlink" href="#radarplot" title="Permalink to this headline">¶</a></h1>
+<p>Example for gallery with radarplot</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dmd</span> <span class="k">import</span> <span class="n">Decomposition</span><span class="p">,</span> <span class="n">Radar</span>
+<span class="kn">import</span> <span class="nn">plotly</span>
+
+
+<span class="n">dcp</span> <span class="o">=</span> <span class="n">Decomposition</span><span class="p">(</span><span class="n">filenames</span><span class="o">=</span><span class="s1">&#39;/home/adhaene/Documents/Dynamic Mode Toolbox Data/Rest1LR_Sub100307_Glasser.mat&#39;</span><span class="p">)</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">Radar</span><span class="p">(</span><span class="n">dcp</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="n">dcp</span><span class="o">.</span><span class="n">atlas</span><span class="p">)</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+<span class="n">plotly</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  8.727 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-radar-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/68af9f42f247e1cf37819bdf0935cee5/plot_radar.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_radar.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/b3e47441e21de082cb17ca0fa814237c/plot_radar.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_radar.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+
+
+    <div class="pagination">
+       <ul>   
+         
+         <li>
+            <a href="../genindex.html" title="General Index" accesskey="I">index</a>
+         </li>
+         
+         <li>
+            <a href="../dmd-tutorial.html" title="Dynamic Mode Toolbox - Tutorial" accesskey="P">previous</a>
+         </li>
+         
+       </ul>
+     </div>
+  </div>
+  
+  <div class="right-col">
+     <div class="tree"><p class="caption"><span class="caption-text">Table of contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../core.html">Core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decomposition.html">Decomposition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../decomposition.html#constructor">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../decomposition.html#methods">Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../decomposition.html#api-reference">API reference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timeseries.html">TimeSeries</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../timeseries.html#constructor">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../timeseries.html#methods">Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../timeseries.html#api-reference">API reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../brain.html">Brain</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../brain.html#constructor">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../brain.html#methods">Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../brain.html#api-reference">API reference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../radar.html">Radar</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../radar.html#constructor">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../radar.html#methods">Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../radar.html#api-reference">API reference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../spectre.html">Spectre</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../spectre.html#constructor">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spectre.html#methods">Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spectre.html#api-reference">API reference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timeplot.html">TimePlot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../timeplot.html#constructor">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../timeplot.html#methods">Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../timeplot.html#api-reference">API reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../datasets.html">Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../atlas.html">Atlas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../atlas.html#constructor">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../atlas.html#methods">Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../atlas.html#api-reference">API reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dmd-tutorial.html">Dynamic Mode Toolbox - Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../dmd-tutorial.html#Installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dmd-tutorial.html#Importing-the-adequate-modules">Importing the adequate modules</a></li>
+</ul>
+</li>
+</ul>
+
+     </div>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../dmd-tutorial.html"
+                        title="previous chapter">Dynamic Mode Toolbox - Tutorial</a></p>
+<div class="box ">
+  <h3>This Page</h3>
+  <ul class="link-list">
+    <li><a href="../_sources/auto_examples/plot_radar.rst.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+  </div>
+  <div class="clear"></div>
+    </div>
+    <div id="footer">
+      <ul>
+        <li>&copy; Copyright 2020, Arnaud Dhaene (EPFL).</li>
+      <li>Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 3.1.0.</li>
+      </ul>
+    </div>
+
+
+  </body>
+</html>

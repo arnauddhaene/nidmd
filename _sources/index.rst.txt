@@ -8,8 +8,11 @@ dmd documentation
     core
     plotting
     datasets
+    dmd-tutorial.ipynb
 
 .. include:: ../../README.rst
+
+.. include:: auto_examples/index.rst
 
 Indices and tables
 ==================

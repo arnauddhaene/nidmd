@@ -1,179 +1,321 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Decomposition &#8212; dmd  documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Decomposition &mdash; dmd  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="TimeSeries" href="timeseries.html" />
-    <link rel="prev" title="Core" href="core.html" />
+    <link rel="prev" title="Core" href="core.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
    
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
-  
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
           
 
-          <div class="body" role="main">
+          
+            <a href="index.html" class="icon icon-home"> dmd
+          
+
+          
+          </a>
+
+          
             
-  <div class="section" id="decomposition">
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="core.html">Core</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Decomposition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#constructor">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#methods">Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api-reference">API reference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="timeseries.html">TimeSeries</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dmd-tutorial.html">Dynamic Mode Toolbox - Tutorial</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">dmd</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="core.html">Core</a> &raquo;</li>
+        
+      <li>Decomposition</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/decomposition.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="decomposition">
 <h1>Decomposition<a class="headerlink" href="#decomposition" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<dl class="py class">
 <dt id="dmd.Decomposition">
-<em class="property">class </em><code class="descclassname">dmd.</code><code class="descname">Decomposition</code><span class="sig-paren">(</span><em>data=None</em>, <em>filenames=None</em>, <em>sampling_time=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">dmd.</code><code class="sig-name descname">Decomposition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition" title="Permalink to this definition">¶</a></dt>
 <dd><p>Representation of a Decomposition.</p>
 </dd></dl>
 
 <div class="section" id="constructor">
 <h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
-<dl class="method">
+<dl class="py method">
 <dt id="dmd.Decomposition.__init__">
-<code class="descclassname">Decomposition.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>data=None</em>, <em>filenames=None</em>, <em>sampling_time=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">Decomposition.</code><code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decomposition Constructor.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>Array-like</em>) – Preprocessed time-series fMRI data. Can be list of Array-like</li>
-<li><strong>filenames</strong> (<em>str</em>) – filenames of <code class="code docutils literal notranslate"><span class="pre">.mat</span></code> files containing data. Can be list of <strong>str</strong>.</li>
-<li><strong>sampling_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Sampling time of time-series recording.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>Array-like</em>) – Preprocessed time-series fMRI data. Can be list of Array-like</p></li>
+<li><p><strong>filenames</strong> (<em>str</em>) – filenames of <code class="code docutils literal notranslate"><span class="pre">.mat</span></code> files containing data. Can be list of <strong>str</strong>.</p></li>
+<li><p><strong>sampling_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Sampling time of time-series recording.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body"><ul class="first last simple">
-<li><strong>data</strong> (<em>Array-like</em>) – Time-series raw data</li>
-<li><strong>X</strong> (<em>Array-like</em>) – Time-series data from t:1-&gt;T</li>
-<li><strong>Y</strong> (<em>Array-like</em>) – Time-series data from t:0-&gt;T-1</li>
-<li><strong>atlas</strong> (<em>dmd.Atlas</em>) – Cortical Parcellation atlas used for this decomposition</li>
-<li><strong>eig_val</strong> (<em>Array-like</em>) – Eigenvalues of the eigen-decomposition of the Auto-regressive matrix</li>
-<li><strong>eig_vec</strong> (<em>Array-like</em>) – Eigenvectors of the eigen-decomposition of the Auto-regressive matrix</li>
-<li><strong>eig_idx</strong> (<em>Array-like</em>) – Indices for descending order of the eigen-decomposition of the Auto-regressive matrix</li>
-<li><strong>A</strong> (<em>Array-like</em>) – Auto-regressive matrix</li>
-<li><strong>Z</strong> (<em>Array-like</em>) – Approximation of the activity versus time for each mode</li>
-<li><strong>df</strong> (<em>pd.DataFrame</em>) – Pandas DataFrame containing the following columns: mode, value, intensity, damping_time, period, conjugate,
-strength_real, strength_imag, activity</li>
+</dd>
+<dt class="field-even">Yields</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>data</strong> (<em>Array-like</em>) – Time-series raw data</p></li>
+<li><p><strong>X</strong> (<em>Array-like</em>) – Time-series data from t:1-&gt;T</p></li>
+<li><p><strong>Y</strong> (<em>Array-like</em>) – Time-series data from t:0-&gt;T-1</p></li>
+<li><p><strong>atlas</strong> (<em>dmd.Atlas</em>) – Cortical Parcellation atlas used for this decomposition</p></li>
+<li><p><strong>eig_val</strong> (<em>Array-like</em>) – Eigenvalues of the eigen-decomposition of the Auto-regressive matrix</p></li>
+<li><p><strong>eig_vec</strong> (<em>Array-like</em>) – Eigenvectors of the eigen-decomposition of the Auto-regressive matrix</p></li>
+<li><p><strong>eig_idx</strong> (<em>Array-like</em>) – Indices for descending order of the eigen-decomposition of the Auto-regressive matrix</p></li>
+<li><p><strong>A</strong> (<em>Array-like</em>) – Auto-regressive matrix</p></li>
+<li><p><strong>Z</strong> (<em>Array-like</em>) – Approximation of the activity versus time for each mode</p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – Pandas DataFrame containing the following columns: mode, value, intensity, damping_time, period, conjugate,
+strength_real, strength_imag, activity</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="methods">
 <h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#dmd.Decomposition.run" title="dmd.Decomposition.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.run</span></code></a>()</td>
-<td>Run Decomposition.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dmd.Decomposition.run" title="dmd.Decomposition.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.run</span></code></a>()</p></td>
+<td><p>Run Decomposition.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#dmd.Decomposition.add" title="dmd.Decomposition.add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.add</span></code></a>(data)</td>
-<td>Add data to Decomposition.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="#dmd.Decomposition.add" title="dmd.Decomposition.add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.add</span></code></a>(data)</p></td>
+<td><p>Add data to Decomposition.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.extract</span></code>(filename)</td>
-<td>Extracts fMRI data from file.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.extract</span></code>(filename)</p></td>
+<td><p>Extracts fMRI data from file.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.split</span></code>(data)</td>
-<td>Split time-series into X: [1-&gt;T] and Y:[0-&gt;T-1].</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.split</span></code>(data)</p></td>
+<td><p>Split time-series into X: [1-&gt;T] and Y:[0-&gt;T-1].</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.normalize</span></code>(data[,&nbsp;direction,&nbsp;…])</td>
-<td>Normalize a matrix</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.normalize</span></code>(data[, direction, …])</p></td>
+<td><p>Normalize a matrix</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#dmd.Decomposition.compute_match" title="dmd.Decomposition.compute_match"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.compute_match</span></code></a>(other,&nbsp;m)</td>
-<td>Get approximated matched modes for match group with self as a reference.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="#dmd.Decomposition.compute_match" title="dmd.Decomposition.compute_match"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.compute_match</span></code></a>(other, m)</p></td>
+<td><p>Get approximated matched modes for match group with self as a reference.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="api-reference">
 <h2>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt>
-<em class="property">class </em><code class="descclassname">dmd.</code><code class="descname">Decomposition</code><span class="sig-paren">(</span><em>data=None</em>, <em>filenames=None</em>, <em>sampling_time=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition"><span class="viewcode-link">[source]</span></a></dt>
+<dl class="py class">
+<dt id="id0">
+<em class="property">class </em><code class="sig-prename descclassname">dmd.</code><code class="sig-name descname">Decomposition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
 <dd><p>Representation of a Decomposition.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="dmd.Decomposition.add">
-<code class="descname">add</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.add" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add data to Decomposition.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>Array-like</em>) – Time-series data.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body"><strong>atlas</strong> (<em>dmd.Atlas</em>) – Cortical Parcellation atlas used for this decomposition</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ImportError</span></code> – If the import fails.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Array-like</em>) – Time-series data.</p>
+</dd>
+<dt class="field-even">Yields</dt>
+<dd class="field-even"><p><strong>atlas</strong> (<em>dmd.Atlas</em>) – Cortical Parcellation atlas used for this decomposition</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>ImportError</strong> – If the import fails.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="dmd.Decomposition.compute_match">
-<code class="descname">compute_match</code><span class="sig-paren">(</span><em>other</em>, <em>m</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.compute_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.compute_match" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">compute_match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em>, <em class="sig-param"><span class="n">m</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.compute_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.compute_match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get approximated matched modes for match group with self as a reference.
 Predicts amplification of approximated modes using linear regression.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>other</strong> (<a class="reference internal" href="#dmd.Decomposition" title="dmd.Decomposition"><em>dmd.Decomposition</em></a>) – match group</li>
-<li><strong>m</strong> (<em>int</em>) – number of modes analyzed for approximation</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#id0" title="dmd.Decomposition"><em>dmd.Decomposition</em></a>) – match group</p></li>
+<li><p><strong>m</strong> (<em>int</em>) – number of modes analyzed for approximation</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>modes</strong> (<em>pd.DataFrame</em>) – Pandas DataFrame containing the following columns: mode, value, damping_time, period, conjudate</li>
-<li><strong>x</strong> (<em>Array-like</em>) – Vector containing absolute value of top 10 approximated eigenvalues of self (by mode matching to self)</li>
-<li><strong>y</strong> (<em>Array-like</em>) – Vector containing absolute value of top 10 real eigenvalues of self</li>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>modes</strong> (<em>pd.DataFrame</em>) – Pandas DataFrame containing the following columns: mode, value, damping_time, period, conjudate</p></li>
+<li><p><strong>x</strong> (<em>Array-like</em>) – Vector containing absolute value of top 10 approximated eigenvalues of self (by mode matching to self)</p></li>
+<li><p><strong>y</strong> (<em>Array-like</em>) – Vector containing absolute value of top 10 real eigenvalues of self</p></li>
 </ul>
 </p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="dmd.Decomposition.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run Decomposition.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>df</strong> – Pandas DataFrame containing the following columns: mode, value, intensity, damping_time, period, conjugate,
-strength_real, strength_imag, activity</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">pd.DataFrame</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>df</strong> – Pandas DataFrame containing the following columns: mode, value, intensity, damping_time, period, conjugate,
+strength_real, strength_imag, activity</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -182,74 +324,52 @@ strength_real, strength_imag, activity</td>
 </div>
 
 
+           </div>
+           
           </div>
-          
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="timeseries.html" class="btn btn-neutral float-right" title="TimeSeries" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="core.html" class="btn btn-neutral float-left" title="Core" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Arnaud Dhaene (EPFL)
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">dmd</a></h1>
+
+    </section>
+
+  </div>
+  
 
 
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
 
-
-
-
-
-
-<h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Table of contents</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="core.html">Core</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Decomposition</a></li>
-<li class="toctree-l2"><a class="reference internal" href="timeseries.html">TimeSeries</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="datasets.html">Datasets</a></li>
-</ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-  <li><a href="core.html">Core</a><ul>
-      <li>Previous: <a href="core.html" title="previous chapter">Core</a></li>
-      <li>Next: <a href="timeseries.html" title="next chapter">TimeSeries</a></li>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2020, Arnaud Dhaene (EPFL).
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
-      
-      |
-      <a href="_sources/decomposition.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
+  
+  
     
+   
 
-    
-  </body>
+</body>
 </html>
