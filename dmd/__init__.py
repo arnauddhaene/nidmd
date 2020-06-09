@@ -17,4 +17,10 @@ from pathlib import *
 
 ROOT_DIR = Path(__file__).parent
 
-__all__ = ['decomposition', 'plotting', 'datasets']
+from dmd.core import (Decomposition, TimeSeries)
+
+from dmd.plotting import (Brain, Spectre, Radar, TimePlot)
+
+from dmd.datasets import Atlas
+
+__all__ = ['core', 'plotting', 'datasets']

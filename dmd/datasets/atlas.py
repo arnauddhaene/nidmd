@@ -10,13 +10,16 @@ from ..errors import AtlasError
 
 
 class Atlas:
-    """ Class for fetching atlas data. """
+    """ Representation of a Cortical Parcellation Atlas. """
 
     def __init__(self, nroi: int):
         """
-        Constructor
+        Atlas Constructor.
 
-        :param nroi: [int] number of roi
+        Parameters
+        ----------
+        nroi : int
+            Number of ROI.
         """
 
         datapath = Path(__file__).parent.joinpath('data')
@@ -33,9 +36,17 @@ class Atlas:
 
     def __eq__(self, other):
         """
-        Check that two Atlas instances use the same cortical parcellation
-        :param other: [Atlas] other atlas instance
-        :return: [boolean]
+        Check that two Atlas instances use the same cortical parcellation.
+
+        Parameters
+        ----------
+        other : dmd.Atlas
+            other Atlas instance
+
+        Returns
+        -------
+        equal : boolean
+            True if both Atlas instances have the same number of ROIs
         """
         
         if isinstance(other, Atlas):
@@ -44,7 +55,22 @@ class Atlas:
         return False
 
     @staticmethod
-    def _get_surface():
+    def surface():
+        """
+        Returns  3D surface coordinates.
+
+        Returns
+        -------
+        fsaverage : Dictionary-like
+            (from the Nilearn documentation) The interest attributes are : - 'pial_left': Gifti file,
+            left hemisphere pial surface mesh - 'pial_right': Gifti file, right hemisphere
+            pial surface mesh - 'infl_left': Gifti file, left hemisphere inflated pial surface
+            mesh - 'infl_right': Gifti file, right hemisphere inflated pial surface mesh
+            - 'sulc_left': Gifti file, left hemisphere sulcal depth data - 'sulc_right': Gifti
+            file, right hemisphere sulcal depth data
+        surf : Dictionary-like
+            Object containing the x, y, z coordinates as well as the i, j, k triangulation coordinates
+        """
         """
         Get surface for plotting.
 

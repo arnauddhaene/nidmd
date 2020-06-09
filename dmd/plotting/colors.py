@@ -8,7 +8,7 @@ colorlist = ['#1abc9c', '#2ecc71', '#3498db', '#9b59b6', '#34495e', '#f1c40f', '
 def matplotlib_to_plotly(cmap, pl_entries=255):
     """
     Matplotlib to Plotly colorscale
-    from https://plotly.com/python/v3/matplotlib-colorscales/
+    from `<https://plotly.com/python/v3/matplotlib-colorscales/>`_
 
     :param cmap: Union[Colormap, LinearSegmentedColormap, ListedColormap] mpl cm
     :param pl_entries: [int] number of entries (default 255)

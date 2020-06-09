@@ -10,14 +10,22 @@ class Brain:
 
     def __init__(self, df1, order, coords_2d, df2=None):
         """
-        Constructor
+        Brain Constructor.
 
-        :param df1: intensity information (object with 'intensity', 'conjugate')
-        :param order: order of the mode
-        :param coords_2d: [pd.DataFrame] 2D cortical parcellation coordinates data frame
-        :param df2: intensity information for comparison (object with 'intensity', 'conjugate')
+        Parameters
+        ----------
+        df1 : pd.DataFrame
+            Pandas DataFrame containing at least :code:`intensity` and :code:`conjugate` columns.
+            The :code:`intensity` column must contain Array-like values of the length of the cortical atlas.
+        order : int
+            Mode order
+        coords_2d : pd.DataFrame
+            Pandas DataFrame containing the 2D corticial parcellation coordinates. These can be fetched from
+            Decomposition.atlas.coords_2d
+        df2 : pd.DataFrame, optional
+            Pandas DataFrame containing at least :code:`intensity` and :code:`conjugate` columns
+            The :code:`intensity` column must contain Array-like values of the length of the cortical atlas.
         """
-
         self.coords_2d = coords_2d
         self.mode1 = df1.loc[order - 1][['intensity', 'conjugate']]
         if df2 is not None:
@@ -27,14 +35,24 @@ class Brain:
         self.order = order
 
     @staticmethod
-    def _get_intensity(modes, imag=False):
+    def intensities(modes, imag=False):
         """
-        Add mode
+        Returns activity intensities of modes.
 
-        :param modes: [pd.DataFrame] with columns 'conjugate' and 'intensity'
-        :param imag: [boolean] get imaginary values
-        :return rows: [list] index list of number of figure rows
-        :return intensity: [list of Array-like]
+        Parameters
+        ----------
+        modes : pd.DataFrame
+            Pandas DataFrame containing at least :code:`intensity` and :code:`conjugate` columns.
+            The :code:`intensity` column must contain Array-like values of the length of the cortical atlas.
+        imag : boolean, optional
+            Retrieve the imaginary values from the activity intensities (default False)
+
+        Returns
+        -------
+        rows : list
+            list of range from 0 number of figure subplots
+        intensity : list of Array-like
+            Activity intensities for each mode
         """
 
         rows = []
@@ -67,23 +85,32 @@ class Brain:
 
     def figure(self, imag=False, colormap='coolwarm'):
         """
-        Get Figure.
+        Returns Plotly Figure.
 
-        :param imag: [boolean] Plot imaginary values
-        :param colormap: [matplotlib colorscale] 'coolwarm' by default
-        :return: [go.Figure]
+        Parameters
+        ----------
+        imag : boolean, optional
+            Incorporate brain visualizations for imaginary activity values (default False)
+        colormap : str
+            Colormap supported by matplotlib, which can be found on the 
+            `official reference <https://matplotlib.org/3.1.1/gallery/color/colormap_reference.html>`_
+
+        Returns
+        -------
+        fig : go.Figure
+            Plotly figure of brain visualizations
         """
 
         # Analysis
         if self.mode2 is None:
 
-            rows, intensity = self._get_intensity([self.mode1], imag)
+            rows, intensity = self.intensities([self.mode1], imag)
             labels = ['Real'] if len(rows) == 1 else ['Real', 'Imaginary']
 
         # Comparison
         else:
 
-            rows, intensity = self._get_intensity([self.mode1, self.mode2], imag)
+            rows, intensity = self.intensities([self.mode1, self.mode2], imag)
 
             if len(rows) == 2:
                 labels = ['G1 Real', 'G2 Real']

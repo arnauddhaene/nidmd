@@ -1,30 +1,15 @@
-Welcome to dmd's documentation!
-===============================
-
-.. include:: includeme
-
-.. automodule:: dmd.utils
-	:members:
-    :undoc-members:
-.. automodule:: dmd.decomposition.decomposition
-    :members:
-    :undoc-members:
-.. automodule:: dmd.plotting.brain
-    :members:
-    :undoc-members:
-.. automodule:: dmd.plotting.spectre
-	:members:
-    :undoc-members:
-.. automodule:: dmd.plotting.radar
-	:members:
-    :undoc-members:
-.. automodule:: dmd.plotting.timeplot
-	:members:
-    :undoc-members:
+dmd documentation
+===================================
 
 .. toctree::
-	:maxdepth: 2
-	:caption: Contents:
+    :maxdepth: 2
+    :caption: Table of contents
+
+    core
+    plotting
+    datasets
+
+.. include:: ../../README.rst
 
 Indices and tables
 ==================
