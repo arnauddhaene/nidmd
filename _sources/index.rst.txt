@@ -1,17 +1,15 @@
-Welcome to dmd's documentation!
-===============================
-
-.. automodule:: dmd.main
-.. automodule:: dmd.utils
-.. automodule:: dmd.decomposition.decomposition
-.. automodule:: dmd.plotting.brain
-.. automodule:: dmd.plotting.spectre
-.. automodule:: dmd.plotting.radar
-.. automodule:: dmd.plotting.timeplot
+dmd documentation
+===================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Table of contents
+
+    core
+    plotting
+    datasets
+
+.. include:: ../../README.rst
 
 Indices and tables
 ==================

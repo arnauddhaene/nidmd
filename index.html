@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Welcome to dmd’s documentation! &#8212; dmd  documentation</title>
+    <title>dmd documentation &#8212; dmd  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,6 +16,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Core" href="core.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -32,9 +33,57 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-dmd.main">
-<span id="welcome-to-dmd-s-documentation"></span><h1>Welcome to dmd’s documentation!<a class="headerlink" href="#module-dmd.main" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-dmd.utils"></span><span class="target" id="module-dmd.decomposition.decomposition"></span><span class="target" id="module-dmd.plotting.brain"></span><span class="target" id="module-dmd.plotting.spectre"></span><span class="target" id="module-dmd.plotting.radar"></span><span class="target" id="module-dmd.plotting.timeplot"></span><div class="toctree-wrapper compound">
+  <div class="section" id="dmd-documentation">
+<h1>dmd documentation<a class="headerlink" href="#dmd-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Table of contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="core.html">Core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="decomposition.html">Decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timeseries.html">TimeSeries</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="brain.html">Brain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="radar.html">Radar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectre.html">Spectre</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timeplot.html">TimePlot</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="atlas.html">Atlas</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="dynamic-mode-decomposition">
+<h2>Dynamic Mode Decomposition<a class="headerlink" href="#dynamic-mode-decomposition" title="Permalink to this headline">¶</a></h2>
+<p>Based on [Casorso et al., 2019][2], the dynamic mode decomposition algorithm allows for a dynamic analysis of cortical neurological activation. Here, a dashboard is developed to allow users to analyse their data using standardized and publication-quality visualizations of the dynamic modes.</p>
+<div class="section" id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
+<p>To install the package, simply run the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">dmd</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="input-data">
+<h3>Input data<a class="headerlink" href="#input-data" title="Permalink to this headline">¶</a></h3>
+<p>This dashboard handles preprocessed data as described in [Casorso et al., 2019 - Methods][2].
+The input needed for a successful visualization is one or multiple <code class="code docutils literal notranslate"><span class="pre">.mat</span></code> file(s). Each file corresponds to an fMRI run and should contain one matrix of size <cite>N x T</cite>, with <cite>N</cite> being the number of ROIs in the cortical parcellation and <cite>T</cite> being the observational timepoints.</p>
+<p>In the current version, two parcellations are supported:</p>
+<ul class="simple">
+<li>[Glasser et al., 2016][1], containing <cite>N = 360</cite> regions.</li>
+<li>[Schaefer et al., 2018][3], containing <cite>N = 400</cite> regions.</li>
+</ul>
+<p>## References</p>
+<p>[1] M. F. Glasser et al., “A multi-modal parcellation of human cerebral cortex,” Nature, vol. 536, no. 7615, pp. 171–178, 11 2016, doi: 10.1038/nature18933.</p>
+<p>[2] J. Casorso, X. Kong, W. Chi, D. Van De Ville, B. T. T. Yeo, and R. Liégeois, “Dynamic mode decomposition of resting-state and task fMRI,” NeuroImage, vol. 194, pp. 42–54, Jul. 2019, doi: 10.1016/j.neuroimage.2019.03.019.</p>
+<p>[3] A. Schaefer et al., “Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI,” Cerebral Cortex, vol. 28, no. 9, pp. 3095–3114, Sep. 2018, doi: 10.1093/cercor/bhx179.</p>
+<p>[2]: <a class="reference external" href="http://www.sciencedirect.com/science/article/pii/S1053811919301922">http://www.sciencedirect.com/science/article/pii/S1053811919301922</a>
+[1]: <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/27437579/">https://pubmed.ncbi.nlm.nih.gov/27437579/</a>
+[3]: <a class="reference external" href="https://academic.oup.com/cercor/article/28/9/3095/3978804">https://academic.oup.com/cercor/article/28/9/3095/3978804</a>
+[4]: <a class="reference external" href="https://build-system.fman.io/">https://build-system.fman.io/</a></p>
+</div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -63,11 +112,18 @@
 
 
 <h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Table of contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="core.html">Core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">Datasets</a></li>
+</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="core.html" title="next chapter">Core</a></li>
   </ul></li>
 </ul>
 </div>
