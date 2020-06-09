@@ -1,0 +1,178 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Atlas &#8212; dmd  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Datasets" href="datasets.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="atlas">
+<h1>Atlas<a class="headerlink" href="#atlas" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="dmd.Atlas">
+<em class="property">class </em><code class="descclassname">dmd.</code><code class="descname">Atlas</code><span class="sig-paren">(</span><em>nroi: int</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/datasets/atlas.html#Atlas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Atlas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of a Cortical Parcellation Atlas.</p>
+</dd></dl>
+
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<dl class="method">
+<dt id="dmd.Atlas.__init__">
+<code class="descclassname">Atlas.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>nroi: int</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/datasets/atlas.html#Atlas.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Atlas.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Atlas Constructor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nroi</strong> (<em>int</em>) – Number of ROI.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#dmd.Atlas.surface" title="dmd.Atlas.surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Atlas.surface</span></code></a>()</td>
+<td>Returns  3D surface coordinates.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="api-reference">
+<h2>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">dmd.</code><code class="descname">Atlas</code><span class="sig-paren">(</span><em>nroi: int</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/datasets/atlas.html#Atlas"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Representation of a Cortical Parcellation Atlas.</p>
+<dl class="staticmethod">
+<dt id="dmd.Atlas.surface">
+<em class="property">static </em><code class="descname">surface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/datasets/atlas.html#Atlas.surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Atlas.surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns  3D surface coordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>fsaverage</strong> (<em>Dictionary-like</em>) – (from the Nilearn documentation) The interest attributes are : - ‘pial_left’: Gifti file,
+left hemisphere pial surface mesh - ‘pial_right’: Gifti file, right hemisphere
+pial surface mesh - ‘infl_left’: Gifti file, left hemisphere inflated pial surface
+mesh - ‘infl_right’: Gifti file, right hemisphere inflated pial surface mesh
+- ‘sulc_left’: Gifti file, left hemisphere sulcal depth data - ‘sulc_right’: Gifti
+file, right hemisphere sulcal depth data</li>
+<li><strong>surf</strong> (<em>Dictionary-like</em>) – Object containing the x, y, z coordinates as well as the i, j, k triangulation coordinates</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">dmd</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Table of contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="core.html">Core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="datasets.html">Datasets</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Atlas</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="datasets.html">Datasets</a><ul>
+      <li>Previous: <a href="datasets.html" title="previous chapter">Datasets</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Arnaud Dhaene (EPFL).
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/atlas.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

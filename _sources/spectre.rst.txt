@@ -1,0 +1,24 @@
+Spectre
+=======
+
+.. currentmodule:: dmd
+
+.. autoclass:: Spectre
+
+Constructor
+###########
+
+.. automethod:: Spectre.__init__
+
+Methods
+#######
+
+.. autosummary::
+
+    Spectre.figure
+
+API reference
+#############
+
+.. autoclass:: Spectre
+    :members:

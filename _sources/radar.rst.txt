@@ -1,0 +1,24 @@
+Radar
+=====
+
+.. currentmodule:: dmd
+
+.. autoclass:: Radar
+
+Constructor
+###########
+
+.. automethod:: Radar.__init__
+
+Methods
+#######
+
+.. autosummary::
+
+    Radar.figure
+
+API reference
+#############
+
+.. autoclass:: Radar
+    :members:

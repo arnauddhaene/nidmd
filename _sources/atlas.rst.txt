@@ -1,0 +1,24 @@
+Atlas
+=====
+
+.. currentmodule:: dmd
+
+.. autoclass:: Atlas
+
+Constructor
+###########
+
+.. automethod:: Atlas.__init__
+
+Methods
+#######
+
+.. autosummary::
+
+    Atlas.surface
+
+API reference
+#############
+
+.. autoclass:: Atlas
+    :members:

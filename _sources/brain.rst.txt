@@ -1,0 +1,25 @@
+Brain
+=====
+
+.. currentmodule:: dmd
+
+.. autoclass:: Brain
+
+Constructor
+###########
+
+.. automethod:: Brain.__init__
+
+Methods
+#######
+
+.. autosummary::
+
+    Brain.intensities
+    Brain.figure
+
+API reference
+#############
+
+.. autoclass:: Brain
+    :members:
