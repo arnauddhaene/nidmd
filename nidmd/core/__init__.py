@@ -1,5 +1,5 @@
 """
-Dynamic Mode Decomposition for dmd
+Dynamic Mode Decomposition for nidmd
 """
 from .decomposition import Decomposition
 from .timeseries import TimeSeries

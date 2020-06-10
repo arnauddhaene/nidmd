@@ -1,5 +1,5 @@
 """
-Dynamic Mode Decomposition for dmd
+Dynamic Mode Decomposition for nidmd
 """
 from .atlas import Atlas
 

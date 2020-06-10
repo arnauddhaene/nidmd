@@ -6,7 +6,10 @@ from pathlib import *
 from nilearn.datasets import fetch_surf_fsaverage
 from nilearn.surface import load_surf_mesh
 
-from ..errors import AtlasError
+
+class AtlasError(Exception):
+    """Exception for wrong call to cortical surface atlas."""
+    pass
 
 
 class Atlas:
@@ -20,18 +23,29 @@ class Atlas:
         ----------
         nroi : int
             Number of ROI.
+
+        Yields
+        ------
+        size : int
+            Number of ROI
+        name : {'glasser', 'schaefer'}
+            Name of cortical parcellation atlas. Supported are Glasser and Schaefer atlasses.
+        coords_2d : pd.DataFrame
+            Pandas DataFrame containing 2D coordinates of cortical surface plotting
+        networks : Dictionary-like
+            Object containing indices relevant to each network.
         """
 
         datapath = Path(__file__).parent.joinpath('data')
 
-        metadata = json.load(open(Path.joinpath(datapath, 'ATLAS.JSON')))
+        metadata = json.load(open(Path.joinpath(datapath, 'ATLAS.JSON').as_posix()))
 
         if str(nroi) not in metadata['atlas'].keys():
             raise AtlasError('Number of ROIs ({}) incoherent with any installed cortical parcellation.'.format(nroi))
 
         self.size = nroi
         self.name = metadata['atlas'][str(nroi)]
-        self.coords_2d = pd.read_json(Path.joinpath(datapath, '{}.json'.format(self.name)))
+        self.coords_2d = pd.read_json(Path.joinpath(datapath, '{}.json'.format(self.name)).as_posix())
         self.networks = metadata['networks'][self.name]
 
     def __eq__(self, other):
@@ -40,7 +54,7 @@ class Atlas:
 
         Parameters
         ----------
-        other : dmd.Atlas
+        other : nidmd.Atlas
             other Atlas instance
 
         Returns

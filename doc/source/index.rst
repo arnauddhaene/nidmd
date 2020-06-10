@@ -9,7 +9,7 @@ dmd documentation
     plotting
     datasets
 
-.. include:: ../../README.rst
+.. include:: README.rst
 
 Indices and tables
 ==================

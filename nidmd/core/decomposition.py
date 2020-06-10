@@ -14,7 +14,6 @@ from sklearn.linear_model import LinearRegression
 
 from .timeseries import TimeSeries
 from ..datasets.atlas import Atlas
-from ..errors import AtlasError
 
 
 class Decomposition(TimeSeries):
@@ -43,7 +42,7 @@ class Decomposition(TimeSeries):
             Time-series data from t:1->T
         Y : Array-like
             Time-series data from t:0->T-1
-        atlas : dmd.Atlas
+        atlas : nidmd.Atlas
             Cortical Parcellation atlas used for this decomposition
         eig_val : Array-like
             Eigenvalues of the eigen-decomposition of the Auto-regressive matrix
@@ -100,7 +99,7 @@ class Decomposition(TimeSeries):
             
         Yields
         ------
-        atlas : dmd.Atlas
+        atlas : nidmd.Atlas
             Cortical Parcellation atlas used for this decomposition
 
         Raises
@@ -344,7 +343,7 @@ class Decomposition(TimeSeries):
 
         Parameters
         ----------
-        other : dmd.Decomposition
+        other : nidmd.Decomposition
             match group
         m : int
             number of modes analyzed for approximation

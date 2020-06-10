@@ -23,8 +23,10 @@ class Radar:
         if df2 is not None:
             df2_ = df2.copy()
             df2_['group'] = [2] * df2_.shape[0]
+            self.analysis = False
         else:
             df2_ = None
+            self.analysis = True
 
         self.df = pd.concat([df1_, df2_])
         self.networks = list(atlas.networks.keys())
@@ -67,18 +69,18 @@ class Radar:
         r_r = self.df.loc[(self.df['mode'] == mode) & (self.df['group'] == group)].strength_real.to_list()[0]
         r_i = self.df.loc[(self.df['mode'] == mode) & (self.df['group'] == group)].strength_imag.to_list()[0]
 
+        verbalise = 'Mode {}'.format(mode) + ' Group {}'.format(group) if not self.analysis else ''
+
         fig.add_trace(go.Scatterpolar(
             r=self._close(r_r), theta=self._close(self.networks), mode="lines",
-            legendgroup='Mode {0} Group {1}'.format(mode, group), showlegend=True,
-            name='Mode {0} Group {1}'.format(mode, group), subplot="polar1",
+            legendgroup=verbalise, showlegend=True, name=verbalise, subplot="polar1",
             line=dict(color=color, dash='dash' if group != 1 else None)
         ), row=1, col=1)
 
         if imag:
             fig.add_trace(go.Scatterpolar(
                 r=self._close(r_i), theta=self._close(self.networks), mode="lines",
-                legendgroup='Mode {0} Group {1}'.format(mode, group), showlegend=False,
-                name='Mode {0} Group {1}'.format(mode, group), subplot="polar2",
+                legendgroup=verbalise, showlegend=False, name=verbalise, subplot="polar2",
                 line=dict(color=color, dash='dash' if group != 1 else None),
             ), row=1, col=2)
 

@@ -1,5 +1,5 @@
 """
-Plotting code for dmd
+Plotting code for nidmd
 """
 
 from .brain import Brain

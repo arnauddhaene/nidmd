@@ -113,14 +113,14 @@ class Brain:
             rows, intensity = self.intensities([self.mode1, self.mode2], imag)
 
             if len(rows) == 2:
-                labels = ['G1 Real', 'G2 Real']
+                labels = ['Group 1 \n Real', 'Group 2 \n Real']
             elif len(rows) == 3:
                 if self.mode1.conjugate:
-                    labels = ['G1 Real', 'G1 Imaginary','G2 Real']
+                    labels = ['Group 1 \n  Real', 'Group 1 \n Imaginary', 'Group 2 \n Real']
                 else:
-                    labels = ['G1 Real', 'G2 Real', 'G2 Imaginary']
+                    labels = ['Group 1 \n Real', 'Group 2 \n  Real', 'Group 2 \n  Imaginary']
             else:
-                labels = ['G1 Real', 'G1 Imaginary', 'G2 Real', 'G2 Imaginary']
+                labels = ['Group 1 \n Real', 'Group 1 \n Imaginary', 'Group 2 \n  Real', 'Group 2 \n  Imaginary']
 
         fig = make_subplots(rows=len(rows), cols=1, horizontal_spacing=0.05, vertical_spacing=0.05)
 
