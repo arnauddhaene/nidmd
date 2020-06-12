@@ -51,7 +51,7 @@ class TimeSeries:
                     self.extract(f)
 
     @staticmethod
-    def split(data):
+    def split(data, normalize=True):
         """
         Split time-series into X: [1->T] and Y:[0->T-1].
 
@@ -59,6 +59,8 @@ class TimeSeries:
         ----------
         data : Array-like
             Time-series data. Can be list of Array-like.
+        normalize : boolean
+            For normalization of the input data.
 
         Returns
         -------
@@ -74,6 +76,10 @@ class TimeSeries:
         """
 
         if isinstance(data, np.ndarray):
+
+            if normalize:
+                data, _, _ = TimeSeries.normalize(data, direction=1, demean=True, destandard=True)
+
             return data[:, 1:], data[:, :-1]
         elif isinstance(data, list):
             # 'empty' arrays for creating X and Y
@@ -92,11 +98,12 @@ class TimeSeries:
                     logging.warning('Matrix contains {} zero rows.'.format(z_idx.shape))
 
                 # normalize matrices
-                matrix_n, _, _ = TimeSeries.normalize(matrix, direction=1, demean=True, destandard=True)
+                if normalize:
+                    matrix, _, _ = TimeSeries.normalize(matrix, direction=1, demean=True, destandard=True)
 
                 # concatenate matrices
-                x_temp = matrix_n[:, 1:]
-                y_temp = matrix_n[:, :-1]
+                x_temp = matrix[:, 1:]
+                y_temp = matrix[:, :-1]
                 x = np.concatenate((x, x_temp), axis=1)
                 y = np.concatenate((y, y_temp), axis=1)
 
@@ -119,20 +126,26 @@ class TimeSeries:
             If file does not contain matrix
         """
 
+        assert isinstance(filename, str)
         assert Path(filename).exists()
 
-        mat = scp.loadmat(filename)
-        d = None
+        if Path(filename).suffix == '.mat':
+            mat = scp.loadmat(filename)
+            d = None
 
-        for key in mat.keys():
-            if key[:2] != '__':
-                d = mat[key]
-                logging.info("Extracted matrix from file {} from key {}".format(filename, key))
-                continue
+            for key in mat.keys():
+                if key[:2] != '__':
+                    d = mat[key]
+                    logging.info("Extracted matrix from file {} from key {}".format(filename, key))
+                    continue
 
-        if d is None:
-            logging.error("Can not find matrix inside .mat file.")
-            raise ImportError("Can not find matrix inside .mat file.")
+            if d is None:
+                logging.error("Can not find matrix inside .mat file.")
+                raise ImportError("Can not find matrix inside .mat file.")
+
+        elif Path(filename).suffix == '.csv':
+
+            d = np.genfromtxt(filename, delimiter=",")
 
         self.add(d)
 
@@ -182,17 +195,24 @@ class TimeSeries:
         x = np.asarray(x)
         assert isinstance(x, np.ndarray)
 
+        if direction is None:
+            return (x - np.mean(x)) / np.std(x), np.mean(x), np.std(x)
+
         # Fetch statistical information
         std = np.std(x, axis=direction)
         mean = np.mean(x, axis=direction)
 
+        assert mean.shape[0] == std.shape[0]
+
+        shape = (1, mean.shape[0]) if direction == 0 else (mean.shape[0], 1)
+
         # normalization of mean
         if demean:
-            x -= mean.reshape((mean.shape[0]), 1)
+            x -= mean.reshape(shape)
 
         # normalization of standard deviation
         if destandard:
-            x /= std.reshape((std.shape[0]), 1)
+            x /= std.reshape(shape)
 
         return x, mean, std
 

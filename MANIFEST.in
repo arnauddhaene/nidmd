@@ -1,0 +1,3 @@
+include nidmd/datasets/data/*
+include README.md
+include setup.py

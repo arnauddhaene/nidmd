@@ -45,9 +45,9 @@ class TimePlot:
 
             for mode in range(1, amount):
 
-                activity = df[df['mode'] == mode].activity.to_list()[0]
+                activity = list(df[df['mode'] == mode].activity.to_list()[0])
 
-                fig.add_trace(go.Scatter(x=list(np.array(range(activity.shape[0]))), y=activity,
+                fig.add_trace(go.Scatter(x=list(np.array(range(len(activity)))), y=activity,
                                          legendgroup='Mode {}'.format(mode), showlegend=True if g == 1 else False,
                                          name='Mode {}'.format(mode),
                                          line=dict(color=colorlist[mode])),

@@ -13,7 +13,7 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 
 from .timeseries import TimeSeries
-from ..datasets.atlas import Atlas
+from ..datasets.atlas import Atlas, AtlasError
 
 
 class Decomposition(TimeSeries):

@@ -69,7 +69,8 @@ class Radar:
         r_r = self.df.loc[(self.df['mode'] == mode) & (self.df['group'] == group)].strength_real.to_list()[0]
         r_i = self.df.loc[(self.df['mode'] == mode) & (self.df['group'] == group)].strength_imag.to_list()[0]
 
-        verbalise = 'Mode {}'.format(mode) + ' Group {}'.format(group) if not self.analysis else ''
+        verbalise = 'Mode {}'.format(mode)
+        verbalise += ' Group {}'.format(group) if not self.analysis else ''
 
         fig.add_trace(go.Scatterpolar(
             r=self._close(r_r), theta=self._close(self.networks), mode="lines",

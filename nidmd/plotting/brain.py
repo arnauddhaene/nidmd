@@ -6,6 +6,7 @@ import matplotlib.cm as cm
 
 from .colors import colorscale
 
+
 class Brain:
 
     def __init__(self, df1, order, coords_2d, df2=None):
@@ -33,6 +34,7 @@ class Brain:
         else:
             self.mode2 = None
         self.order = order
+        self.atlas_size = np.unique(list(self.coords_2d.label)).shape[0] - 1
 
     @staticmethod
     def intensities(modes, imag=False):
@@ -126,28 +128,59 @@ class Brain:
 
         for row in rows:
 
-            for id in range(1, list(self.coords_2d['.id'])[-1] + 1):
-                roi = self.coords_2d[self.coords_2d['.id'] == id]
-                x = roi['.long']
-                y = roi['.lat']
-                region = roi['region'].iloc[0] if roi['region'].size != 0 else None
+            goodroi = np.unique(
+                self.coords_2d[self.coords_2d.region.notnull()]['.roi']
+            )
 
-                if type(region) == str:
+            roimap = dict(
+                zip(
+                    goodroi, list(range(len(goodroi)))
+                )
+            )
 
-                    indice = roi['.roi'].iloc[0] - 1
+            roidx = np.unique(
+                self.coords_2d['.roi']
+            )
 
-                    if roi['hemi'].iloc[0] == 'right':
-                        indice += int(intensity[0].shape[0] / 2)
+            for hemi in ['left', 'right']:
 
-                    val = intensity[row - 1][indice]
+                for roi in roidx:
 
-                    col = 'rgb({0},{1},{2})'.format(*cm.get_cmap(colormap)(val)[:3])
-                else:
-                    col = 'black'
+                    roi_df = self.coords_2d[(self.coords_2d['.roi'] == roi) & (self.coords_2d.hemi == hemi)]
 
-                fig.add_trace(go.Scatter(x=x, y=y, fill='toself', mode='lines', line=dict(color='black', width=0.5),
-                                         fillcolor=col, name=region if region else None, hoverinfo=None),
-                              row=row, col=1)
+                    if not roi_df.empty:
+
+                        # Define color and region name
+                        # Check that region is a valid region
+                        if not np.unique(roi_df.region.isnull())[0]:
+
+                            region = np.unique(roi_df.region)[0]
+
+                            indice = roimap[roi]
+
+                            if hemi is 'right':
+                                indice += int(self.atlas_size / 2)
+
+                            val = intensity[row - 1][indice]
+
+                            col = 'rgb({0},{1},{2})'.format(*cm.get_cmap(colormap)(val)[:3])
+
+                        else:
+
+                            col = 'black'
+
+                            region = 'Gingular Pole'
+
+                        # Find traces with identifiers
+                        for id in np.unique(roi_df['.id']):
+
+                            # Add id selector
+                            x = roi_df[roi_df['.id'] == id]['.long']
+                            y = roi_df[roi_df['.id'] == id]['.lat']
+
+                            fig.add_trace(go.Scatter(x=x, y=y, fill='toself', mode='lines', line=dict(color='black', width=0.5),
+                                                     fillcolor=col, name=region if region else None, hoverinfo=None),
+                                          row=row, col=1)
 
             fig.add_trace(go.Scatter(x=[300, 1100], y=[-25, -25], text=['left', 'right'], mode='text'),
                           row=row, col=1)

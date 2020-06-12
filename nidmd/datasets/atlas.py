@@ -68,6 +68,12 @@ class Atlas:
 
         return False
 
+    def __repr__(self):
+        return "nidmd.Atlas({})".format(self.size)
+
+    def __str__(self):
+        return "{} Atlas of size {}".format(self.name, self.size)
+
     @staticmethod
     def surface():
         """
