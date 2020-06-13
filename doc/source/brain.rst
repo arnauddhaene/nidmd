@@ -1,7 +1,7 @@
 Brain
 =====
 
-.. currentmodule:: dmd
+.. currentmodule:: nidmd
 
 .. autoclass:: Brain
     :noindex:

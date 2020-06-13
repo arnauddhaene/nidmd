@@ -1,7 +1,7 @@
 Radar
 =====
 
-.. currentmodule:: dmd
+.. currentmodule:: nidmd
 
 .. autoclass:: Radar
     :noindex:

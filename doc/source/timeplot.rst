@@ -1,7 +1,7 @@
 TimePlot
 ========
 
-.. currentmodule:: dmd
+.. currentmodule:: nidmd
 
 .. autoclass:: TimePlot
     :noindex:

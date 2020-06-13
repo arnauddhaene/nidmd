@@ -1,7 +1,7 @@
 Spectre
 =======
 
-.. currentmodule:: dmd
+.. currentmodule:: nidmd
 
 .. autoclass:: Spectre
     :noindex:

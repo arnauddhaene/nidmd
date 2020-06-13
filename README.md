@@ -1,6 +1,6 @@
 # Dynamic Mode Decomposition
 
-Based on [Casorso et al., 2019][2] the dynamic mode decomposition (DMD) algorithm allows for a dynamic analysis of cortical neurological activation. Here, a Python module is developed facilitating both analysis and visualization aspects of the DMD.
+Based on [Casorso et al., 2019][2], the dynamic mode decomposition (DMD) algorithm allows for a dynamic analysis of cortical neurological activation. Here, a Python module is developed facilitating both analysis and visualization aspects of the DMD.
 
 ## Installation
 
@@ -23,6 +23,10 @@ In the current version, two parcellations are supported:
 
 * [Glasser et al., 2016][1], containing `N = 360` regions.
 * [Schaefer et al., 2018][2], containing `N = 400` regions.
+
+### Examples
+
+A Jupyter Notebook can be found in the `examples` directory. It complements the [documentation](arnauddhaene.github.io/nidmd).
 
 ## References
 

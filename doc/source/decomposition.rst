@@ -1,7 +1,7 @@
 Decomposition
 =============
 
-.. currentmodule:: dmd
+.. currentmodule:: nidmd
 
 .. autoclass:: Decomposition
     :noindex:
@@ -22,6 +22,10 @@ Methods
     Decomposition.split
     Decomposition.normalize
     Decomposition.compute_match
+    Decomposition.get_decomposition
+    Decomposition.dmd
+    Decomposition._compute
+
 
 API reference
 #############

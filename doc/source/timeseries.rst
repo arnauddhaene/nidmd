@@ -1,7 +1,7 @@
 TimeSeries
 =============
 
-.. currentmodule:: dmd
+.. currentmodule:: nidmd
 
 .. autoclass:: TimeSeries
     :noindex:
@@ -20,6 +20,9 @@ Methods
     TimeSeries.extract
     TimeSeries.split
     TimeSeries.normalize
+    TimeSeries.dmd
+    TimeSeries.get_decomposition
+    TimeSeries.match_modes
 
 API reference
 #############

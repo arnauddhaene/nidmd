@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'dmd'
+project = 'nidmd'
 copyright = '2020, Arnaud Dhaene (EPFL)'
 author = 'Arnaud Dhaene (EPFL)'
 
@@ -46,7 +46,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
-    'sphinx.ext.autosummary'
+    'sphinx.ext.autosummary',
+    'nbsphinx'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -136,7 +137,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'dmd.tex', 'dmd Documentation',
+    (master_doc, 'nidmd.tex', 'nidmd Documentation',
      'Arnaud Dhaene (EPFL)', 'manual'),
 ]
 
@@ -146,7 +147,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'dmd', 'dmd Documentation',
+    (master_doc, 'nidmd', 'nidmd Documentation',
      [author], 1)
 ]
 
@@ -157,9 +158,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'dmd', 'dmd Documentation',
-     author, 'dmd', 'One line description of project.',
-     'Miscellaneous'),
+    (master_doc, 'nidmd', 'nidmd Documentation',
+     author, 'nidmd', 'Neuroimaging Dynamic Mode Decomposition',
+     'Neuroimaging'),
 ]
 
 

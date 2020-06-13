@@ -1,7 +1,7 @@
 Atlas
 =====
 
-.. currentmodule:: dmd
+.. currentmodule:: nidmd
 
 .. autoclass:: Atlas
     :noindex:

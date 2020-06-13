@@ -1,4 +1,4 @@
-dmd documentation
+nidmd documentation
 ===================================
 
 .. toctree::
@@ -8,6 +8,7 @@ dmd documentation
     core
     plotting
     datasets
+    examples.ipynb
 
 .. include:: README.rst
 

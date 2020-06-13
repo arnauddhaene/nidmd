@@ -1,7 +1,7 @@
 Datasets
 ========
 
-.. currentmodule:: dmd
+.. currentmodule:: nidmd
 
 .. toctree::
 

@@ -50,6 +50,74 @@ class TimeSeries:
                 for f in filenames:
                     self.extract(f)
 
+    def dmd(self, normalize=True):
+        """
+        Returns a dictionary-like object containing Dynamic Mode Decomposition elements.
+
+        Parameters
+        ----------
+        normalize : boolean
+            Normalize data before decomposition (default True)
+
+        Returns
+        -------
+        dmd : Dictionary-like
+            Dynamic Mode Decomposition elements with keys: {values, vectors, indices, A, activity}
+        """
+
+        if self.data is None:
+            raise ValueError("No data to perform DMD on.")
+
+        x, y = self.split(self.data, normalize)
+
+        eig_val, eig_vec, eig_idx, a = self.get_decomposition(x, y)
+
+        activity_t = la.inv(eig_vec) @ x
+
+        return dict(values=eig_val, vectors=eig_vec, indices=eig_idx, A=a, activity=activity_t)
+
+    def get_decomposition(self, x, y):
+        """
+        Get dynamic modes by Least Squares optimization of Auto-regressive model.
+
+        Parameters
+        ----------
+        x : Array-like
+            data for t (1->T)
+        y : Array-like
+            data for t (0->T-1)
+
+        Returns
+        -------
+        eig_val : Array-like
+            Eigenvalues of the eigen-decomposition of the Auto-regressive matrix
+        eig_vec : Array-like
+            Eigenvectors of the eigen-decomposition of the Auto-regressive matrix
+        eig_idx : Array-like
+            Indices that sort the eigenvalues in descending order
+        A : Array-like
+            The Auto-regressive matrix.
+        """
+        x = np.asarray(x)
+        y = np.asarray(y)
+        assert isinstance(x, np.ndarray)
+        assert isinstance(y, np.ndarray)
+        assert x.shape == y.shape
+
+        a = (x @ y.T) @ (np.linalg.inv(y @ y.T))
+
+        # extract eigenvalues and eigenvectors
+        eig_val, eig_vec = np.linalg.eig(a)
+
+        # sort descending - from https://stackoverflow.com/questions/8092920/
+        # simply use index for later use
+        eig_idx = np.abs(eig_val).argsort()[::-1]
+
+        # adjust eigenvectors' phases to assure their orthogonality
+        eig_vec = self.adjust_phase(eig_vec)
+
+        return eig_val, eig_vec, eig_idx, a
+
     @staticmethod
     def split(data, normalize=True):
         """
@@ -261,3 +329,68 @@ class TimeSeries:
             ox[:, j] = adjed if np.mean(adjed) >= 0 else -1 * adjed
 
         return ox
+
+    @staticmethod
+    def match_modes(tc, s, m):
+        """
+        Match modes using Time Series data of match group and eigenvectors of reference group.
+
+        Parameters
+        ----------
+        tc : Array-like
+            Raw time-series data from match group
+        s : Array-like
+            Eigenvectors from the eigen-decomposition of the auto-regressive model of the reference group.
+        m : int
+            number of modes analyzed for approximation
+
+        Returns
+        -------
+        d : Array-like
+            Approximation of the :code:`m` first modes matched to the Reference group.
+
+        Raises
+        ------
+        AtlasError
+            If cortical parcellation is not supported.
+        """
+        s_inv = la.inv(s)
+
+        n, t = tc.shape
+
+        b = np.empty([m, 1], dtype=complex)
+        a = np.empty([m, m], dtype=complex)
+
+        if tc.shape[0] != s.shape[0]:
+            logging.error("Cortical parcellation of reference and match group do not correspond.")
+            raise ValueError("Cortical parcellation of reference and match groups do not correspond.")
+
+        t2, t1 = TimeSeries.split([tc])
+        t2 = t2.T
+        t1 = t1.T
+
+        for r in range(m):
+
+            r1 = s[:, r].reshape(n, 1) @ s_inv[r, :].reshape(1, n)
+
+            for c in range(r, m):
+
+                c1 = s[:, c].reshape(n, 1) @ s_inv[c, :].reshape(1, n)
+
+                if r != c:
+
+                    middle_matrix = (c1.T @ r1 + r1.T @ c1)
+
+                    a[r, c] = t1.flatten() @ (t1 @ middle_matrix.T).flatten()
+
+                    a[c, r] = a[r, c]
+
+                else:
+
+                    a[r, c] = 2 * t1.flatten() @ (t1 @ r1.T @ r1).flatten()
+
+            b[r] = 2 * t2.flatten() @ (t1 @ r1.T).flatten()
+
+        d = la.solve(a, b)
+
+        return np.around(d, decimals=8)
