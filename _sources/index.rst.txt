@@ -1,4 +1,4 @@
-dmd documentation
+nidmd documentation
 ===================================
 
 .. toctree::
