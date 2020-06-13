@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Dynamic Mode Decomposition &mdash; nidmd  documentation</title>
+  <title>Installation &mdash; nidmd  documentation</title>
   
 
   
@@ -84,6 +84,7 @@
 <li class="toctree-l1"><a class="reference internal" href="core.html">Core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="datasets.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
 
             
@@ -129,7 +130,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Dynamic Mode Decomposition</li>
+      <li>Installation</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -172,24 +173,21 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="dynamic-mode-decomposition">
-<h1>Dynamic Mode Decomposition<a class="headerlink" href="#dynamic-mode-decomposition" title="Permalink to this headline">¶</a></h1>
-<p>Based on <a class="reference internal" href="index.html#casorso"><span class="std std-ref">Casorso et al., 2019</span></a>, the dynamic mode decomposition (DMD) algorithm allows for a dynamic analysis of cortical neurological activation. Here, a Python module is developed facilitating both analysis and visualization aspects of the DMD.</p>
 <div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>To install the package, simply run the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">nidmd</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="dashboard">
-<h3>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this headline">¶</a></h3>
+<h2>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this headline">¶</a></h2>
 <p>In parallel to this Python module, a dashboard called <a class="reference external" href="https://github.com/arnauddhaene/nidmd-dashboard">nidmd-dashboard</a> has been developed to facilitate analysis, comparison, and mode matching of the DMD of time-series fMRI data.</p>
 </div>
 <div class="section" id="input-data">
-<h3>Input data<a class="headerlink" href="#input-data" title="Permalink to this headline">¶</a></h3>
+<h2>Input data<a class="headerlink" href="#input-data" title="Permalink to this headline">¶</a></h2>
 <p>This dashboard handles preprocessed data as described in <a class="reference internal" href="index.html#casorso"><span class="std std-ref">Casorso et al., 2019 - Methods</span></a>.
 The input needed for a successful visualization is one or multiple files containing time-series data. Each file corresponds to an fMRI run and should contain one matrix of size <cite>N x T</cite>, with <cite>N</cite> being the number of ROIs in the cortical parcellation and <cite>T</cite> being the observational timepoints.</p>
 <p>In the current version, two parcellations are supported:</p>
@@ -199,16 +197,15 @@ The input needed for a successful visualization is one or multiple files contain
 </ul>
 </div>
 <div class="section" id="examples">
-<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <p>A Jupyter Notebook can be found in the <cite>examples</cite> directory. It complements the <a class="reference external" href="arnauddhaene.github.io/nidmd">documentation</a>.</p>
 </div>
 </div>
 <div class="section" id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<h1>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h1>
 <p id="glasser"><a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/27437579/">[1]</a> M. F. Glasser et al., “A multi-modal parcellation of human cerebral cortex,” Nature, vol. 536, no. 7615, pp. 171–178, 11 2016, doi: 10.1038/nature18933.</p>
 <p id="casorso"><a class="reference external" href="http://www.sciencedirect.com/science/article/pii/S1053811919301922">[2]</a> J. Casorso, X. Kong, W. Chi, D. Van De Ville, B. T. T. Yeo, and R. Liégeois, “Dynamic mode decomposition of resting-state and task fMRI,” NeuroImage, vol. 194, pp. 42–54, Jul. 2019, doi: 10.1016/j.neuroimage.2019.03.019.</p>
 <p id="schaefer"><a class="reference external" href="https://academic.oup.com/cercor/article/28/9/3095/3978804">[3]</a> A. Schaefer et al., “Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI,” Cerebral Cortex, vol. 28, no. 9, pp. 3095–3114, Sep. 2018, doi: 10.1093/cercor/bhx179.</p>
-</div>
 </div>
 
 
