@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Decomposition &mdash; dmd  documentation</title>
+  <title>Decomposition &mdash; nidmd  documentation</title>
   
 
   
@@ -25,7 +25,6 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -52,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> dmd
+            <a href="index.html" class="icon icon-home"> nidmd
           
 
           
@@ -96,7 +95,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="datasets.html">Datasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dmd-tutorial.html">Dynamic Mode Toolbox - Tutorial</a></li>
 </ul>
 
             
@@ -111,7 +109,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">dmd</a>
+          <a href="index.html">nidmd</a>
         
       </nav>
 
@@ -190,16 +188,16 @@
 <div class="section" id="decomposition">
 <h1>Decomposition<a class="headerlink" href="#decomposition" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="dmd.Decomposition">
-<em class="property">class </em><code class="sig-prename descclassname">dmd.</code><code class="sig-name descname">Decomposition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">nidmd.</code><code class="sig-name descname">Decomposition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/decomposition.html#Decomposition"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Representation of a Decomposition.</p>
 </dd></dl>
 
 <div class="section" id="constructor">
 <h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
 <dl class="py method">
-<dt id="dmd.Decomposition.__init__">
-<code class="sig-prename descclassname">Decomposition.</code><code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.Decomposition.__init__">
+<code class="sig-prename descclassname">Decomposition.</code><code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/decomposition.html#Decomposition.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.Decomposition.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decomposition Constructor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -214,7 +212,7 @@
 <li><p><strong>data</strong> (<em>Array-like</em>) – Time-series raw data</p></li>
 <li><p><strong>X</strong> (<em>Array-like</em>) – Time-series data from t:1-&gt;T</p></li>
 <li><p><strong>Y</strong> (<em>Array-like</em>) – Time-series data from t:0-&gt;T-1</p></li>
-<li><p><strong>atlas</strong> (<em>dmd.Atlas</em>) – Cortical Parcellation atlas used for this decomposition</p></li>
+<li><p><strong>atlas</strong> (<em>nidmd.Atlas</em>) – Cortical Parcellation atlas used for this decomposition</p></li>
 <li><p><strong>eig_val</strong> (<em>Array-like</em>) – Eigenvalues of the eigen-decomposition of the Auto-regressive matrix</p></li>
 <li><p><strong>eig_vec</strong> (<em>Array-like</em>) – Eigenvectors of the eigen-decomposition of the Auto-regressive matrix</p></li>
 <li><p><strong>eig_idx</strong> (<em>Array-like</em>) – Indices for descending order of the eigen-decomposition of the Auto-regressive matrix</p></li>
@@ -236,23 +234,32 @@ strength_real, strength_imag, activity</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#dmd.Decomposition.run" title="dmd.Decomposition.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.run</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nidmd.Decomposition.run" title="nidmd.Decomposition.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.run</span></code></a>()</p></td>
 <td><p>Run Decomposition.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#dmd.Decomposition.add" title="dmd.Decomposition.add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.add</span></code></a>(data)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nidmd.Decomposition.add" title="nidmd.Decomposition.add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.add</span></code></a>(data)</p></td>
 <td><p>Add data to Decomposition.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.extract</span></code>(filename)</p></td>
 <td><p>Extracts fMRI data from file.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.split</span></code>(data)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.split</span></code>(data[, normalize])</p></td>
 <td><p>Split time-series into X: [1-&gt;T] and Y:[0-&gt;T-1].</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.normalize</span></code>(data[, direction, …])</p></td>
 <td><p>Normalize a matrix</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#dmd.Decomposition.compute_match" title="dmd.Decomposition.compute_match"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.compute_match</span></code></a>(other, m)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nidmd.Decomposition.compute_match" title="nidmd.Decomposition.compute_match"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.compute_match</span></code></a>(other, m)</p></td>
 <td><p>Get approximated matched modes for match group with self as a reference.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.get_decomposition</span></code>(x, y)</p></td>
+<td><p>Get dynamic modes by Least Squares optimization of Auto-regressive model.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition.dmd</span></code>([normalize])</p></td>
+<td><p>Returns a dictionary-like object containing Dynamic Mode Decomposition elements.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decomposition._compute</span></code>(val, vec, index, time)</p></td>
+<td><p>Compute Decomposition to fetch DataFrame with all relevant info.</p></td>
 </tr>
 </tbody>
 </table>
@@ -260,19 +267,19 @@ strength_real, strength_imag, activity</p></li>
 <div class="section" id="api-reference">
 <h2>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="id0">
-<em class="property">class </em><code class="sig-prename descclassname">dmd.</code><code class="sig-name descname">Decomposition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.Decomposition">
+<em class="property">class </em><code class="sig-prename descclassname">nidmd.</code><code class="sig-name descname">Decomposition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/decomposition.html#Decomposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.Decomposition" title="Permalink to this definition">¶</a></dt>
 <dd><p>Representation of a Decomposition.</p>
 <dl class="py method">
-<dt id="dmd.Decomposition.add">
-<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.add" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.Decomposition.add">
+<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/decomposition.html#Decomposition.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.Decomposition.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add data to Decomposition.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>data</strong> (<em>Array-like</em>) – Time-series data.</p>
 </dd>
 <dt class="field-even">Yields</dt>
-<dd class="field-even"><p><strong>atlas</strong> (<em>dmd.Atlas</em>) – Cortical Parcellation atlas used for this decomposition</p>
+<dd class="field-even"><p><strong>atlas</strong> (<em>nidmd.Atlas</em>) – Cortical Parcellation atlas used for this decomposition</p>
 </dd>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><strong>ImportError</strong> – If the import fails.</p>
@@ -281,14 +288,14 @@ strength_real, strength_imag, activity</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="dmd.Decomposition.compute_match">
-<code class="sig-name descname">compute_match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em>, <em class="sig-param"><span class="n">m</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.compute_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.compute_match" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.Decomposition.compute_match">
+<code class="sig-name descname">compute_match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em>, <em class="sig-param"><span class="n">m</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/decomposition.html#Decomposition.compute_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.Decomposition.compute_match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get approximated matched modes for match group with self as a reference.
 Predicts amplification of approximated modes using linear regression.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>other</strong> (<a class="reference internal" href="#id0" title="dmd.Decomposition"><em>dmd.Decomposition</em></a>) – match group</p></li>
+<li><p><strong>other</strong> (<a class="reference internal" href="#nidmd.Decomposition" title="nidmd.Decomposition"><em>nidmd.Decomposition</em></a>) – match group</p></li>
 <li><p><strong>m</strong> (<em>int</em>) – number of modes analyzed for approximation</p></li>
 </ul>
 </dd>
@@ -304,8 +311,8 @@ Predicts amplification of approximated modes using linear regression.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="dmd.Decomposition.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/decomposition.html#Decomposition.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Decomposition.run" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.Decomposition.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/decomposition.html#Decomposition.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.Decomposition.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run Decomposition.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>

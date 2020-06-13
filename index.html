@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>dmd documentation &mdash; dmd  documentation</title>
+  <title>dmd documentation &mdash; nidmd  documentation</title>
   
 
   
@@ -25,7 +25,6 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -51,7 +50,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> dmd
+            <a href="#" class="icon icon-home"> nidmd
           
 
           
@@ -86,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="core.html">Core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="datasets.html">Datasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dmd-tutorial.html">Dynamic Mode Toolbox - Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
 
             
@@ -101,7 +100,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">dmd</a>
+          <a href="#">nidmd</a>
         
       </nav>
 
@@ -196,25 +195,36 @@
 <li class="toctree-l2"><a class="reference internal" href="atlas.html">Atlas</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="dmd-tutorial.html">Dynamic Mode Toolbox - Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="dmd-tutorial.html#Installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dmd-tutorial.html#Importing-the-adequate-modules">Importing the adequate modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#Installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#Importing-the-adequate-modules">Importing the adequate modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#Loading-data-into-a-Decomposition-instance">Loading data into a <code class="docutils literal notranslate"><span class="pre">Decomposition</span></code> instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#Decomposition-is-a-child-of-TimeSeries"><code class="docutils literal notranslate"><span class="pre">Decomposition</span></code> is a child of <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#Fetching-the-Atlas">Fetching the <code class="docutils literal notranslate"><span class="pre">Atlas</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#Retrieving-information-from-a-Decomposition-instance">Retrieving information from a <code class="docutils literal notranslate"><span class="pre">Decomposition</span></code> instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#Plotting">Plotting</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="dynamic-mode-decomposition">
 <h2>Dynamic Mode Decomposition<a class="headerlink" href="#dynamic-mode-decomposition" title="Permalink to this headline">¶</a></h2>
-<p>Based on <a class="reference internal" href="#casorso"><span class="std std-ref">Casorso et al., 2019</span></a>, the dynamic mode decomposition algorithm allows for a dynamic analysis of cortical neurological activation. Here, a dashboard is developed to allow users to analyse their data using standardized and publication-quality visualizations of the dynamic modes.</p>
+<p>Based on <a class="reference internal" href="#casorso"><span class="std std-ref">Casorso et al., 2019</span></a>, the dynamic mode decomposition (DMD) algorithm allows for a dynamic analysis of cortical neurological activation. Here, a Python module is developed facilitating both analysis and visualization aspects of the DMD.</p>
 <div class="section" id="installation">
 <h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
 <p>To install the package, simply run the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">dmd</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">nidmd</span>
 </pre></div>
 </div>
 </div>
+<div class="section" id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="dashboard">
+<h4>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this headline">¶</a></h4>
+<p>In parallel to this Python module, a dashboard called <a class="reference external" href="https://github.com/arnauddhaene/nidmd-dashboard">nidmd-dashboard</a> has been developed to facilitate analysis, comparison, and mode matching of the DMD of time-series fMRI data.</p>
+</div>
 <div class="section" id="input-data">
-<h3>Input data<a class="headerlink" href="#input-data" title="Permalink to this headline">¶</a></h3>
+<h4>Input data<a class="headerlink" href="#input-data" title="Permalink to this headline">¶</a></h4>
 <p>This dashboard handles preprocessed data as described in <a class="reference internal" href="#casorso"><span class="std std-ref">Casorso et al., 2019 - Methods</span></a>.
 The input needed for a successful visualization is one or multiple files containing time-series data. Each file corresponds to an fMRI run and should contain one matrix of size <cite>N x T</cite>, with <cite>N</cite> being the number of ROIs in the cortical parcellation and <cite>T</cite> being the observational timepoints.</p>
 <p>In the current version, two parcellations are supported:</p>
@@ -223,8 +233,10 @@ The input needed for a successful visualization is one or multiple files contain
 <li><p><a class="reference internal" href="#schaefer"><span class="std std-ref">Schaefer et al., 2018</span></a>, containing <cite>N = 400</cite> regions.</p></li>
 </ul>
 </div>
-<div class="section" id="tutorial">
-<h3>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="examples">
+<h4>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h4>
+<p>A Jupyter Notebook can be found in the <cite>examples</cite> directory. It complements the <a class="reference external" href="arnauddhaene.github.io/nidmd">documentation</a>.</p>
+</div>
 </div>
 <div class="section" id="references">
 <h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>

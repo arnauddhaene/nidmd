@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>TimeSeries &mdash; dmd  documentation</title>
+  <title>TimeSeries &mdash; nidmd  documentation</title>
   
 
   
@@ -25,7 +25,6 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -52,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> dmd
+            <a href="index.html" class="icon icon-home"> nidmd
           
 
           
@@ -96,7 +95,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="datasets.html">Datasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dmd-tutorial.html">Dynamic Mode Toolbox - Tutorial</a></li>
 </ul>
 
             
@@ -111,7 +109,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">dmd</a>
+          <a href="index.html">nidmd</a>
         
       </nav>
 
@@ -190,16 +188,16 @@
 <div class="section" id="timeseries">
 <h1>TimeSeries<a class="headerlink" href="#timeseries" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="dmd.TimeSeries">
-<em class="property">class </em><code class="sig-prename descclassname">dmd.</code><code class="sig-name descname">TimeSeries</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/timeseries.html#TimeSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.TimeSeries" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">nidmd.</code><code class="sig-name descname">TimeSeries</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/timeseries.html#TimeSeries"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Representation of time-series data.</p>
 </dd></dl>
 
 <div class="section" id="constructor">
 <h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
 <dl class="py method">
-<dt id="dmd.TimeSeries.__init__">
-<code class="sig-prename descclassname">TimeSeries.</code><code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/timeseries.html#TimeSeries.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.TimeSeries.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.TimeSeries.__init__">
+<code class="sig-prename descclassname">TimeSeries.</code><code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/timeseries.html#TimeSeries.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.TimeSeries.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>TimeSeries Constructor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -221,17 +219,26 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#dmd.TimeSeries.add" title="dmd.TimeSeries.add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries.add</span></code></a>(data)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nidmd.TimeSeries.add" title="nidmd.TimeSeries.add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries.add</span></code></a>(data)</p></td>
 <td><p>Add data</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#dmd.TimeSeries.extract" title="dmd.TimeSeries.extract"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries.extract</span></code></a>(filename)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nidmd.TimeSeries.extract" title="nidmd.TimeSeries.extract"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries.extract</span></code></a>(filename)</p></td>
 <td><p>Extracts fMRI data from file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#dmd.TimeSeries.split" title="dmd.TimeSeries.split"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries.split</span></code></a>(data)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nidmd.TimeSeries.split" title="nidmd.TimeSeries.split"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries.split</span></code></a>(data[, normalize])</p></td>
 <td><p>Split time-series into X: [1-&gt;T] and Y:[0-&gt;T-1].</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#dmd.TimeSeries.normalize" title="dmd.TimeSeries.normalize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries.normalize</span></code></a>(data[, direction, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nidmd.TimeSeries.normalize" title="nidmd.TimeSeries.normalize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries.normalize</span></code></a>(data[, direction, …])</p></td>
 <td><p>Normalize a matrix</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nidmd.TimeSeries.dmd" title="nidmd.TimeSeries.dmd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries.dmd</span></code></a>([normalize])</p></td>
+<td><p>Returns a dictionary-like object containing Dynamic Mode Decomposition elements.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nidmd.TimeSeries.get_decomposition" title="nidmd.TimeSeries.get_decomposition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries.get_decomposition</span></code></a>(x, y)</p></td>
+<td><p>Get dynamic modes by Least Squares optimization of Auto-regressive model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nidmd.TimeSeries.match_modes" title="nidmd.TimeSeries.match_modes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries.match_modes</span></code></a>(tc, s, m)</p></td>
+<td><p>Match modes using Time Series data of match group and eigenvectors of reference group.</p></td>
 </tr>
 </tbody>
 </table>
@@ -239,12 +246,12 @@
 <div class="section" id="api-reference">
 <h2>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="id0">
-<em class="property">class </em><code class="sig-prename descclassname">dmd.</code><code class="sig-name descname">TimeSeries</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/timeseries.html#TimeSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.TimeSeries">
+<em class="property">class </em><code class="sig-prename descclassname">nidmd.</code><code class="sig-name descname">TimeSeries</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filenames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/timeseries.html#TimeSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.TimeSeries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Representation of time-series data.</p>
 <dl class="py method">
-<dt id="dmd.TimeSeries.add">
-<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/timeseries.html#TimeSeries.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.TimeSeries.add" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.TimeSeries.add">
+<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/timeseries.html#TimeSeries.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.TimeSeries.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -254,8 +261,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="dmd.TimeSeries.adjust_phase">
-<em class="property">static </em><code class="sig-name descname">adjust_phase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/timeseries.html#TimeSeries.adjust_phase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.TimeSeries.adjust_phase" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.TimeSeries.adjust_phase">
+<em class="property">static </em><code class="sig-name descname">adjust_phase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/timeseries.html#TimeSeries.adjust_phase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.TimeSeries.adjust_phase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adjust phase of matrix for orthogonalization of columns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -271,8 +278,25 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="dmd.TimeSeries.extract">
-<code class="sig-name descname">extract</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/timeseries.html#TimeSeries.extract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.TimeSeries.extract" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.TimeSeries.dmd">
+<code class="sig-name descname">dmd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">normalize</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/timeseries.html#TimeSeries.dmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.TimeSeries.dmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary-like object containing Dynamic Mode Decomposition elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>normalize</strong> (<em>boolean</em>) – Normalize data before decomposition (default True)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dmd</strong> – Dynamic Mode Decomposition elements with keys: {values, vectors, indices, A, activity}</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dictionary-like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nidmd.TimeSeries.extract">
+<code class="sig-name descname">extract</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/timeseries.html#TimeSeries.extract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.TimeSeries.extract" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extracts fMRI data from file. Supported formats are: { code:<cite>.mat</cite> }</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -285,8 +309,55 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="dmd.TimeSeries.normalize">
-<em class="property">static </em><code class="sig-name descname">normalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">direction</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">demean</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">destandard</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/timeseries.html#TimeSeries.normalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.TimeSeries.normalize" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.TimeSeries.get_decomposition">
+<code class="sig-name descname">get_decomposition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/timeseries.html#TimeSeries.get_decomposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.TimeSeries.get_decomposition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get dynamic modes by Least Squares optimization of Auto-regressive model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>Array-like</em>) – data for t (1-&gt;T)</p></li>
+<li><p><strong>y</strong> (<em>Array-like</em>) – data for t (0-&gt;T-1)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>eig_val</strong> (<em>Array-like</em>) – Eigenvalues of the eigen-decomposition of the Auto-regressive matrix</p></li>
+<li><p><strong>eig_vec</strong> (<em>Array-like</em>) – Eigenvectors of the eigen-decomposition of the Auto-regressive matrix</p></li>
+<li><p><strong>eig_idx</strong> (<em>Array-like</em>) – Indices that sort the eigenvalues in descending order</p></li>
+<li><p><strong>A</strong> (<em>Array-like</em>) – The Auto-regressive matrix.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nidmd.TimeSeries.match_modes">
+<em class="property">static </em><code class="sig-name descname">match_modes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tc</span></em>, <em class="sig-param"><span class="n">s</span></em>, <em class="sig-param"><span class="n">m</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/timeseries.html#TimeSeries.match_modes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.TimeSeries.match_modes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match modes using Time Series data of match group and eigenvectors of reference group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tc</strong> (<em>Array-like</em>) – Raw time-series data from match group</p></li>
+<li><p><strong>s</strong> (<em>Array-like</em>) – Eigenvectors from the eigen-decomposition of the auto-regressive model of the reference group.</p></li>
+<li><p><strong>m</strong> (<em>int</em>) – number of modes analyzed for approximation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>d</strong> – Approximation of the <code class="code docutils literal notranslate"><span class="pre">m</span></code> first modes matched to the Reference group.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Array-like</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>AtlasError</strong> – If cortical parcellation is not supported.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nidmd.TimeSeries.normalize">
+<em class="property">static </em><code class="sig-name descname">normalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">direction</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">demean</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">destandard</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/timeseries.html#TimeSeries.normalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.TimeSeries.normalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalize a matrix</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -309,12 +380,15 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="dmd.TimeSeries.split">
-<em class="property">static </em><code class="sig-name descname">split</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/core/timeseries.html#TimeSeries.split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.TimeSeries.split" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.TimeSeries.split">
+<em class="property">static </em><code class="sig-name descname">split</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">normalize</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/core/timeseries.html#TimeSeries.split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.TimeSeries.split" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split time-series into X: [1-&gt;T] and Y:[0-&gt;T-1].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>Array-like</em>) – Time-series data. Can be list of Array-like.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>Array-like</em>) – Time-series data. Can be list of Array-like.</p></li>
+<li><p><strong>normalize</strong> (<em>boolean</em>) – For normalization of the input data.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Atlas &mdash; dmd  documentation</title>
+  <title>Atlas &mdash; nidmd  documentation</title>
   
 
   
@@ -25,7 +25,6 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -37,7 +36,6 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Dynamic Mode Toolbox - Tutorial" href="dmd-tutorial.html" />
     <link rel="prev" title="Datasets" href="datasets.html" /> 
 </head>
 
@@ -52,7 +50,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> dmd
+            <a href="index.html" class="icon icon-home"> nidmd
           
 
           
@@ -95,7 +93,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="dmd-tutorial.html">Dynamic Mode Toolbox - Tutorial</a></li>
 </ul>
 
             
@@ -110,7 +107,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">dmd</a>
+          <a href="index.html">nidmd</a>
         
       </nav>
 
@@ -189,20 +186,28 @@
 <div class="section" id="atlas">
 <h1>Atlas<a class="headerlink" href="#atlas" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="dmd.Atlas">
-<em class="property">class </em><code class="sig-prename descclassname">dmd.</code><code class="sig-name descname">Atlas</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nroi</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/datasets/atlas.html#Atlas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Atlas" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">nidmd.</code><code class="sig-name descname">Atlas</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nroi</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/datasets/atlas.html#Atlas"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Representation of a Cortical Parcellation Atlas.</p>
 </dd></dl>
 
 <div class="section" id="constructor">
 <h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
 <dl class="py method">
-<dt id="dmd.Atlas.__init__">
-<code class="sig-prename descclassname">Atlas.</code><code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nroi</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/datasets/atlas.html#Atlas.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Atlas.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.Atlas.__init__">
+<code class="sig-prename descclassname">Atlas.</code><code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nroi</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/datasets/atlas.html#Atlas.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.Atlas.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Atlas Constructor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>nroi</strong> (<em>int</em>) – Number of ROI.</p>
+</dd>
+<dt class="field-even">Yields</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>size</strong> (<em>int</em>) – Number of ROI</p></li>
+<li><p><strong>name</strong> (<em>{‘glasser’, ‘schaefer’}</em>) – Name of cortical parcellation atlas. Supported are Glasser and Schaefer atlasses.</p></li>
+<li><p><strong>coords_2d</strong> (<em>pd.DataFrame</em>) – Pandas DataFrame containing 2D coordinates of cortical surface plotting</p></li>
+<li><p><strong>networks</strong> (<em>Dictionary-like</em>) – Object containing indices relevant to each network.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -216,7 +221,7 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#dmd.Atlas.surface" title="dmd.Atlas.surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Atlas.surface</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nidmd.Atlas.surface" title="nidmd.Atlas.surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Atlas.surface</span></code></a>()</p></td>
 <td><p>Returns  3D surface coordinates.</p></td>
 </tr>
 </tbody>
@@ -225,12 +230,12 @@
 <div class="section" id="api-reference">
 <h2>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="id0">
-<em class="property">class </em><code class="sig-prename descclassname">dmd.</code><code class="sig-name descname">Atlas</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nroi</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/datasets/atlas.html#Atlas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.Atlas">
+<em class="property">class </em><code class="sig-prename descclassname">nidmd.</code><code class="sig-name descname">Atlas</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nroi</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/datasets/atlas.html#Atlas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.Atlas" title="Permalink to this definition">¶</a></dt>
 <dd><p>Representation of a Cortical Parcellation Atlas.</p>
 <dl class="py method">
-<dt id="dmd.Atlas.surface">
-<em class="property">static </em><code class="sig-name descname">surface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dmd/datasets/atlas.html#Atlas.surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dmd.Atlas.surface" title="Permalink to this definition">¶</a></dt>
+<dt id="nidmd.Atlas.surface">
+<em class="property">static </em><code class="sig-name descname">surface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nidmd/datasets/atlas.html#Atlas.surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nidmd.Atlas.surface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns  3D surface coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -260,8 +265,6 @@ file, right hemisphere sulcal depth data</p></li>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="dmd-tutorial.html" class="btn btn-neutral float-right" title="Dynamic Mode Toolbox - Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="datasets.html" class="btn btn-neutral float-left" title="Datasets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

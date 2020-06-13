@@ -1,7 +1,7 @@
 Core
 ====
 
-.. currentmodule:: dmd
+.. currentmodule:: nidmd
 
 .. toctree::
 

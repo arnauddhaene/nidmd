@@ -1,7 +1,7 @@
 Plotting
 ========
 
-.. currentmodule:: dmd
+.. currentmodule:: nidmd
 
 .. toctree::
 
