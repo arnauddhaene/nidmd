@@ -58,6 +58,7 @@ class Decomposition(TimeSeries):
             Pandas DataFrame containing the following columns: mode, value, intensity, damping_time, period, conjugate,
             strength_real, strength_imag, activity
         """
+
         # Call to super class
         super().__init__(data, filenames, sampling_time)
 
@@ -71,52 +72,13 @@ class Decomposition(TimeSeries):
         self.Z = None
         self.df = None
 
-        if data is not None:
-            if isinstance(data, np.ndarray):
-                self.add(data)
-            else:
-                assert isinstance(data, list)
-                for d in data:
-                    self.add(d)
-        elif filenames is not None:
-            if isinstance(filenames, str):
-                self.extract(filenames)
-            else:
-                assert isinstance(filenames, list)
-                for f in filenames:
-                    self.extract(f)
-
-        self.run()
-
-    def add(self, data):
-        """
-        Add data to Decomposition.
-
-        Parameters
-        ----------
-        data : Array-like
-            Time-series data.
-            
-        Yields
-        ------
-        atlas : nidmd.Atlas
-            Cortical Parcellation atlas used for this decomposition
-
-        Raises
-        ------
-        ImportError
-            If the import fails.
-        """
-
-        # Verify that data is correctly formatted
         try:
-            self.atlas = Atlas(data.shape[0])
+            self.atlas = Atlas(self.data[0].shape[0])
+            logging.info('Data added to Decomposition using {} atlas.'.format(self.atlas))
         except AtlasError:
             raise ImportError('Data import attempt failed. No atlas was attributed.')
 
-        super().add(data)
-
-        logging.info('Data added to Decomposition using {} atlas.'.format(self.atlas))
+        self.run()
 
     def run(self):
         """
