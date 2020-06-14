@@ -34,7 +34,7 @@ class TimeSeries:
 
         self.sampling_time = sampling_time
         self.data = []
-
+        
         if data is not None:
             if isinstance(data, np.ndarray):
                 self.add(data)

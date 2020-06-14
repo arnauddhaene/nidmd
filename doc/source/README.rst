@@ -1,9 +1,3 @@
-**************************
-Dynamic Mode Decomposition
-**************************
-
-Based on :ref:`Casorso et al., 2019 <casorso>`, the dynamic mode decomposition (DMD) algorithm allows for a dynamic analysis of cortical neurological activation. Here, a Python module is developed facilitating both analysis and visualization aspects of the DMD.
-
 Installation
 ############
 
