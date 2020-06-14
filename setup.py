@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
      name='nidmd',
-     version='0.2.2',
+     version='0.2.3',
      author="Arnaud Dhaene (EPFL)",
      author_email="arnaud.dhaene@epfl.ch",
      description="Dynamic Mode Decomposition of time-series fMRI",

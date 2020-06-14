@@ -216,7 +216,7 @@ class Decomposition(TimeSeries):
         # First the modes should be matched with myself to get regression params
         logging.info('Fetching reference mode matching for regression parameter estimation.')
 
-        borderline = self.eig_val[self.eig_idx][m].conj() == self.eig_val[self.eig_idx][m + 1]
+        borderline = self.eig_val[self.eig_idx][m].conj() == self.eig_val[self.eig_idx][m - 1]
         mm = (m + 1) if borderline else m
 
         own = self.match_modes(self.X, self.eig_vec[:, self.eig_idx], mm)
